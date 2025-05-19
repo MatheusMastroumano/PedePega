@@ -1,6 +1,6 @@
 import express from 'express';
 import { listarProdutosController, obterProdutoPorIdController, criarProdutoController, atualizarProdutoController, deletarProdutoController } from '../controllers/ProdutoController.js';
-import authMiddleware from './middlewares/authMiddleware.js';
+import authMiddleware from '../middlewares/authMiddleware.js';
 import multer from 'multer';
 import path from 'path';
 import { fileURLToPath } from 'url';
