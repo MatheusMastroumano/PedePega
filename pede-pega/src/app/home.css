@@ -1,0 +1,12 @@
+* {
+    font-family: sans-serif;
+}
+
+::-webkit-scrollbar {
+    display: none;
+}
+
+.edit-button {
+    position: absolute;
+    z-index: 1000;
+}
