@@ -114,4 +114,12 @@ async function deleteRecord(table, where) {
     }
 }
 
-export { readAll, read, create, update, deleteRecord };
+async function compare (senha, hash) {
+    try {
+        return await bcrypt.compare(senha, hash);
+    } catch (err) {
+        console.error('Erro ao comparar senha com hash: ', err);
+    }
+}
+
+export { readAll, read, create, update, deleteRecord, compare};

@@ -3,11 +3,13 @@ const app = express();
 const port = 3000;
 
 import produtoRotas from './routes/produtoRotas.js';
+import authRotas from './routes/authRotas.js';
 import cors from 'cors';
 
 app.use(cors());
 app.use(express.json());
 app.use('/produtos', produtoRotas);
+app.use('/auth', authRotas);
 
 app.get('/', (req, res) => {
     res.send('<h1>API PedePega</h1>');

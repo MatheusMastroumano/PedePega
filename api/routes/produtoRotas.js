@@ -1,5 +1,6 @@
 import express from 'express';
 import { listarProdutosController, obterProdutoPorIdController, criarProdutoController, atualizarProdutoController, deletarProdutoController } from '../controllers/ProdutoController.js';
+import authMiddleware from './middlewares/authMiddleware.js';
 import multer from 'multer';
 import path from 'path';
 import { fileURLToPath } from 'url';
@@ -21,8 +22,8 @@ const upload = multer({ storage: storage });
 
 router.get('/', listarProdutosController);
 router.get('/:id', obterProdutoPorIdController);
-router.post('/', criarProdutoController);
-router.put('/:id', atualizarProdutoController);
-router.delete('/:id', deletarProdutoController);
+router.post('/', authMiddleware, upload.single('capa'), criarProdutoController);
+router.put('/:id', authMiddleware,upload.single('capa'), atualizarProdutoController);
+router.delete('/:id', authMiddleware, deletarProdutoController);
 
 export default router;
