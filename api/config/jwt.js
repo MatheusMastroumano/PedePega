@@ -1,2 +1,2 @@
-export const JWT_SECRET = "Insira a chave aqui";
+export const JWT_SECRET = "b2a28a255eca5d205fb37de2168a86fd76f9423a835004908cd5a061f039c32e5cf1f5c4d452372c3e97987d745cfe182ab806afa791ffcb833a7447f1afda53";
 

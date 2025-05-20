@@ -8,8 +8,18 @@ import cors from 'cors';
 
 app.use(cors());
 app.use(express.json());
+
+const logger = (req, res, next) => {
+    const data = new Date();
+    console.log(`[${data.toISOString()}] ${req.method} ${req.url}`);
+    next();
+}
+
+app.use(logger);
+
 app.use('/produtos', produtoRotas);
 app.use('/auth', authRotas);
+
 
 app.get('/', (req, res) => {
     res.send('<h1>API PedePega</h1>');
