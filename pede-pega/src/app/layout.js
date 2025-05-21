@@ -1,7 +1,7 @@
 
 import "./globals.css";
 import Footer from "./components/Footer/Footer.jsx";
-import Header from "./components/Header/Header.jsx";
+import NavBar from "./components/NavBar/NavBar.jsx";
 import { Poppins } from "next/font/google";
 
 const poppins = Poppins({
@@ -11,18 +11,21 @@ const poppins = Poppins({
 
 export const metadata = {
   title: "Pede&Pega",
+  description: "O melhor site de lanches da sua escola!",
 };
 
 
 export default function RootLayout({ children }) {
   return (
-    <html lang="pt-BR">
+    <html lang="en">
       <body className={poppins.className}>
-        <Header />
-        
-        {children}
-
-        <Footer />
+        <div className="min-h-screen flex flex-col">
+          <NavBar />
+          <main className="flex-grow">
+            {children}
+          </main>
+          <Footer />
+        </div>
       </body>
     </html>
   );

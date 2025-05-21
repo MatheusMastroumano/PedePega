@@ -65,7 +65,7 @@ const atualizarProdutoController = async (req, res) => {
             imagemPath: imagemPath,
         };
         await atualizarProduto(produtoId, produtoData);
-        res.status(200).json({ mensagem: 'Livro atualizado com sucesso' });
+        res.status(200).json({ mensagem: 'Produto atualizado com sucesso' });
     } catch (err) {
         console.error('Não foi possível atualizar o produto', err);
         res.status(500).json({ mensagem: 'Erro ao atualizar produto...' });

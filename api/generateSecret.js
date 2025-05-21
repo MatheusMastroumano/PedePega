@@ -4,3 +4,5 @@ return crypto.randomBytes(64).toString('hex');
 }
 const secretKey = generateSecretKey();
 console.log('Chave Secreta Gerada:', secretKey);
+
+export {secretKey};
