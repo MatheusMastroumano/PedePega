@@ -1,31 +1,59 @@
+import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
-import {read, compare} from '../config/database.js';
+import { read, compare, create } from '../config/database.js';
 import { JWT_SECRET } from '../config/jwt.js';
 
-const loginController = async (req, res) => {
-    const {email, senha} = req.body;
+const registerController = async (req, res) => {
+  const { name, email, senha } = req.body;
 
-    try {
-        const usuario = await read('email', `email = '${email}'`);
+  try {
+    const usuario = await read('users', `email = ?`, [email]);
 
-        if(!usuario) {
-            return res.status(404).json({mensagem: 'Usuário não encontrado'});
-        }
-        const senhaCorreta = await compare(senha, usuario.senha);
-
-        if(!senhaCorreta) {
-            return res.status(401).json({mensagem: 'Senha incorreta'});
-        }
-
-        const token = jwt.sign({id: usuario.id, tipo: usuario.tipo}, JWT_SECRET , {
-            expiresIn: '3h',
-        });
-
-        res.json({mensagem: 'Login realizado com sucesso', token});
-    } catch (err) {
-        console.error('Erro ao fazer login')
-        res.status(500).json({mensagem: 'Erro ao fazer login'});
+    if (usuario) {
+      return res.status(400).json({ mensagem: 'Email já cadastrado' });
     }
+
+    const saltRounds = 10;
+    const hashedSenha = await bcrypt.hash(senha, saltRounds);
+
+    const userData = { name, email, senha: hashedSenha };
+    const userId = await create('users', userData);
+
+    const token = jwt.sign({ id: userId }, JWT_SECRET, {
+      expiresIn: '3h',
+    });
+
+    res.status(201).json({ mensagem: 'Usuário registrado com sucesso', token });
+  } catch (err) {
+    console.error('Erro ao registrar:', err);
+    res.status(500).json({ mensagem: 'Erro ao registrar usuário' });
+  }
 };
 
-export { loginController };
+const loginController = async (req, res) => {
+  const { email, senha } = req.body;
+
+  try {
+    const usuario = await read('users', `email = ?`, [email]);
+
+    if (!usuario) {
+      return res.status(404).json({ mensagem: 'Usuário não encontrado' });
+    }
+    const senhaCorreta = await compare(senha, usuario.senha);
+
+    if (!senhaCorreta) {
+      return res.status(401).json({ mensagem: 'Senha incorreta' });
+    }
+
+    const token = jwt.sign({ id: usuario.id }, JWT_SECRET, {
+      expiresIn: '3h',
+    });
+
+    res.json({ mensagem: 'Login realizado com sucesso', token });
+  } catch (err) {
+    console.error('Erro ao fazer login:', err);
+    res.status(500).json({ mensagem: 'Erro ao fazer login' });
+  }
+};
+
+export { loginController, registerController };
