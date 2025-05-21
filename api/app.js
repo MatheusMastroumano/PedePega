@@ -1,25 +1,22 @@
+// server.js
 import express from 'express';
-const app = express();
-const port = 3000;
-
+import cors from 'cors';
+import chalk from 'chalk';
+import logger from './logger.js';
 import produtoRotas from './routes/produtoRotas.js';
 import authRotas from './routes/authRotas.js';
-import cors from 'cors';
+
+const app = express();
+const port = 3000;
 
 app.use(cors());
 app.use(express.json());
 
-const logger = (req, res, next) => {
-    const data = new Date();
-    console.log(`[${data.toISOString()}] ${req.method} ${req.url}`);
-    next();
-}
-
+// Usar o middleware de logging com Chalk
 app.use(logger);
 
 app.use('/produtos', produtoRotas);
 app.use('/auth', authRotas);
-
 
 app.get('/', (req, res) => {
     res.send('<h1>API PedePega</h1>');
@@ -32,8 +29,14 @@ app.options('/', (req, res) => {
 
 app.use((req, res) => {
     res.status(404).json({mensagem: 'Rota não encontrada...'});
-})
+});
+
+// Capturar erros não tratados
+app.use((err, req, res, next) => {
+    console.error(chalk.bgRed.white(' ERRO '), chalk.red(err.message));
+    res.status(500).json({ mensagem: 'Erro interno do servidor' });
+});
 
 app.listen(port, () => {
-    console.log(`Servidor rodando em http://localhost:${port}`);
-})
+    console.log(chalk.bgBlue.white(' INFO '), chalk.blue(`Servidor rodando em http://localhost:${port}`));
+});
