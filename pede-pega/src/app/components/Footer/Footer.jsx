@@ -5,41 +5,47 @@ export default function Footer() {
                 <div className="container mx-auto px-4">
                     <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
                         <div>
-                            <h3 className="text-xl font-bold mb-4">Pede<span className="text-yellow-500">&amp;</span>Pega</h3>
-                            <p className="text-gray-300 text-[15px] mb-4">Skip the line and order ahead. Your school cafeteria food, your way.</p>
+                            <h3 className="text-xl font-bold mb-4">Pede<span className="text-yellow-600">&amp;</span>Pega</h3>
+                            <p className="text-gray-500 text-[15px] mb-4">Evite filas e peça já. Seu lanche do seu jeito.</p>
                             <div className="flex space-x-4">
 
                             </div>
                         </div>
 
                         <div>
-                            <h4 className="text-lg font-semibold mb-4">Quick Links</h4>
+                            <h4 className="text-lg font-semibold mb-4">Links Rápidos</h4>
                             <ul className="space-y-2 text-[15px]">
-
+                            <a href="#" className="no-underline font-medium text-gray-300 hover:text-gray-500 trasition-colors duration-300">Ola</a>
+                            <a href="#" className="no-underline font-medium text-gray-300 hover:text-gray-500 trasition-colors duration-300">Ola</a>
+                            <a href="#" className="no-underline font-medium text-gray-300 hover:text-gray-500 trasition-colors duration-300">Ola</a>
+                            <a href="#" className="no-underline font-medium text-gray-300 hover:text-gray-500 trasition-colors duration-300">Ola</a>
                             </ul>
                         </div>
 
                         <div>
-                            <h4 className="text-lg font-semibold mb-4">Help &amp; Support</h4>
+                            <h4 className="text-lg font-semibold mb-4">Ajuda &amp; Suporte</h4>
                             <ul className="space-y-2 text-[15px]">
-
+                            <a href="#" className="no-underline font-medium text-gray-300 hover:text-gray-500 trasition-colors duration-300">Ola</a>
+                            <a href="#" className="no-underline font-medium text-gray-300 hover:text-gray-500 trasition-colors duration-300">Ola</a>
+                            <a href="#" className="no-underline font-medium text-gray-300 hover:text-gray-500 trasition-colors duration-300">Ola</a>
+                            <a href="#" className="no-underline font-medium text-gray-300 hover:text-gray-500 trasition-colors duration-300">Ola</a>
                             </ul>
                         </div>
 
                         <div>
-                            <h4 className="text-lg font-semibold mb-4">Contact</h4>
+                            <h4 className="text-lg font-semibold mb-4">Contato</h4>
                             <ul className="space-y-2 text-[15px]">
                                 <li className="flex items-center">
-                                   
+                                <a href="#" className="no-underline font-medium text-gray-300 hover:text-gray-500 trasition-colors duration-300">Ola</a>
                                 </li>
                                 <li className="flex items-center">
-                                
+                                <a href="#" className="no-underline font-medium text-gray-300 hover:text-gray-500 trasition-colors duration-300">Ola</a>
                                 </li>
                                 <li className="flex items-center">
-                                   
+                                <a href="#" className="no-underline font-medium text-gray-300 hover:text-gray-500 trasition-colors duration-300">Ola</a>
                                 </li>
                                 <li className="flex items-center">
-                                   
+                                <a href="#" className="no-underline font-medium text-gray-300 hover:text-gray-500 trasition-colors duration-300">Ola</a>
                                 </li>
                             </ul>
                         </div>
