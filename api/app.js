@@ -1,4 +1,3 @@
-// server.js
 import express from 'express';
 import cors from 'cors';
 import chalk from 'chalk';
@@ -11,8 +10,6 @@ const port = 3000;
 
 app.use(cors());
 app.use(express.json());
-
-// Usar o middleware de logging com Chalk
 app.use(logger);
 
 app.use('/produtos', produtoRotas);
