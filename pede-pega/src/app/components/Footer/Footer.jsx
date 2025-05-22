@@ -14,38 +14,46 @@ export default function Footer() {
 
                         <div>
                             <h4 className="text-lg font-semibold mb-4">Links Rápidos</h4>
-                            <ul className="space-y-2 text-[15px]">
-                            <a href="#" className="no-underline font-medium text-gray-300 hover:text-gray-500 trasition-colors duration-300">Ola</a>
-                            <a href="#" className="no-underline font-medium text-gray-300 hover:text-gray-500 trasition-colors duration-300">Ola</a>
-                            <a href="#" className="no-underline font-medium text-gray-300 hover:text-gray-500 trasition-colors duration-300">Ola</a>
-                            <a href="#" className="no-underline font-medium text-gray-300 hover:text-gray-500 trasition-colors duration-300">Ola</a>
+                            <ul className="space-y-2 text-[15px] flex flex-col">
+                                <a href="#" className="no-underline font-medium text-gray-300 hover:text-gray-500 trasition-colors duration-300">Ola</a>
+                                <a href="#" className="no-underline font-medium text-gray-300 hover:text-gray-500 trasition-colors duration-300">Ola</a>
+                                <a href="#" className="no-underline font-medium text-gray-300 hover:text-gray-500 trasition-colors duration-300">Ola</a>
+                                <a href="#" className="no-underline font-medium text-gray-300 hover:text-gray-500 trasition-colors duration-300">Ola</a>
                             </ul>
                         </div>
 
                         <div>
                             <h4 className="text-lg font-semibold mb-4">Ajuda &amp; Suporte</h4>
-                            <ul className="space-y-2 text-[15px]">
-                            <a href="#" className="no-underline font-medium text-gray-300 hover:text-gray-500 trasition-colors duration-300">Ola</a>
-                            <a href="#" className="no-underline font-medium text-gray-300 hover:text-gray-500 trasition-colors duration-300">Ola</a>
-                            <a href="#" className="no-underline font-medium text-gray-300 hover:text-gray-500 trasition-colors duration-300">Ola</a>
-                            <a href="#" className="no-underline font-medium text-gray-300 hover:text-gray-500 trasition-colors duration-300">Ola</a>
+                            <ul className="space-y-2 text-[15px] flex flex-col">
+                                <li>
+                                    <a href="#" className="no-underline font-medium text-gray-300 hover:text-gray-500 trasition-colors duration-300">Ola</a>
+                                </li>
+                                <li>
+                                    <a href="#" className="no-underline font-medium text-gray-300 hover:text-gray-500 trasition-colors duration-300">Ola</a>
+                                </li>
+                                <li>
+                                    <a href="#" className="no-underline font-medium text-gray-300 hover:text-gray-500 trasition-colors duration-300">Ola</a>
+                                </li>
+                                <li>
+                                    <a href="#" className="no-underline font-medium text-gray-300 hover:text-gray-500 trasition-colors duration-300">Ola</a>
+                                </li>
                             </ul>
                         </div>
 
                         <div>
                             <h4 className="text-lg font-semibold mb-4">Contato</h4>
-                            <ul className="space-y-2 text-[15px]">
+                            <ul className="space-y-2 text-[15px] ">
                                 <li className="flex items-center">
-                                <a href="#" className="no-underline font-medium text-gray-300 hover:text-gray-500 trasition-colors duration-300">Ola</a>
+                                    <a href="#" className="no-underline font-medium text-gray-300 hover:text-gray-500 trasition-colors duration-300">Ola</a>
                                 </li>
                                 <li className="flex items-center">
-                                <a href="#" className="no-underline font-medium text-gray-300 hover:text-gray-500 trasition-colors duration-300">Ola</a>
+                                    <a href="#" className="no-underline font-medium text-gray-300 hover:text-gray-500 trasition-colors duration-300">Ola</a>
                                 </li>
                                 <li className="flex items-center">
-                                <a href="#" className="no-underline font-medium text-gray-300 hover:text-gray-500 trasition-colors duration-300">Ola</a>
+                                    <a href="#" className="no-underline font-medium text-gray-300 hover:text-gray-500 trasition-colors duration-300">Ola</a>
                                 </li>
                                 <li className="flex items-center">
-                                <a href="#" className="no-underline font-medium text-gray-300 hover:text-gray-500 trasition-colors duration-300">Ola</a>
+                                    <a href="#" className="no-underline font-medium text-gray-300 hover:text-gray-500 trasition-colors duration-300">Ola</a>
                                 </li>
                             </ul>
                         </div>

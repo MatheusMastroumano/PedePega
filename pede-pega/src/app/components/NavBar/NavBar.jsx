@@ -20,12 +20,12 @@ export default function Navbar() {
   return (
     <nav className="flex items-center justify-between px-4 py-3 bg-white shadow-md relative z-50">
       {/* Logo placeholder */}
-      <div><img src="/img/Logo.svg" className="" /></div>
+      <div><img src="/img/Logo.svg" className=" h-[40px]" /></div>
 
       {/* Center clickable text */}
       <div className="absolute left-1/2 transform -translate-x-1/2">
-        <a href="#" className="text-lg font-medium no-underline text-black">
-          Pede<span className="text-yellow-500">&amp;</span>Pega
+        <a href="#" className="text-[25px] font-medium no-underline text-black">
+          Pede<span className="text-yellow-600">&amp;</span>Pega
         </a>
       </div>
 
