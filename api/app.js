@@ -1,19 +1,27 @@
+// app.js - Arquivo principal atualizado
 import express from 'express';
 import cors from 'cors';
 import chalk from 'chalk';
 import logger from './logger.js';
 import produtoRotas from './routes/produtoRotas.js';
 import authRotas from './routes/authRotas.js';
+import carrinhoRotas from './routes/carrinhoRotas.js'; // Nova importação
 
 const app = express();
 const port = 3000;
 
 app.use(cors());
 app.use(express.json());
+
+// Usar o middleware de logging com Chalk
 app.use(logger);
 
+// Rotas existentes
 app.use('/produtos', produtoRotas);
 app.use('/auth', authRotas);
+
+// Nova rota do carrinho
+app.use('/carrinho', carrinhoRotas);
 
 app.get('/', (req, res) => {
     res.send('<h1>API PedePega</h1>');
