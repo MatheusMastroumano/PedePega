@@ -1,6 +1,5 @@
 'use client'
 
-import { useState, useEffect } from "react";
 import Image from 'next/image';
 
 export default function Home() {
@@ -17,6 +16,7 @@ export default function Home() {
     { icone: '/img/Tortadechocolate.png', titulo: 'Torta de chocolate' },
     { icone: '/img/Sucosnaturais.png', titulo: 'Sucos naturais' }
   ]
+
   return (
     <main className="bg-white min-h-screen">
 
