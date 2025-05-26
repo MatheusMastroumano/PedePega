@@ -4,35 +4,73 @@ import {
   create,
   update,
   deleteRecord,
+  getConnection
 } from "../config/database.js";
 
 const obterCarrinho = async (usuarioId) => {
   try {
-    return await readAll(
-      "carrinho_item JOIN produto ON carrinho_item.id_produto = produto.id_produto",
-      "carrinho_item.id_usuario = ? AND produto.disponivel = 1",
-      [usuarioId]
-    );
+    const connection = await getConnection();
+    try {
+      const sql = `
+        SELECT * 
+        FROM carrinho_item 
+        JOIN produto ON carrinho_item.id_produto = produto.id_produto 
+        WHERE carrinho_item.id_usuario = ? AND produto.estoque > 0
+      `;
+      console.log("Query:", sql, "Params:", [usuarioId]);
+      const [rows] = await connection.execute(sql, [usuarioId]);
+      return rows;
+    } finally {
+      connection.release();
+    }
   } catch (err) {
-    console.error("Erro ao obter carrinho...", err);
+    console.error("Erro ao obter carrinho:", err);
+    throw err;
+  }
+};
+
+const calcularTotalCarrinho = async (usuarioId) => {
+  try {
+    const connection = await getConnection();
+    try {
+      const sql = `
+        SELECT carrinho_item.quantidade, produto.preco
+        FROM carrinho_item 
+        JOIN produto ON carrinho_item.id_produto = produto.id_produto 
+        WHERE carrinho_item.id_usuario = ? AND produto.estoque > 0
+      `;
+      console.log("Query:", sql, "Params:", [usuarioId]);
+      const [items] = await connection.execute(sql, [usuarioId]);
+      return items.reduce((total, item) => {
+        return total + item.quantidade * parseFloat(item.preco);
+      }, 0);
+    } finally {
+      connection.release();
+    }
+  } catch (err) {
+    console.error("Erro ao calcular total:", err);
     throw err;
   }
 };
 
 const adicionarItemCarrinho = async (usuarioId, produtoId, quantidade) => {
   try {
-    //verifica produto (existe/disponivel)
-    const produto = await read("produto", "id_produto = ?", produtoId);
+    const produto = await read("produto", "id_produto = ?", [produtoId]);
+
+    console.log("Produto retornado:", produto);
 
     if (!produto) {
-      return { mensagem: "Produto não existe" };
+      return { erro: "Produto não encontrado" };
     }
 
-    if (!produto.disponivel) {
-      return { mensagem: "Produto não disponível" };
+    // Verifica se há estoque suficiente
+    const estoque = parseInt(produto.estoque);
+    const quantidadeNum = parseInt(quantidade);
+    if (estoque < quantidadeNum) {
+      return { erro: "Estoque insuficiente" };
     }
 
-    //verifica se ja esta no carrinho
+    // Verifica se já está no carrinho
     const itemExistente = await read(
       "carrinho_item",
       "id_usuario = ? AND id_produto = ?",
@@ -40,7 +78,18 @@ const adicionarItemCarrinho = async (usuarioId, produtoId, quantidade) => {
     );
 
     if (itemExistente) {
-      const novaQuantidade = itemExistente.quantidade + quantidade;
+      const novaQuantidade = parseInt(itemExistente.quantidade) + quantidadeNum;
+      // Verifica se a nova quantidade não excede o estoque
+      if (estoque < novaQuantidade) {
+        return { erro: "Estoque insuficiente para a nova quantidade" };
+      }
+      // Subtrai a quantidade adicional do estoque
+      await update(
+        "produto",
+        { estoque: estoque - quantidadeNum },
+        "id_produto = ?",
+        [produtoId]
+      );
       return await update(
         "carrinho_item",
         { quantidade: novaQuantidade },
@@ -48,26 +97,70 @@ const adicionarItemCarrinho = async (usuarioId, produtoId, quantidade) => {
         [itemExistente.id_carrinho_item]
       );
     } else {
-      //cria novo item carrinho
+      // Subtrai a quantidade do estoque
+      await update(
+        "produto",
+        { estoque: estoque - quantidadeNum },
+        "id_produto = ?",
+        [produtoId]
+      );
+      // Cria novo item no carrinho
       const itemData = {
         id_usuario: usuarioId,
         id_produto: produtoId,
-        quantidade: quantidade,
+        quantidade: quantidadeNum,
       };
 
       return await create("carrinho_item", itemData);
     }
   } catch (err) {
-    console.error("Erro ao adicionar item ao carrinho", err);
+    console.error("Erro ao adicionar item ao carrinho:", err);
     throw err;
   }
 };
 
 const atualizarQuantidadeItem = async (usuarioId, itemId, quantidade) => {
   try {
+    // Verificar se o item existe no carrinho
+    const item = await read(
+      "carrinho_item",
+      "id_carrinho_item = ? AND id_usuario = ?",
+      [itemId, usuarioId]
+    );
+    if (!item) {
+      return 0; // Retorna 0 para indicar que o item não foi encontrado
+    }
+
+    // Buscar o produto associado
+    const produto = await read("produto", "id_produto = ?", [item.id_produto]);
+    if (!produto) {
+      return { erro: "Produto não encontrado" };
+    }
+
+    // Verificar se há estoque suficiente
+    const estoque = parseInt(produto.estoque);
+    const quantidadeNum = parseInt(quantidade);
+    const quantidadeAtual = parseInt(item.quantidade);
+    const diferenca = quantidadeNum - quantidadeAtual;
+
+    if (diferenca > 0 && estoque < diferenca) {
+      return { erro: "Estoque insuficiente" };
+    }
+
+    // Atualizar o estoque
+    if (diferenca !== 0) {
+      await update(
+        "produto",
+        { estoque: estoque - diferenca },
+        "id_produto = ?",
+        [item.id_produto]
+      );
+    }
+
+    // Atualizar a quantidade no carrinho
     return await update(
       "carrinho_item",
-      { quantidade: quantidade },
+      { quantidade: quantidadeNum },
       "id_carrinho_item = ? AND id_usuario = ?",
       [itemId, usuarioId]
     );
@@ -79,9 +172,33 @@ const atualizarQuantidadeItem = async (usuarioId, itemId, quantidade) => {
 
 const removerItemCarrinho = async (usuarioId, itemId) => {
   try {
+    // Verificar se o item existe no carrinho
+    const item = await read(
+      "carrinho_item",
+      "id_carrinho_item = ? AND id_usuario = ?",
+      [itemId, usuarioId]
+    );
+    if (!item) {
+      return 0; // Retorna 0 para indicar que o item não foi encontrado
+    }
+
+    // Restaurar a quantidade ao estoque
+    const produto = await read("produto", "id_produto = ?", [item.id_produto]);
+    if (produto) {
+      const estoque = parseInt(produto.estoque);
+      const quantidade = parseInt(item.quantidade);
+      await update(
+        "produto",
+        { estoque: estoque + quantidade },
+        "id_produto = ?",
+        [item.id_produto]
+      );
+    }
+
+    // Remover o item do carrinho
     return await deleteRecord(
       "carrinho_item",
-      "id_carrinho_item = ? AND id_usuario",
+      "id_carrinho_item = ? AND id_usuario = ?",
       [itemId, usuarioId]
     );
   } catch (err) {
@@ -92,6 +209,29 @@ const removerItemCarrinho = async (usuarioId, itemId) => {
 
 const limparCarrinho = async (usuarioId) => {
   try {
+    // Obter todos os itens do carrinho
+    const itens = await readAll(
+      "carrinho_item",
+      "id_usuario = ?",
+      [usuarioId]
+    );
+
+    // Restaurar o estoque para cada item
+    for (const item of itens) {
+      const produto = await read("produto", "id_produto = ?", [item.id_produto]);
+      if (produto) {
+        const estoque = parseInt(produto.estoque);
+        const quantidade = parseInt(item.quantidade);
+        await update(
+          "produto",
+          { estoque: estoque + quantidade },
+          "id_produto = ?",
+          [item.id_produto]
+        );
+      }
+    }
+
+    // Limpar o carrinho
     return await deleteRecord("carrinho_item", "id_usuario = ?", [usuarioId]);
   } catch (err) {
     console.error("Erro ao limpar carrinho:", err);
@@ -99,26 +239,22 @@ const limparCarrinho = async (usuarioId) => {
   }
 };
 
-const calcularTotalCarrinho = async (usuarioId) => {
-  try {
-    const items = await readAll(
-      "carrinho_item JOIN produto ON carrinho_item.id_produto = produto.id_produto",
-      "carrinho_item.id_usuario = ? ANd produto.disponivel = 1",
-      [usuarioId]
-    );
-    return items.reduce((total, item) => {
-      return total + item.quantidade * parseFloat(item.preco);
-    }, 0);
-  } catch (err) {
-    console.error("Erro ao calcular total:", err);
-    throw err;
-  }
-};
-
 const contarItensCarrinho = async (usuarioId) => {
   try {
-    const items = await readAll("carrinho_item", "id_usuario = ?", [usuarioId]);
-    return items.reduce((total, item) => total + item.quantidade, 0);
+    const connection = await getConnection();
+    try {
+      const sql = `
+        SELECT SUM(quantidade) as total_itens
+        FROM carrinho_item 
+        JOIN produto ON carrinho_item.id_produto = produto.id_produto 
+        WHERE carrinho_item.id_usuario = ? AND produto.estoque > 0
+      `;
+      console.log("Query:", sql, "Params:", [usuarioId]);
+      const [rows] = await connection.execute(sql, [usuarioId]);
+      return rows[0].total_itens || 0;
+    } finally {
+      connection.release();
+    }
   } catch (err) {
     console.error("Erro ao contar itens do carrinho:", err);
     throw err;

@@ -114,4 +114,4 @@ async function compare(senha, hash) {
   }
 }
 
-export { readAll, read, create, update, deleteRecord, compare };
+export { readAll, read, create, update, deleteRecord, compare, getConnection };
