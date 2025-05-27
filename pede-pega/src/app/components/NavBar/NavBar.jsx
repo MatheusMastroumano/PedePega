@@ -14,6 +14,20 @@ export default function Navbar() {
   const [showNavbar, setShowNavbar] = useState(true);
   const [lastScrollY, setLastScrollY] = useState(0);
 
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+
+  // Verifica se há token JWT salvo
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    setIsAuthenticated(!!token);
+  }, []);
+
+  const handleLogout = () => {
+    localStorage.removeItem("token");
+    setIsAuthenticated(false);
+    router.push("/"); // Redireciona para a home
+  };
+
   // Esconder/mostrar a navbar com base no scroll
   useEffect(() => {
     const handleScroll = () => {
@@ -55,9 +69,8 @@ export default function Navbar() {
   return (
     <>
       <nav
-        className={`fixed top-0 left-0 right-0 z-50 bg-white shadow-md transition-transform duration-200 ${
-          showNavbar ? 'translate-y-0' : '-translate-y-full'
-        }`}
+        className={`fixed top-0 left-0 right-0 z-50 bg-white shadow-md transition-transform duration-200 ${showNavbar ? 'translate-y-0' : '-translate-y-full'
+          }`}
       >
         <div className="flex items-center justify-between px-4 py-3 relative">
           {/* Logo à esquerda */}
@@ -104,9 +117,8 @@ export default function Navbar() {
 
         {/* Painel lateral deslizante */}
         <div
-          className={`fixed top-0 right-0 h-full w-64 bg-white shadow-lg transform transition-transform duration-300 ease-in-out menu-panel z-50 ${
-            isOpen ? 'translate-x-0' : 'translate-x-full'
-          }`}
+          className={`fixed top-0 right-0 h-full w-64 bg-white shadow-lg transform transition-transform duration-300 ease-in-out menu-panel z-50 ${isOpen ? 'translate-x-0' : 'translate-x-full'
+            }`}
         >
           <div className="flex justify-end p-4">
             <button onClick={() => setIsOpen(false)} aria-label="Fechar menu">
@@ -128,9 +140,15 @@ export default function Navbar() {
             </li>
             <li
               className="text-lg text-black cursor-pointer hover:underline"
-              onClick={() => handleNavigation('/contato')}
+              onClick={() => {
+                if (isAuthenticated) {
+                  handleLogout();
+                } else {
+                  handleNavigation("/FormLoginRegister");
+                }
+              }}
             >
-              Contato
+              {isAuthenticated ? "Sair" : "Entrar"}
             </li>
           </ul>
         </div>

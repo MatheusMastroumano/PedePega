@@ -1,89 +1,107 @@
-'use client';
+"use client";
+import React, { useEffect, useState } from "react";
 
-import { useCart } from '../components/Cart/contextoCart';
-import Link from 'next/link';
+const Carrinho = () => {
+  const [cartItems, setCartItems] = useState([]);
+  const [total, setTotal] = useState(0);
+  const [loading, setLoading] = useState(true);
+  const token = typeof window !== "undefined" ? localStorage.getItem("token") : null;
 
-function LoadingDots() {
+
+  useEffect(() => {
+    if (!token) {
+      setLoading(false);
+      return;
+    }
+
+    const fetchCarrinho = async () => {
+      try {
+        const res = await fetch("/models/Carrinho.js", {
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+        });
+
+        if (!res.ok) throw new Error("Erro ao buscar o carrinho");
+
+        const data = await res.json();
+
+        setCartItems(data);
+        calcularTotal(data);
+      } catch (err) {
+        console.error("Erro ao carregar o carrinho:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchCarrinho();
+  }, [token]);
+
+  const calcularTotal = (itens) => {
+    const total = itens.reduce((sum, item) => {
+      const preco = item.preco || item.price || 0;
+      const quantidade = item.quantidade || item.quantity || 1;
+      return sum + preco * quantidade;
+    }, 0);
+    setTotal(total);
+  };
+
+  const removerItem = async (itemId) => {
+    try {
+      const res = await fetch(`${itemId}`, {
+        method: "DELETE",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      if (!res.ok) throw new Error("Erro ao remover o item");
+
+      const novosItens = cartItems.filter((item) => item.id !== itemId);
+      setCartItems(novosItens);
+      calcularTotal(novosItens);
+    } catch (err) {
+      console.error("Erro ao remover item:", err);
+    }
+  };
+
+  if (loading) return <div className="p-4 text-center">Carregando...</div>;
+
+  if (!token) return <div className="p-4 text-center text-red-500">Usuário não autenticado.</div>;
+
   return (
-    <div className="flex items-center gap-2">
-      {[...Array(3)].map((_, i) => (
-        <span
-          key={i}
-          className="w-3 h-3 bg-yellow-600 rounded-full animate-bounce"
-          style={{ animationDelay: `${i * 0.2}s` }}
-        />
-      ))}
-    </div>
-  );
-}
-
-export default function carrinho() {
-  const { cartItems, changeQuantity, removeFromCart, getTotalPrice } = useCart();
-
-  return (
-    <div className="min-h-[300px] flex flex-col justify-center items-center p-6 text-center">
-      <h1 className="text-2xl font-bold mb-6">Seu Carrinho</h1>
-
+    <div className="p-6">
+      <h2 className="text-2xl font-semibold mb-4">Carrinho de Compras</h2>
       {cartItems.length === 0 ? (
-        <>
-          <div className="flex items-center justify-center gap-3 text-gray-500 mb-4">
-            <p>O carrinho está vazio.</p>
-            <LoadingDots />
-          </div>
-          <Link href="/PaginaCart">
-            <p className="text-yellow-600 underline hover:text-yellow-700">
-              Ver produtos
-            </p>
-          </Link>
-        </>
+        <p className="text-gray-500">Seu carrinho está vazio.</p>
       ) : (
-        <div className="w-full max-w-3xl space-y-4">
+        <div className="space-y-4">
           {cartItems.map((item) => (
-            <div
-              key={item.id}
-              className="flex items-center justify-between bg-white p-4 rounded shadow"
-            >
-              <div className="flex items-center gap-4">
-                <img
-                  src={item.imagem || item.image}
-                  alt={item.nome || item.name}
-                  className="h-16 w-16 object-contain"
-                />
-                <div>
-                  <h2 className="font-semibold">{item.nome || item.name}</h2>
-                  <p className="text-sm text-gray-600">
-                    R$ {(item.preco || item.price).toFixed(2)}
-                  </p>
-                </div>
+            <div key={item.id} className="flex items-center justify-between bg-white p-4 shadow rounded-lg">
+              <div>
+                <h3 className="text-lg font-medium">{item.nome || item.name}</h3>
+                <p className="text-gray-600">
+                  Quantidade: {item.quantidade || item.quantity}
+                </p>
+                <p className="text-gray-600">
+                  Preço: R$ {(item.preco || item.price).toFixed(2)}
+                </p>
               </div>
-              <div className="flex items-center gap-2">
-                <button
-                  onClick={() => changeQuantity(item.id, -1)}
-                  className="px-2 py-1 bg-gray-200 rounded"
-                >
-                  -
-                </button>
-                <span>{item.quantity}</span>
-                <button
-                  onClick={() => changeQuantity(item.id, 1)}
-                  className="px-2 py-1 bg-gray-200 rounded"
-                >
-                  +
-                </button>
-                <button
-                  onClick={() => removeFromCart(item.id)}
-                  className="ml-2 px-3 py-1 bg-red-500 text-white rounded"
-                >
-                  Remover
-                </button>
-              </div>
+              <button
+                onClick={() => removerItem(item.id)}
+                className="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded"
+              >
+                Remover
+              </button>
             </div>
           ))}
-          <div className="text-right mt-4 text-lg font-bold">
-            Total: R$ {getTotalPrice().toFixed(2)}
-          </div>
+          <div className="text-xl font-bold text-right">Total: R$ {total.toFixed(2)}</div>
         </div>
       )}
     </div>
   );
-}
+};
+
+export default Carrinho;

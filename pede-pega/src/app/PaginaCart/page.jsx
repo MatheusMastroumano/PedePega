@@ -7,6 +7,7 @@ export default function ProdutosPage() {
   const [produtos, setProdutos] = useState([]);
   const { addToCart } = useCart();
   const router = useRouter();
+  const produtosDisponiveis = produtos.filter(p => p.disponivel);
 
   useEffect(() => {
     fetch('http://localhost:3001/produtos')
@@ -19,17 +20,21 @@ export default function ProdutosPage() {
     <div className="p-6 flex flex-wrap justify-center gap-6">
       {produtos.map((produto) => (
         <div
-          key={produto.id}
+          key={produto.id_produto}
           className="bg-white shadow-md rounded-xl w-64 p-4 flex flex-col items-center text-center"
         >
           <img src={produto.imagem} alt={produto.nome} className="h-32 object-contain mb-2" />
           <h2 className="text-lg font-semibold text-black">{produto.nome}</h2>
-          <p className="text-yellow-600 font-bold text-lg">R$ {produto.preco.toFixed(2)}</p>
+          <p className="text-yellow-600 font-bold text-lg"> R$ {parseFloat(produto.preco).toFixed(2)}</p>
 
           {/* Botão Adicionar ao Carrinho */}
           <button
             className="mt-2 px-4 py-2 bg-yellow-500 hover:bg-yellow-600 text-white rounded-lg w-full"
-            onClick={() => addToCart(produto)}
+            onClick={() => addToCart({
+              ...produto,
+            preco: parseFloat(produto.preco).toFixed(2)
+            })
+          }
           >
             Adicionar ao Carrinho
           </button>
@@ -37,7 +42,7 @@ export default function ProdutosPage() {
           {/* Botão Ver Detalhes (outline) */}
           <button
             className="mt-2 px-4 py-2 border-2 border-yellow-500 text-yellow-500 hover:bg-yellow-100 rounded-lg w-full"
-            onClick={() => router.push(`/produto/${produto.id}`)}
+            onClick={() => router.push(`/produto/${produto.id_produto}`)}
           >
             Ver Detalhes
           </button>
