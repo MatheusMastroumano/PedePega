@@ -1,103 +1,162 @@
 "use client";
-import React, { useEffect, useState } from "react";
+import React, { useEffect } from "react";
+import { useCart } from "../components/Cart/contextoCart.js";
+import { useAuth } from "../components/AuthContexto/ContextoAuth.js"; // Ajuste o caminho conforme necessário
 
 const Carrinho = () => {
-  const [cartItems, setCartItems] = useState([]);
-  const [total, setTotal] = useState(0);
-  const [loading, setLoading] = useState(true);
-  const token = typeof window !== "undefined" ? localStorage.getItem("token") : null;
+  const {
+    cartItems,
+    loading,
+    total,
+    removeFromCart,
+    increaseQuantity,
+    decreaseQuantity,
+    clearCart,
+    fetchCartFromAPI,
+    getTotalItems,
+  } = useCart();
+  
+  const { token } = useAuth();
 
-
+  // Recarrega o carrinho quando a página é acessada
   useEffect(() => {
-    if (!token) {
-      setLoading(false);
-      return;
+    if (token) {
+      fetchCartFromAPI();
     }
-
-    const fetchCarrinho = async () => {
-      try {
-        const res = await fetch("/models/Carrinho.js", {
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-        });
-
-        if (!res.ok) throw new Error("Erro ao buscar o carrinho");
-
-        const data = await res.json();
-
-        setCartItems(data);
-        calcularTotal(data);
-      } catch (err) {
-        console.error("Erro ao carregar o carrinho:", err);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchCarrinho();
   }, [token]);
 
-  const calcularTotal = (itens) => {
-    const total = itens.reduce((sum, item) => {
-      const preco = item.preco || item.price || 0;
-      const quantidade = item.quantidade || item.quantity || 1;
-      return sum + preco * quantidade;
-    }, 0);
-    setTotal(total);
-  };
+  if (loading) {
+    return (
+      <div className="p-4 text-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-yellow-500 mx-auto"></div>
+        <p className="mt-2">Carregando carrinho...</p>
+      </div>
+    );
+  }
 
-  const removerItem = async (itemId) => {
-    try {
-      const res = await fetch(`${itemId}`, {
-        method: "DELETE",
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-
-      if (!res.ok) throw new Error("Erro ao remover o item");
-
-      const novosItens = cartItems.filter((item) => item.id !== itemId);
-      setCartItems(novosItens);
-      calcularTotal(novosItens);
-    } catch (err) {
-      console.error("Erro ao remover item:", err);
-    }
-  };
-
-  if (loading) return <div className="p-4 text-center">Carregando...</div>;
-
-  if (!token) return <div className="p-4 text-center text-red-500">Usuário não autenticado.</div>;
+  if (!token) {
+    return (
+      <div className="p-4 text-center">
+        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
+          <strong>Acesso negado!</strong> Você precisa estar logado para ver o carrinho.
+        </div>
+      </div>
+    );
+  }
 
   return (
-    <div className="p-6">
-      <h2 className="text-2xl font-semibold mb-4">Carrinho de Compras</h2>
+    <div className="p-6 max-w-4xl mx-auto">
+      <div className="flex justify-between items-center mb-6">
+        <h2 className="text-3xl font-bold text-gray-800">Carrinho de Compras</h2>
+        {cartItems.length > 0 && (
+          <button
+            onClick={clearCart}
+            className="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg transition-colors"
+            disabled={loading}
+          >
+            Limpar Carrinho
+          </button>
+        )}
+      </div>
+
       {cartItems.length === 0 ? (
-        <p className="text-gray-500">Seu carrinho está vazio.</p>
+        <div className="text-center py-12">
+          <div className="text-6xl mb-4">🛒</div>
+          <p className="text-xl text-gray-500 mb-4">Seu carrinho está vazio</p>
+          <p className="text-gray-400">Adicione alguns produtos para começar suas compras!</p>
+        </div>
       ) : (
         <div className="space-y-4">
+          {/* Header do carrinho */}
+          <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-6">
+            <div className="flex justify-between items-center">
+              <span className="text-lg font-semibold text-gray-700">
+                {getTotalItems()} {getTotalItems() === 1 ? 'item' : 'itens'} no carrinho
+              </span>
+              <span className="text-2xl font-bold text-yellow-600">
+                Total: R$ {total.toFixed(2)}
+              </span>
+            </div>
+          </div>
+
+          {/* Lista de itens */}
           {cartItems.map((item) => (
-            <div key={item.id} className="flex items-center justify-between bg-white p-4 shadow rounded-lg">
-              <div>
-                <h3 className="text-lg font-medium">{item.nome || item.name}</h3>
-                <p className="text-gray-600">
-                  Quantidade: {item.quantidade || item.quantity}
-                </p>
-                <p className="text-gray-600">
-                  Preço: R$ {(item.preco || item.price).toFixed(2)}
-                </p>
+            <div key={item.id} className="bg-white border border-gray-200 rounded-lg p-6 shadow-sm hover:shadow-md transition-shadow">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center space-x-4">
+                  {item.imagem && (
+                    <img
+                      src={item.imagem}
+                      alt={item.nome}
+                      className="w-16 h-16 object-cover rounded-lg"
+                    />
+                  )}
+                  <div>
+                    <h3 className="text-xl font-semibold text-gray-800">{item.nome}</h3>
+                    <p className="text-gray-600">Preço unitário: R$ {item.preco.toFixed(2)}</p>
+                    <p className="text-sm text-gray-500">Estoque disponível: {item.estoque}</p>
+                  </div>
+                </div>
+
+                <div className="flex items-center space-x-4">
+                  {/* Controles de quantidade */}
+                  <div className="flex items-center space-x-2">
+                    <button
+                      onClick={() => decreaseQuantity(item.id)}
+                      disabled={loading || item.quantidade <= 1}
+                      className="w-8 h-8 rounded-full bg-gray-200 hover:bg-gray-300 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center transition-colors"
+                    >
+                      -
+                    </button>
+                    
+                    <span className="w-12 text-center font-semibold text-lg">
+                      {item.quantidade}
+                    </span>
+                    
+                    <button
+                      onClick={() => increaseQuantity(item.id)}
+                      disabled={loading || item.quantidade >= item.estoque}
+                      className="w-8 h-8 rounded-full bg-gray-200 hover:bg-gray-300 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center transition-colors"
+                    >
+                      +
+                    </button>
+                  </div>
+
+                  {/* Subtotal */}
+                  <div className="text-right min-w-[100px]">
+                    <p className="text-lg font-bold text-gray-800">
+                      R$ {(item.preco * item.quantidade).toFixed(2)}
+                    </p>
+                  </div>
+
+                  {/* Botão remover */}
+                  <button
+                    onClick={() => removeFromCart(item.id)}
+                    disabled={loading}
+                    className="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    Remover
+                  </button>
+                </div>
               </div>
-              <button
-                onClick={() => removerItem(item.id)}
-                className="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded"
-              >
-                Remover
-              </button>
             </div>
           ))}
-          <div className="text-xl font-bold text-right">Total: R$ {total.toFixed(2)}</div>
+
+          {/* Footer com total e botão de finalizar */}
+          <div className="bg-gray-50 border border-gray-200 rounded-lg p-6 mt-6">
+            <div className="flex justify-between items-center">
+              <div>
+                <p className="text-lg text-gray-600">Total de itens: {getTotalItems()}</p>
+                <p className="text-2xl font-bold text-gray-800">Total: R$ {total.toFixed(2)}</p>
+              </div>
+              <button
+                className="bg-green-500 hover:bg-green-600 text-white px-8 py-3 rounded-lg text-lg font-semibold transition-colors"
+                disabled={loading}
+              >
+                Finalizar Compra
+              </button>
+            </div>
+          </div>
         </div>
       )}
     </div>
