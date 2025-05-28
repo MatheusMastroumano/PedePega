@@ -3,12 +3,14 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Mail, Lock, User } from 'lucide-react';
+import { useAuth } from '../components/AuthContexto/ContextoAuth.js';
 
 export default function AuthPage() {
   const [isLogin, setIsLogin] = useState(true);
   const [form, setForm] = useState({ name: '', email: '', senha: '' });
   const [passwordStrength, setPasswordStrength] = useState('');
   const router = useRouter();
+  const { login } = useAuth();
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -32,26 +34,28 @@ export default function AuthPage() {
     setPasswordStrength('');
   };
 
+  
   const handleSubmit = async (e) => {
     e.preventDefault();
-
+  
     const endpoint = isLogin ? '/auth/login' : '/auth/register';
     const body = isLogin
       ? { email: form.email, senha: form.senha }
       : { name: form.name, email: form.email, senha: form.senha };
-
+  
     try {
       const response = await fetch(`http://localhost:3001${endpoint}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(body),
       });
-
+  
       const data = await response.json();
-
+  
       if (response.ok) {
         localStorage.setItem('token', data.token);
-        router.push('/PaginaCart');
+        login(data.token); // Atualiza o contexto corretamente
+        router.push('/PaginaCart'); // Redireciona
       } else {
         alert(data.mensagem || 'Erro');
       }
@@ -59,9 +63,12 @@ export default function AuthPage() {
       alert('Erro na requisição');
     }
   };
+  
+
+
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-100 px-4 animate-fade-in">
+    <div className="min-h-screen flex items-center justify-center bg-gray-100 px-4">
       <div className="bg-white shadow-2xl rounded-2xl p-8 w-full max-w-md text-black transition-all duration-300">
         <h1 className="text-3xl font-bold mb-6 text-center">
           {isLogin ? 'Entrar na conta' : 'Criar conta'}

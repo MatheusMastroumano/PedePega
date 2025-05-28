@@ -4,13 +4,14 @@ import { useState, useEffect } from 'react';
 import { Menu, X, ShoppingCart } from 'lucide-react';
 import { useCart } from '../Cart/contextoCart.js';
 import { useRouter } from 'next/navigation';
+import { useAuth } from '../AuthContexto/ContextoAuth.js';
 
 export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
   const { getTotalPrice } = useCart();
   const router = useRouter();
   const totalPrice = getTotalPrice();
-
+  const { token, logout } = useAuth();
   const [showNavbar, setShowNavbar] = useState(true);
   const [lastScrollY, setLastScrollY] = useState(0);
 
@@ -138,18 +139,24 @@ export default function Navbar() {
             >
               Produtos
             </li>
-            <li
-              className="text-lg text-black cursor-pointer hover:underline"
-              onClick={() => {
-                if (isAuthenticated) {
-                  handleLogout();
-                } else {
-                  handleNavigation("/FormLoginRegister");
-                }
-              }}
-            >
-              {isAuthenticated ? "Sair" : "Entrar"}
-            </li>
+            {token ? (
+              <li
+                className="text-lg text-black cursor-pointer hover:underline"
+                onClick={() => {
+                  logout();
+                  router.push('/');
+                }}
+              >
+                Sair
+              </li>
+            ) : (
+              <li
+                className="text-lg text-black cursor-pointer hover:underline"
+                onClick={() => handleNavigation('/FormLoginRegister')}
+              >
+                Entrar
+              </li>
+            )}
           </ul>
         </div>
       </div>
