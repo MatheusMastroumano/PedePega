@@ -8,26 +8,22 @@ import { useAuth } from '../AuthContexto/ContextoAuth.js';
 
 export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
-  const { getTotalPrice } = useCart();
+  const { getTotalPrice, getTotalItems, fetchCartFromAPI } = useCart();
   const router = useRouter();
-  const totalPrice = getTotalPrice();
   const { token, logout } = useAuth();
   const [showNavbar, setShowNavbar] = useState(true);
   const [lastScrollY, setLastScrollY] = useState(0);
 
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  // Valores do carrinho
+  const totalPrice = getTotalPrice();
+  const totalItems = getTotalItems();
 
-  // Verifica se há token JWT salvo
+  // Buscar carrinho quando a navbar é carregada e há token
   useEffect(() => {
-    const token = localStorage.getItem("token");
-    setIsAuthenticated(!!token);
-  }, []);
-
-  const handleLogout = () => {
-    localStorage.removeItem("token");
-    setIsAuthenticated(false);
-    router.push("/"); // Redireciona para a home
-  };
+    if (token) {
+      fetchCartFromAPI();
+    }
+  }, [token]);
 
   // Esconder/mostrar a navbar com base no scroll
   useEffect(() => {
@@ -67,6 +63,12 @@ export default function Navbar() {
     setIsOpen(false);
   };
 
+  const handleLogout = () => {
+    logout();
+    setIsOpen(false);
+    router.push('/');
+  };
+
   return (
     <>
       <nav
@@ -81,23 +83,35 @@ export default function Navbar() {
 
           {/* Nome centralizado */}
           <div className="absolute left-1/2 transform -translate-x-1/2">
-            <a href="#" className="text-[25px] font-medium no-underline text-black">
+            <button 
+              onClick={() => router.push('/')}
+              className="text-[25px] font-medium no-underline text-black hover:text-yellow-600 transition-colors"
+            >
               Pede<span className="text-yellow-600">&amp;</span>Pega
-            </a>
+            </button>
           </div>
 
           {/* Carrinho e menu */}
           <div className="flex items-center gap-4">
             <button
               onClick={() => router.push('/carrinho')}
-              className="flex items-center gap-2 text-black font-semibold hover:underline"
+              className="flex items-center gap-2 text-black font-semibold hover:text-yellow-600 transition-colors relative"
             >
-              <ShoppingCart size={24} />
-              R$ {totalPrice.toFixed(2)}
+              <div className="relative">
+                <ShoppingCart size={24} />
+                {totalItems > 0 && (
+                  <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
+                    {totalItems > 99 ? '99+' : totalItems}
+                  </span>
+                )}
+              </div>
+              <span className="hidden sm:block">
+                R$ {totalPrice.toFixed(2)}
+              </span>
             </button>
 
             <button
-              className="focus:outline-none menu-toggle text-black"
+              className="focus:outline-none menu-toggle text-black hover:text-yellow-600 transition-colors"
               onClick={() => setIsOpen(!isOpen)}
               aria-label="Toggle menu"
             >
@@ -123,35 +137,56 @@ export default function Navbar() {
         >
           <div className="flex justify-end p-4">
             <button onClick={() => setIsOpen(false)} aria-label="Fechar menu">
-              <X size={24} className="text-black" />
+              <X size={24} className="text-black hover:text-yellow-600 transition-colors" />
             </button>
           </div>
+          
+          {/* Informações do carrinho no menu */}
+          {token && (
+            <div className="px-6 py-4 border-b border-gray-200">
+              <div className="flex items-center justify-between text-sm text-gray-600">
+                <span>Carrinho:</span>
+                <span className="font-semibold">
+                  {totalItems} {totalItems === 1 ? 'item' : 'itens'}
+                </span>
+              </div>
+              <div className="text-lg font-bold text-yellow-600">
+                R$ {totalPrice.toFixed(2)}
+              </div>
+            </div>
+          )}
+          
           <ul className="px-6 py-4 space-y-4">
             <li
-              className="text-lg text-black cursor-pointer hover:underline"
+              className="text-lg text-black cursor-pointer hover:text-yellow-600 transition-colors"
               onClick={() => handleNavigation('/')}
             >
               Início
             </li>
             <li
-              className="text-lg text-black cursor-pointer hover:underline"
+              className="text-lg text-black cursor-pointer hover:text-yellow-600 transition-colors"
               onClick={() => handleNavigation('/PaginaCart')}
             >
               Produtos
             </li>
+            {token && (
+              <li
+                className="text-lg text-black cursor-pointer hover:text-yellow-600 transition-colors"
+                onClick={() => handleNavigation('/carrinho')}
+              >
+                Carrinho
+              </li>
+            )}
             {token ? (
               <li
-                className="text-lg text-black cursor-pointer hover:underline"
-                onClick={() => {
-                  logout();
-                  router.push('/');
-                }}
+                className="text-lg text-red-600 cursor-pointer hover:text-red-700 transition-colors"
+                onClick={handleLogout}
               >
                 Sair
               </li>
             ) : (
               <li
-                className="text-lg text-black cursor-pointer hover:underline"
+                className="text-lg text-black cursor-pointer hover:text-yellow-600 transition-colors"
                 onClick={() => handleNavigation('/FormLoginRegister')}
               >
                 Entrar
