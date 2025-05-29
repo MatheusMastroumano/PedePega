@@ -9,9 +9,17 @@ export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [isHydrated, setIsHydrated] = useState(false);
 
-  // Carregar token do localStorage quando o componente monta
+  // Verificar se está no cliente (hidratação)
   useEffect(() => {
+    setIsHydrated(true);
+  }, []);
+
+  // Carregar token do localStorage apenas no cliente
+  useEffect(() => {
+    if (!isHydrated) return;
+
     try {
       const savedToken = localStorage.getItem('authToken');
       const savedUser = localStorage.getItem('userData');
@@ -51,7 +59,7 @@ export const AuthProvider = ({ children }) => {
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [isHydrated]);
 
   const login = (tokenData, userData) => {
     try {
@@ -61,9 +69,11 @@ export const AuthProvider = ({ children }) => {
       setUser(userData);
       setIsAuthenticated(true);
       
-      localStorage.setItem('authToken', tokenData);
-      if (userData) {
-        localStorage.setItem('userData', JSON.stringify(userData));
+      if (isHydrated) {
+        localStorage.setItem('authToken', tokenData);
+        if (userData) {
+          localStorage.setItem('userData', JSON.stringify(userData));
+        }
       }
       
       console.log('Login realizado com sucesso');
@@ -80,8 +90,10 @@ export const AuthProvider = ({ children }) => {
       setUser(null);
       setIsAuthenticated(false);
       
-      localStorage.removeItem('authToken');
-      localStorage.removeItem('userData');
+      if (isHydrated) {
+        localStorage.removeItem('authToken');
+        localStorage.removeItem('userData');
+      }
       
       console.log('Logout realizado com sucesso');
     } catch (error) {
@@ -111,6 +123,19 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+  // Verificar se o usuário é administrador
+  const isAdmin = () => {
+    if (!user || !token) return false;
+    
+    try {
+      const tokenData = JSON.parse(atob(token.split('.')[1]));
+      return tokenData.role === 'admin' || user.role === 'admin' || user.isAdmin === true;
+    } catch (error) {
+      console.error('Erro ao verificar role de admin:', error);
+      return false;
+    }
+  };
+
   // Função para fazer requisições autenticadas
   const authenticatedFetch = async (url, options = {}) => {
     if (!checkTokenValidity()) {
@@ -127,7 +152,6 @@ export const AuthProvider = ({ children }) => {
     }
 
     console.log('Fazendo requisição autenticada para:', url);
-    console.log('Headers:', { ...headers, Authorization: headers.Authorization ? 'Bearer [TOKEN]' : 'Não presente' });
 
     return fetch(url, {
       ...options,
@@ -140,10 +164,12 @@ export const AuthProvider = ({ children }) => {
     user,
     loading,
     isAuthenticated,
+    isAdmin,
     login,
     logout,
     checkTokenValidity,
     authenticatedFetch,
+    isHydrated,
   };
 
   return (
