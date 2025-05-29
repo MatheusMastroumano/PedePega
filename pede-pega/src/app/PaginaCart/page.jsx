@@ -6,19 +6,49 @@ import { useRouter } from 'next/navigation';
 export default function ProdutosPage() {
   const [produtos, setProdutos] = useState([]);
   const [loadingProducts, setLoadingProducts] = useState(true);
+  const [error, setError] = useState(null);
   const { addToCart, loading: cartLoading, isAuthenticated, isAddingItem } = useCart();
   const router = useRouter();
 
   useEffect(() => {
     const fetchProdutos = async () => {
       try {
-        const res = await fetch('http://localhost:3001/produtos');
-        if (!res.ok) throw new Error('Erro ao buscar produtos');
+        setError(null);
+        console.log('Buscando produtos...');
+        
+        const res = await fetch('http://localhost:3001/produtos', {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        });
+        
+        console.log('Resposta da API produtos:', res.status);
+        
+        if (!res.ok) {
+          let errorMessage = 'Erro ao buscar produtos';
+          try {
+            const errorData = await res.json();
+            errorMessage = errorData.mensagem || errorData.message || errorMessage;
+          } catch (e) {
+            console.log('Erro ao parsear resposta de erro:', e);
+          }
+          throw new Error(errorMessage);
+        }
+        
         const data = await res.json();
+        console.log('Produtos recebidos:', data);
+        
+        // Validar se data é um array
+        if (!Array.isArray(data)) {
+          console.error('Resposta da API não é um array:', data);
+          throw new Error('Formato de dados inválido');
+        }
+        
         setProdutos(data);
       } catch (err) {
         console.error('Erro ao buscar produtos:', err);
-        alert('Erro ao carregar produtos');
+        setError(err.message || 'Erro ao carregar produtos');
       } finally {
         setLoadingProducts(false);
       }
@@ -28,19 +58,40 @@ export default function ProdutosPage() {
   }, []);
 
   const handleAddToCart = async (produto) => {
-    if (!isAuthenticated) {
-      alert('Você precisa estar logado para adicionar itens ao carrinho');
-      router.push('/FormLoginRegister'); // Redireciona para login
-      return;
-    }
+    try {
+      // Validar se o produto tem as propriedades necessárias
+      if (!produto || !produto.id_produto) {
+        console.error('Produto inválido:', produto);
+        alert('Erro: produto inválido');
+        return;
+      }
 
-    // Verifica se há estoque
-    if (!produto.estoque || produto.estoque <= 0) {
-      alert('Produto sem estoque disponível');
-      return;
-    }
+      if (!isAuthenticated) {
+        alert('Você precisa estar logado para adicionar itens ao carrinho');
+        router.push('/FormLoginRegister');
+        return;
+      }
 
-    await addToCart(produto);
+      // Verifica se há estoque
+      if (!produto.estoque || produto.estoque <= 0) {
+        alert('Produto sem estoque disponível');
+        return;
+      }
+
+      console.log('Tentando adicionar produto ao carrinho:', produto);
+      
+      const success = await addToCart(produto);
+      
+      if (success) {
+        // Mostrar feedback visual de sucesso (opcional)
+        console.log('Produto adicionado com sucesso!');
+        // Você pode adicionar uma notificação toast aqui se quiser
+      }
+      
+    } catch (error) {
+      console.error('Erro em handleAddToCart:', error);
+      alert('Erro ao adicionar produto ao carrinho');
+    }
   };
 
   if (loadingProducts) {
@@ -48,6 +99,22 @@ export default function ProdutosPage() {
       <div className="p-6 text-center">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-yellow-500 mx-auto"></div>
         <p className="mt-2">Carregando produtos...</p>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="p-6 text-center">
+        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
+          <strong>Erro!</strong> {error}
+        </div>
+        <button
+          onClick={() => window.location.reload()}
+          className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded"
+        >
+          Tentar Novamente
+        </button>
       </div>
     );
   }
@@ -86,21 +153,26 @@ export default function ProdutosPage() {
                       src={produto.imagemPath} 
                       alt={produto.nome} 
                       className="h-full w-full object-cover"
+                      onError={(e) => {
+                        e.target.style.display = 'none';
+                        e.target.nextSibling.style.display = 'flex';
+                      }}
                     />
-                  ) : (
-                    <div className="text-gray-400 text-4xl">📦</div>
-                  )}
+                  ) : null}
+                  <div className="text-gray-400 text-4xl" style={{display: produto.imagemPath ? 'none' : 'flex'}}>
+                    📦
+                  </div>
                 </div>
 
                 {/* Conteúdo do card */}
                 <div className="p-4">
                   <h2 className="text-lg font-semibold text-gray-800 mb-2 line-clamp-2">
-                    {produto.nome}
+                    {produto.nome || 'Produto sem nome'}
                   </h2>
                   
                   <div className="mb-4">
                     <p className="text-2xl font-bold text-yellow-600">
-                      R$ {parseFloat(produto.preco).toFixed(2)}
+                      R$ {parseFloat(produto.preco || 0).toFixed(2)}
                     </p>
                     <p className={`text-sm ${hasStock ? 'text-gray-500' : 'text-red-500'}`}>
                       {hasStock 

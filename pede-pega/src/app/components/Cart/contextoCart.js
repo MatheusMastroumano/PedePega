@@ -32,17 +32,46 @@ export const CartProvider = ({ children }) => {
     setLoading(true);
     try {
       console.log("Buscando carrinho da API...");
-      const res = await authenticatedFetch("http://localhost:3001/carrinho");
+      
+      // Verificar se o token ainda existe
+      if (!token) {
+        console.log("Token não encontrado");
+        setCartItems([]);
+        setTotal(0);
+        return;
+      }
+
+      const res = await fetch("http://localhost:3001/carrinho", {
+        method: "GET",
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
+      });
 
       console.log("Resposta da API carrinho:", res.status);
 
       if (!res.ok) {
         if (res.status === 401 || res.status === 403) {
-          console.log("Token inválido, fazendo logout...");
+          console.log("Token inválido, limpando carrinho...");
+          setCartItems([]);
+          setTotal(0);
           return;
         }
-        const errorData = await res.json().catch(() => ({}));
-        throw new Error(errorData.mensagem || "Erro ao buscar carrinho");
+        
+        // Para outros erros, tentar pegar a mensagem de erro
+        let errorMessage = "Erro ao buscar carrinho";
+        try {
+          const errorData = await res.json();
+          errorMessage = errorData.mensagem || errorData.message || errorMessage;
+        } catch (e) {
+          console.log("Erro ao parsear resposta de erro:", e);
+        }
+        
+        console.error("Erro HTTP ao buscar carrinho:", res.status, errorMessage);
+        setCartItems([]);
+        setTotal(0);
+        return;
       }
 
       const data = await res.json();
@@ -56,8 +85,30 @@ export const CartProvider = ({ children }) => {
         return;
       }
       
+      // Tratar diferentes estruturas de resposta da API
+      let items = [];
+      let totalValue = 0;
+
+      if (Array.isArray(data)) {
+        // Se data é um array diretamente
+        items = data;
+      } else if (Array.isArray(data.carrinho)) {
+        // Se data tem propriedade carrinho
+        items = data.carrinho;
+        totalValue = parseFloat(data.total) || 0;
+      } else if (Array.isArray(data.items)) {
+        // Se data tem propriedade items
+        items = data.items;
+        totalValue = parseFloat(data.total) || 0;
+      } else {
+        console.log("Carrinho vazio ou formato não reconhecido");
+        setCartItems([]);
+        setTotal(0);
+        return;
+      }
+      
       // Mapear os dados da API para o formato esperado pelo frontend
-      const mappedItems = Array.isArray(data.carrinho) ? data.carrinho.map((item) => {
+      const mappedItems = items.map((item, index) => {
         // Validar se o item tem as propriedades necessárias
         if (!item || typeof item !== 'object') {
           console.warn("Item do carrinho inválido:", item);
@@ -65,21 +116,28 @@ export const CartProvider = ({ children }) => {
         }
 
         return {
-          id: item.id_carrinho_item || item.id,
-          id_produto: item.id_produto,
-          nome: item.nome || 'Produto sem nome',
-          preco: parseFloat(item.preco) || 0,
-          quantidade: parseInt(item.quantidade) || 0,
-          estoque: parseInt(item.estoque) || 0,
-          imagem: item.imagemPath || null,
+          id: item.id_carrinho_item || item.id || `temp-${index}`,
+          id_produto: item.id_produto || item.produto_id,
+          nome: item.nome || item.produto_nome || 'Produto sem nome',
+          preco: parseFloat(item.preco || item.produto_preco) || 0,
+          quantidade: parseInt(item.quantidade) || 1,
+          estoque: parseInt(item.estoque || item.produto_estoque) || 0,
+          imagem: item.imagemPath || item.produto_imagem || item.imagem || null,
         };
-      }).filter(item => item !== null) : [];
+      }).filter(item => item !== null);
 
       console.log("Itens do carrinho mapeados:", mappedItems);
-      console.log("Total calculado:", data.total);
+
+      // Calcular total se não veio da API
+      if (totalValue === 0 && mappedItems.length > 0) {
+        totalValue = mappedItems.reduce((acc, item) => acc + (item.preco * item.quantidade), 0);
+      }
+
+      console.log("Total calculado:", totalValue);
 
       setCartItems(mappedItems);
-      setTotal(parseFloat(data.total) || 0);
+      setTotal(totalValue);
+      
     } catch (err) {
       console.error("Erro ao carregar carrinho:", err);
       // Resetar valores em caso de erro
@@ -94,31 +152,54 @@ export const CartProvider = ({ children }) => {
   const addToCart = async (product) => {
     if (!isAuthenticated) {
       alert("Você precisa estar logado para adicionar itens ao carrinho");
-      return;
+      return false;
     }
 
     if (!checkTokenValidity()) {
       alert("Sua sessão expirou. Faça login novamente.");
-      return;
+      return false;
+    }
+
+    // Validar produto
+    if (!product || !product.id_produto) {
+      console.error("Produto inválido:", product);
+      alert("Erro: produto inválido");
+      return false;
     }
 
     console.log("Adicionando produto ao carrinho:", product);
     setAddingItemId(product.id_produto);
     
     try {
-      const res = await authenticatedFetch("http://localhost:3001/carrinho/items", {
+      const requestBody = {
+        produtoId: product.id_produto,
+        quantidade: 1,
+      };
+
+      console.log("Enviando dados para API:", requestBody);
+
+      const res = await fetch("http://localhost:3001/carrinho/items", {
         method: "POST",
-        body: JSON.stringify({
-          produtoId: product.id_produto,
-          quantidade: 1,
-        }),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
+        body: JSON.stringify(requestBody),
       });
 
       console.log("Resposta ao adicionar item:", res.status);
       
       if (!res.ok) {
-        const responseData = await res.json().catch(() => ({}));
-        throw new Error(responseData.mensagem || "Erro ao adicionar item");
+        let errorMessage = "Erro ao adicionar item";
+        try {
+          const responseData = await res.json();
+          errorMessage = responseData.mensagem || responseData.message || errorMessage;
+        } catch (e) {
+          console.log("Erro ao parsear resposta de erro:", e);
+        }
+        
+        console.error("Erro HTTP ao adicionar item:", res.status, errorMessage);
+        throw new Error(errorMessage);
       }
 
       const responseData = await res.json();
@@ -128,10 +209,12 @@ export const CartProvider = ({ children }) => {
       await fetchCartFromAPI();
       
       console.log("Item adicionado ao carrinho com sucesso!");
+      return true;
       
     } catch (err) {
       console.error("Erro ao adicionar ao carrinho:", err);
-      alert(err.message);
+      alert(err.message || "Erro ao adicionar item ao carrinho");
+      return false;
     } finally {
       setAddingItemId(null);
     }
@@ -144,13 +227,23 @@ export const CartProvider = ({ children }) => {
     console.log("Removendo item do carrinho:", itemId);
     setLoading(true);
     try {
-      const res = await authenticatedFetch(`http://localhost:3001/carrinho/items/${itemId}`, {
+      const res = await fetch(`http://localhost:3001/carrinho/items/${itemId}`, {
         method: "DELETE",
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
       });
 
       if (!res.ok) {
-        const errorData = await res.json().catch(() => ({}));
-        throw new Error(errorData.mensagem || "Erro ao remover item");
+        let errorMessage = "Erro ao remover item";
+        try {
+          const errorData = await res.json();
+          errorMessage = errorData.mensagem || errorData.message || errorMessage;
+        } catch (e) {
+          console.log("Erro ao parsear resposta de erro:", e);
+        }
+        throw new Error(errorMessage);
       }
 
       // Recarrega o carrinho após remover
@@ -158,7 +251,7 @@ export const CartProvider = ({ children }) => {
       
     } catch (err) {
       console.error("Erro ao remover item:", err);
-      alert("Erro ao remover item do carrinho");
+      alert(err.message || "Erro ao remover item do carrinho");
     } finally {
       setLoading(false);
     }
@@ -171,14 +264,24 @@ export const CartProvider = ({ children }) => {
     console.log("Atualizando quantidade:", { itemId, newQuantity });
     setLoading(true);
     try {
-      const res = await authenticatedFetch(`http://localhost:3001/carrinho/items/${itemId}`, {
+      const res = await fetch(`http://localhost:3001/carrinho/items/${itemId}`, {
         method: "PUT",
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
         body: JSON.stringify({ quantidade: newQuantity }),
       });
 
       if (!res.ok) {
-        const errorData = await res.json().catch(() => ({}));
-        throw new Error(errorData.mensagem || "Erro ao atualizar quantidade");
+        let errorMessage = "Erro ao atualizar quantidade";
+        try {
+          const errorData = await res.json();
+          errorMessage = errorData.mensagem || errorData.message || errorMessage;
+        } catch (e) {
+          console.log("Erro ao parsear resposta de erro:", e);
+        }
+        throw new Error(errorMessage);
       }
 
       // Recarrega o carrinho após atualizar
@@ -217,13 +320,23 @@ export const CartProvider = ({ children }) => {
     console.log("Limpando carrinho...");
     setLoading(true);
     try {
-      const res = await authenticatedFetch("http://localhost:3001/carrinho", {
+      const res = await fetch("http://localhost:3001/carrinho", {
         method: "DELETE",
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
       });
 
       if (!res.ok) {
-        const errorData = await res.json().catch(() => ({}));
-        throw new Error(errorData.mensagem || "Erro ao limpar carrinho");
+        let errorMessage = "Erro ao limpar carrinho";
+        try {
+          const errorData = await res.json();
+          errorMessage = errorData.mensagem || errorData.message || errorMessage;
+        } catch (e) {
+          console.log("Erro ao parsear resposta de erro:", e);
+        }
+        throw new Error(errorMessage);
       }
 
       setCartItems([]);
@@ -231,7 +344,7 @@ export const CartProvider = ({ children }) => {
       
     } catch (err) {
       console.error("Erro ao limpar carrinho:", err);
-      alert("Erro ao limpar carrinho");
+      alert(err.message || "Erro ao limpar carrinho");
     } finally {
       setLoading(false);
     }
@@ -251,14 +364,24 @@ export const CartProvider = ({ children }) => {
     setLoading(true);
     
     try {
-      const res = await authenticatedFetch("http://localhost:3001/pedidos/finalizar", {
+      const res = await fetch("http://localhost:3001/pedidos/finalizar", {
         method: "POST",
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
         body: JSON.stringify(dadosPagamento),
       });
 
       if (!res.ok) {
-        const errorData = await res.json().catch(() => ({}));
-        throw new Error(errorData.mensagem || "Erro ao finalizar compra");
+        let errorMessage = "Erro ao finalizar compra";
+        try {
+          const errorData = await res.json();
+          errorMessage = errorData.mensagem || errorData.message || errorMessage;
+        } catch (e) {
+          console.log("Erro ao parsear resposta de erro:", e);
+        }
+        throw new Error(errorMessage);
       }
 
       const resultado = await res.json();
