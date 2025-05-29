@@ -1,11 +1,11 @@
-// app.js - Arquivo principal atualizado
 import express from 'express';
 import cors from 'cors';
 import chalk from 'chalk';
 import logger from './logger.js';
 import produtoRotas from './routes/produtoRotas.js';
 import authRotas from './routes/authRotas.js';
-import carrinhoRotas from './routes/carrinhoRotas.js'; // Nova importação
+import carrinhoRotas from './routes/carrinhoRotas.js'; 
+import pedidoRotas from './routes/pedidoRotas.js';
 
 const app = express();
 const port = 3001;
@@ -17,11 +17,10 @@ app.use(express.json());
 app.use(logger);
 
 // Rotas existentes
-app.use('/produtos', produtoRotas);
-app.use('/auth', authRotas);
-
-// Nova rota do carrinho
-app.use('/carrinho', carrinhoRotas);
+app.use('/api/produtos', produtoRotas);
+app.use('/api/auth', authRotas);
+app.use('/api/carrinho', carrinhoRotas);
+app.use('/api/pedido', pedidoRotas);
 
 app.get('/', (req, res) => {
     res.send('<h1>API PedePega</h1>');
