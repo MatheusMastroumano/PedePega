@@ -4,7 +4,7 @@ import {
   create,
   update,
   deleteRecord,
-  getConnection
+  getConnection,
 } from "../config/database.js";
 
 const obterCarrinho = async (usuarioId) => {
@@ -210,15 +210,13 @@ const removerItemCarrinho = async (usuarioId, itemId) => {
 const limparCarrinho = async (usuarioId) => {
   try {
     // Obter todos os itens do carrinho
-    const itens = await readAll(
-      "carrinho_item",
-      "id_usuario = ?",
-      [usuarioId]
-    );
+    const itens = await readAll("carrinho_item", "id_usuario = ?", [usuarioId]);
 
     // Restaurar o estoque para cada item
     for (const item of itens) {
-      const produto = await read("produto", "id_produto = ?", [item.id_produto]);
+      const produto = await read("produto", "id_produto = ?", [
+        item.id_produto,
+      ]);
       if (produto) {
         const estoque = parseInt(produto.estoque);
         const quantidade = parseInt(item.quantidade);
