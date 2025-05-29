@@ -41,29 +41,45 @@ export const CartProvider = ({ children }) => {
           console.log("Token inválido, fazendo logout...");
           return;
         }
-        const errorData = await res.json();
+        const errorData = await res.json().catch(() => ({}));
         throw new Error(errorData.mensagem || "Erro ao buscar carrinho");
       }
 
       const data = await res.json();
       console.log("Dados do carrinho recebidos:", data);
       
+      // Verificar se os dados estão no formato esperado
+      if (!data || typeof data !== 'object') {
+        console.error("Dados do carrinho inválidos:", data);
+        setCartItems([]);
+        setTotal(0);
+        return;
+      }
+      
       // Mapear os dados da API para o formato esperado pelo frontend
-      const mappedItems = data.carrinho?.map((item) => ({
-        id: item.id_carrinho_item,
-        id_produto: item.id_produto,
-        nome: item.nome,
-        preco: parseFloat(item.preco),
-        quantidade: item.quantidade,
-        estoque: item.estoque,
-        imagem: item.imagemPath,
-      })) || [];
+      const mappedItems = Array.isArray(data.carrinho) ? data.carrinho.map((item) => {
+        // Validar se o item tem as propriedades necessárias
+        if (!item || typeof item !== 'object') {
+          console.warn("Item do carrinho inválido:", item);
+          return null;
+        }
+
+        return {
+          id: item.id_carrinho_item || item.id,
+          id_produto: item.id_produto,
+          nome: item.nome || 'Produto sem nome',
+          preco: parseFloat(item.preco) || 0,
+          quantidade: parseInt(item.quantidade) || 0,
+          estoque: parseInt(item.estoque) || 0,
+          imagem: item.imagemPath || null,
+        };
+      }).filter(item => item !== null) : [];
 
       console.log("Itens do carrinho mapeados:", mappedItems);
       console.log("Total calculado:", data.total);
 
       setCartItems(mappedItems);
-      setTotal(data.total || 0);
+      setTotal(parseFloat(data.total) || 0);
     } catch (err) {
       console.error("Erro ao carregar carrinho:", err);
       // Resetar valores em caso de erro
@@ -99,12 +115,14 @@ export const CartProvider = ({ children }) => {
       });
 
       console.log("Resposta ao adicionar item:", res.status);
-      const responseData = await res.json();
-      console.log("Dados da resposta:", responseData);
-
+      
       if (!res.ok) {
+        const responseData = await res.json().catch(() => ({}));
         throw new Error(responseData.mensagem || "Erro ao adicionar item");
       }
+
+      const responseData = await res.json();
+      console.log("Dados da resposta:", responseData);
 
       // Recarrega o carrinho após adicionar
       await fetchCartFromAPI();
@@ -131,7 +149,7 @@ export const CartProvider = ({ children }) => {
       });
 
       if (!res.ok) {
-        const errorData = await res.json();
+        const errorData = await res.json().catch(() => ({}));
         throw new Error(errorData.mensagem || "Erro ao remover item");
       }
 
@@ -159,7 +177,7 @@ export const CartProvider = ({ children }) => {
       });
 
       if (!res.ok) {
-        const errorData = await res.json();
+        const errorData = await res.json().catch(() => ({}));
         throw new Error(errorData.mensagem || "Erro ao atualizar quantidade");
       }
 
@@ -168,7 +186,7 @@ export const CartProvider = ({ children }) => {
 
     } catch (err) {
       console.error("Erro ao atualizar quantidade:", err);
-      alert(err.message);
+      alert(err.message || "Erro ao atualizar quantidade");
     } finally {
       setLoading(false);
     }
@@ -204,7 +222,7 @@ export const CartProvider = ({ children }) => {
       });
 
       if (!res.ok) {
-        const errorData = await res.json();
+        const errorData = await res.json().catch(() => ({}));
         throw new Error(errorData.mensagem || "Erro ao limpar carrinho");
       }
 
@@ -219,9 +237,49 @@ export const CartProvider = ({ children }) => {
     }
   };
 
+  // Finalizar compra
+  const finalizarCompra = async (dadosPagamento) => {
+    if (!isAuthenticated || !checkTokenValidity()) {
+      throw new Error("Você precisa estar logado para finalizar a compra");
+    }
+
+    if (cartItems.length === 0) {
+      throw new Error("Carrinho vazio");
+    }
+
+    console.log("Finalizando compra com dados:", dadosPagamento);
+    setLoading(true);
+    
+    try {
+      const res = await authenticatedFetch("http://localhost:3001/pedidos/finalizar", {
+        method: "POST",
+        body: JSON.stringify(dadosPagamento),
+      });
+
+      if (!res.ok) {
+        const errorData = await res.json().catch(() => ({}));
+        throw new Error(errorData.mensagem || "Erro ao finalizar compra");
+      }
+
+      const resultado = await res.json();
+      console.log("Compra finalizada:", resultado);
+
+      // Recarregar carrinho (deve estar vazio agora)
+      await fetchCartFromAPI();
+      
+      return resultado;
+      
+    } catch (err) {
+      console.error("Erro ao finalizar compra:", err);
+      throw err;
+    } finally {
+      setLoading(false);
+    }
+  };
+
   // Obter total de itens (quantidade)
   const getTotalItems = () => {
-    return cartItems.reduce((total, item) => total + item.quantidade, 0);
+    return cartItems.reduce((total, item) => total + (item.quantidade || 0), 0);
   };
 
   // Obter preço total
@@ -249,6 +307,7 @@ export const CartProvider = ({ children }) => {
         getTotalItems,
         getTotalPrice,
         fetchCartFromAPI,
+        finalizarCompra,
         isAuthenticated,
         isAddingItem,
       }}
