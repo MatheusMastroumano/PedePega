@@ -11,7 +11,8 @@ const listarProdutos = async () => {
 
 const obterProdutoPorId = async (id) => {
     try {
-        return await read('produto', `id_produto = ${id}`)
+        // CORREÇÃO: Usar parâmetros preparados ao invés de concatenação
+        return await read('produto', 'id_produto = ?', [id]);
     } catch (err) {
         console.error('Erro ao obter produto por ID: ', err);
         throw err;
@@ -20,7 +21,7 @@ const obterProdutoPorId = async (id) => {
 
 const criarProduto = async (produtoData) => {
     try {
-        return await create ('produto', produtoData);
+        return await create('produto', produtoData);
     } catch (err) {
         console.error('Erro ao criar produto', err);
         throw err;
@@ -29,7 +30,8 @@ const criarProduto = async (produtoData) => {
 
 const atualizarProduto = async (id, produtoData) => {
     try {
-        return await update ('produto', produtoData, `id_produto = ${id}`);
+        // CORREÇÃO: Usar parâmetros preparados ao invés de concatenação
+        return await update('produto', produtoData, 'id_produto = ?', [id]);
     } catch (err) {
         console.error('Erro ao atualizar produto', err);
         throw err;
@@ -38,7 +40,8 @@ const atualizarProduto = async (id, produtoData) => {
 
 const deletarProduto = async (id) => {
     try {
-        return await deleteRecord('produto', `id_produto = ${id}`);
+        // CORREÇÃO: Usar parâmetros preparados ao invés de concatenação
+        return await deleteRecord('produto', 'id_produto = ?', [id]);
     } catch (err) {
         console.error('Erro ao excluir produto...');
         throw err;

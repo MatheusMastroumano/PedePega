@@ -8,7 +8,7 @@ export const CartProvider = ({ children }) => {
   const [cartItems, setCartItems] = useState([]);
   const [loading, setLoading] = useState(false);
   const [total, setTotal] = useState(0);
-  const [addingItemId, setAddingItemId] = useState(null); // Para controlar o loading por item
+  const [addingItemId, setAddingItemId] = useState(null);
   const { token } = useAuth();
 
   // Carrega o carrinho quando o token muda (login/logout)
@@ -24,10 +24,14 @@ export const CartProvider = ({ children }) => {
 
   // Função para buscar carrinho da API
   const fetchCartFromAPI = async () => {
-    if (!token) return;
+    if (!token) {
+      console.log("Sem token, não é possível buscar carrinho");
+      return;
+    }
     
     setLoading(true);
     try {
+      console.log("Buscando carrinho da API...");
       const res = await fetch("http://localhost:3001/carrinho", {
         headers: {
           "Content-Type": "application/json",
@@ -35,17 +39,19 @@ export const CartProvider = ({ children }) => {
         },
       });
 
+      console.log("Resposta da API carrinho:", res.status);
+
       if (!res.ok) {
         if (res.status === 401 || res.status === 403) {
           console.log("Token inválido, fazendo logout...");
-          // Token inválido, fazer logout
           return;
         }
-        throw new Error("Erro ao buscar carrinho");
+        const errorData = await res.json();
+        throw new Error(errorData.mensagem || "Erro ao buscar carrinho");
       }
 
       const data = await res.json();
-      console.log("Dados do carrinho:", data);
+      console.log("Dados do carrinho recebidos:", data);
       
       // Mapear os dados da API para o formato esperado pelo frontend
       const mappedItems = data.carrinho?.map((item) => ({
@@ -58,11 +64,16 @@ export const CartProvider = ({ children }) => {
         imagem: item.imagemPath,
       })) || [];
 
+      console.log("Itens do carrinho mapeados:", mappedItems);
+      console.log("Total calculado:", data.total);
+
       setCartItems(mappedItems);
       setTotal(data.total || 0);
     } catch (err) {
       console.error("Erro ao carregar carrinho:", err);
-      // Não mostrar alert para não incomodar o usuário
+      // Resetar valores em caso de erro
+      setCartItems([]);
+      setTotal(0);
     } finally {
       setLoading(false);
     }
@@ -75,7 +86,7 @@ export const CartProvider = ({ children }) => {
       return;
     }
 
-    // Define qual item está sendo adicionado
+    console.log("Adicionando produto ao carrinho:", product);
     setAddingItemId(product.id_produto);
     
     try {
@@ -91,7 +102,9 @@ export const CartProvider = ({ children }) => {
         }),
       });
 
+      console.log("Resposta ao adicionar item:", res.status);
       const responseData = await res.json();
+      console.log("Dados da resposta:", responseData);
 
       if (!res.ok) {
         throw new Error(responseData.mensagem || "Erro ao adicionar item");
@@ -100,14 +113,13 @@ export const CartProvider = ({ children }) => {
       // Recarrega o carrinho após adicionar
       await fetchCartFromAPI();
       
-      // Feedback visual mais suave
       console.log("Item adicionado ao carrinho com sucesso!");
       
     } catch (err) {
       console.error("Erro ao adicionar ao carrinho:", err);
       alert(err.message);
     } finally {
-      setAddingItemId(null); // Remove o loading do item específico
+      setAddingItemId(null);
     }
   };
 
@@ -115,6 +127,7 @@ export const CartProvider = ({ children }) => {
   const removeFromCart = async (itemId) => {
     if (!token) return;
 
+    console.log("Removendo item do carrinho:", itemId);
     setLoading(true);
     try {
       const res = await fetch(`http://localhost:3001/carrinho/items/${itemId}`, {
@@ -144,6 +157,7 @@ export const CartProvider = ({ children }) => {
   const updateQuantity = async (itemId, newQuantity) => {
     if (!token || newQuantity <= 0) return;
 
+    console.log("Atualizando quantidade:", { itemId, newQuantity });
     setLoading(true);
     try {
       const res = await fetch(`http://localhost:3001/carrinho/items/${itemId}`, {
@@ -193,6 +207,7 @@ export const CartProvider = ({ children }) => {
   const clearCart = async () => {
     if (!token) return;
 
+    console.log("Limpando carrinho...");
     setLoading(true);
     try {
       const res = await fetch("http://localhost:3001/carrinho", {
@@ -203,7 +218,8 @@ export const CartProvider = ({ children }) => {
       });
 
       if (!res.ok) {
-        throw new Error("Erro ao limpar carrinho");
+        const errorData = await res.json();
+        throw new Error(errorData.mensagem || "Erro ao limpar carrinho");
       }
 
       setCartItems([]);
@@ -248,7 +264,7 @@ export const CartProvider = ({ children }) => {
         getTotalPrice,
         fetchCartFromAPI,
         isAuthenticated: !!token,
-        isAddingItem, // Nova função para verificar loading por item
+        isAddingItem,
       }}
     >
       {children}
