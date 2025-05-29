@@ -9,35 +9,30 @@ export const CartProvider = ({ children }) => {
   const [loading, setLoading] = useState(false);
   const [total, setTotal] = useState(0);
   const [addingItemId, setAddingItemId] = useState(null);
-  const { token } = useAuth();
+  const { token, isAuthenticated, authenticatedFetch, checkTokenValidity } = useAuth();
 
   // Carrega o carrinho quando o token muda (login/logout)
   useEffect(() => {
-    if (token) {
+    if (isAuthenticated && checkTokenValidity()) {
       fetchCartFromAPI();
     } else {
-      // Se não tem token, limpa o carrinho local
+      // Se não tem token válido, limpa o carrinho local
       setCartItems([]);
       setTotal(0);
     }
-  }, [token]);
+  }, [isAuthenticated, token]);
 
   // Função para buscar carrinho da API
   const fetchCartFromAPI = async () => {
-    if (!token) {
-      console.log("Sem token, não é possível buscar carrinho");
+    if (!isAuthenticated || !checkTokenValidity()) {
+      console.log("Não autenticado ou token inválido, não é possível buscar carrinho");
       return;
     }
     
     setLoading(true);
     try {
       console.log("Buscando carrinho da API...");
-      const res = await fetch("http://localhost:3001/carrinho", {
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-      });
+      const res = await authenticatedFetch("http://localhost:3001/carrinho");
 
       console.log("Resposta da API carrinho:", res.status);
 
@@ -81,8 +76,13 @@ export const CartProvider = ({ children }) => {
 
   // Adicionar item ao carrinho (API + estado local)
   const addToCart = async (product) => {
-    if (!token) {
+    if (!isAuthenticated) {
       alert("Você precisa estar logado para adicionar itens ao carrinho");
+      return;
+    }
+
+    if (!checkTokenValidity()) {
+      alert("Sua sessão expirou. Faça login novamente.");
       return;
     }
 
@@ -90,12 +90,8 @@ export const CartProvider = ({ children }) => {
     setAddingItemId(product.id_produto);
     
     try {
-      const res = await fetch("http://localhost:3001/carrinho/items", {
+      const res = await authenticatedFetch("http://localhost:3001/carrinho/items", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
         body: JSON.stringify({
           produtoId: product.id_produto,
           quantidade: 1,
@@ -125,16 +121,13 @@ export const CartProvider = ({ children }) => {
 
   // Remover item do carrinho
   const removeFromCart = async (itemId) => {
-    if (!token) return;
+    if (!isAuthenticated || !checkTokenValidity()) return;
 
     console.log("Removendo item do carrinho:", itemId);
     setLoading(true);
     try {
-      const res = await fetch(`http://localhost:3001/carrinho/items/${itemId}`, {
+      const res = await authenticatedFetch(`http://localhost:3001/carrinho/items/${itemId}`, {
         method: "DELETE",
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
       });
 
       if (!res.ok) {
@@ -155,17 +148,13 @@ export const CartProvider = ({ children }) => {
 
   // Atualizar quantidade
   const updateQuantity = async (itemId, newQuantity) => {
-    if (!token || newQuantity <= 0) return;
+    if (!isAuthenticated || !checkTokenValidity() || newQuantity <= 0) return;
 
     console.log("Atualizando quantidade:", { itemId, newQuantity });
     setLoading(true);
     try {
-      const res = await fetch(`http://localhost:3001/carrinho/items/${itemId}`, {
+      const res = await authenticatedFetch(`http://localhost:3001/carrinho/items/${itemId}`, {
         method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
         body: JSON.stringify({ quantidade: newQuantity }),
       });
 
@@ -205,16 +194,13 @@ export const CartProvider = ({ children }) => {
 
   // Limpar carrinho
   const clearCart = async () => {
-    if (!token) return;
+    if (!isAuthenticated || !checkTokenValidity()) return;
 
     console.log("Limpando carrinho...");
     setLoading(true);
     try {
-      const res = await fetch("http://localhost:3001/carrinho", {
+      const res = await authenticatedFetch("http://localhost:3001/carrinho", {
         method: "DELETE",
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
       });
 
       if (!res.ok) {
@@ -263,7 +249,7 @@ export const CartProvider = ({ children }) => {
         getTotalItems,
         getTotalPrice,
         fetchCartFromAPI,
-        isAuthenticated: !!token,
+        isAuthenticated,
         isAddingItem,
       }}
     >
