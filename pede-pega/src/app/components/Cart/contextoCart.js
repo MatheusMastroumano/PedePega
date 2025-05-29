@@ -1,6 +1,6 @@
 "use client";
 import { createContext, useContext, useState, useEffect } from "react";
-import { useAuth } from "../AuthContexto/ContextoAuth.js"; // Ajuste o caminho conforme necessário
+import { useAuth } from "../AuthContexto/ContextoAuth.js";
 
 const CartContext = createContext();
 
@@ -8,6 +8,7 @@ export const CartProvider = ({ children }) => {
   const [cartItems, setCartItems] = useState([]);
   const [loading, setLoading] = useState(false);
   const [total, setTotal] = useState(0);
+  const [addingItemId, setAddingItemId] = useState(null); // Para controlar o loading por item
   const { token } = useAuth();
 
   // Carrega o carrinho quando o token muda (login/logout)
@@ -35,10 +36,16 @@ export const CartProvider = ({ children }) => {
       });
 
       if (!res.ok) {
+        if (res.status === 401 || res.status === 403) {
+          console.log("Token inválido, fazendo logout...");
+          // Token inválido, fazer logout
+          return;
+        }
         throw new Error("Erro ao buscar carrinho");
       }
 
       const data = await res.json();
+      console.log("Dados do carrinho:", data);
       
       // Mapear os dados da API para o formato esperado pelo frontend
       const mappedItems = data.carrinho?.map((item) => ({
@@ -55,6 +62,7 @@ export const CartProvider = ({ children }) => {
       setTotal(data.total || 0);
     } catch (err) {
       console.error("Erro ao carregar carrinho:", err);
+      // Não mostrar alert para não incomodar o usuário
     } finally {
       setLoading(false);
     }
@@ -67,7 +75,9 @@ export const CartProvider = ({ children }) => {
       return;
     }
 
-    setLoading(true);
+    // Define qual item está sendo adicionado
+    setAddingItemId(product.id_produto);
+    
     try {
       const res = await fetch("http://localhost:3001/carrinho/items", {
         method: "POST",
@@ -81,22 +91,23 @@ export const CartProvider = ({ children }) => {
         }),
       });
 
+      const responseData = await res.json();
+
       if (!res.ok) {
-        const errorData = await res.json();
-        throw new Error(errorData.mensagem || "Erro ao adicionar item");
+        throw new Error(responseData.mensagem || "Erro ao adicionar item");
       }
 
       // Recarrega o carrinho após adicionar
       await fetchCartFromAPI();
       
-      // Feedback visual
-      alert("Item adicionado ao carrinho com sucesso!");
+      // Feedback visual mais suave
+      console.log("Item adicionado ao carrinho com sucesso!");
       
     } catch (err) {
       console.error("Erro ao adicionar ao carrinho:", err);
       alert(err.message);
     } finally {
-      setLoading(false);
+      setAddingItemId(null); // Remove o loading do item específico
     }
   };
 
@@ -114,16 +125,12 @@ export const CartProvider = ({ children }) => {
       });
 
       if (!res.ok) {
-        throw new Error("Erro ao remover item");
+        const errorData = await res.json();
+        throw new Error(errorData.mensagem || "Erro ao remover item");
       }
 
-      // Atualiza o estado local removendo o item
-      setCartItems((prev) => prev.filter((item) => item.id !== itemId));
-      
-      // Recalcula o total
-      const newItems = cartItems.filter((item) => item.id !== itemId);
-      const newTotal = newItems.reduce((sum, item) => sum + (item.preco * item.quantidade), 0);
-      setTotal(newTotal);
+      // Recarrega o carrinho após remover
+      await fetchCartFromAPI();
       
     } catch (err) {
       console.error("Erro ao remover item:", err);
@@ -153,19 +160,8 @@ export const CartProvider = ({ children }) => {
         throw new Error(errorData.mensagem || "Erro ao atualizar quantidade");
       }
 
-      // Atualiza o estado local
-      setCartItems((prev) =>
-        prev.map((item) =>
-          item.id === itemId ? { ...item, quantidade: newQuantity } : item
-        )
-      );
-
-      // Recalcula o total
-      const updatedItems = cartItems.map((item) =>
-        item.id === itemId ? { ...item, quantidade: newQuantity } : item
-      );
-      const newTotal = updatedItems.reduce((sum, item) => sum + (item.preco * item.quantidade), 0);
-      setTotal(newTotal);
+      // Recarrega o carrinho após atualizar
+      await fetchCartFromAPI();
 
     } catch (err) {
       console.error("Erro ao atualizar quantidade:", err);
@@ -178,8 +174,10 @@ export const CartProvider = ({ children }) => {
   // Aumentar quantidade
   const increaseQuantity = async (itemId) => {
     const item = cartItems.find((item) => item.id === itemId);
-    if (item) {
+    if (item && item.quantidade < item.estoque) {
       await updateQuantity(itemId, item.quantidade + 1);
+    } else if (item && item.quantidade >= item.estoque) {
+      alert("Não há estoque suficiente");
     }
   };
 
@@ -229,6 +227,11 @@ export const CartProvider = ({ children }) => {
     return total;
   };
 
+  // Verifica se um item específico está sendo adicionado
+  const isAddingItem = (productId) => {
+    return addingItemId === productId;
+  };
+
   return (
     <CartContext.Provider
       value={{
@@ -245,6 +248,7 @@ export const CartProvider = ({ children }) => {
         getTotalPrice,
         fetchCartFromAPI,
         isAuthenticated: !!token,
+        isAddingItem, // Nova função para verificar loading por item
       }}
     >
       {children}
