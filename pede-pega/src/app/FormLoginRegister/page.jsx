@@ -44,7 +44,7 @@ export default function AuthPage() {
       : { name: form.name, email: form.email, senha: form.senha };
   
     try {
-      const response = await fetch(`http://localhost:3001${endpoint}`, {
+      const response = await fetch(`http://localhost:3001/api/${endpoint}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(body),
