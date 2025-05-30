@@ -41,7 +41,7 @@ export const CartProvider = ({ children }) => {
         return;
       }
 
-      const res = await fetch("http://localhost:3001/carrinho", {
+      const res = await fetch("http://localhost:3001/api/carrinho", {
         method: "GET",
         headers: {
           'Content-Type': 'application/json',
@@ -122,7 +122,7 @@ export const CartProvider = ({ children }) => {
           preco: parseFloat(item.preco || item.produto_preco) || 0,
           quantidade: parseInt(item.quantidade) || 1,
           estoque: parseInt(item.estoque || item.produto_estoque) || 0,
-          imagem: item.imagemPath || item.produto_imagem || item.imagem || null,
+          imagem: item.imagemPath ? `http://localhost:3001/api/${item.imagemPath}` : null,
         };
       }).filter(item => item !== null);
 
@@ -178,7 +178,7 @@ export const CartProvider = ({ children }) => {
 
       console.log("Enviando dados para API:", requestBody);
 
-      const res = await fetch("http://localhost:3001/carrinho/items", {
+      const res = await fetch("http://localhost:3001/api/carrinho/itens", {
         method: "POST",
         headers: {
           'Content-Type': 'application/json',
@@ -227,7 +227,7 @@ export const CartProvider = ({ children }) => {
     console.log("Removendo item do carrinho:", itemId);
     setLoading(true);
     try {
-      const res = await fetch(`http://localhost:3001/carrinho/items/${itemId}`, {
+      const res = await fetch(`http://localhost:3001/api/carrinho/itens/${itemId}`, {
         method: "DELETE",
         headers: {
           'Content-Type': 'application/json',
@@ -264,7 +264,7 @@ export const CartProvider = ({ children }) => {
     console.log("Atualizando quantidade:", { itemId, newQuantity });
     setLoading(true);
     try {
-      const res = await fetch(`http://localhost:3001/carrinho/items/${itemId}`, {
+      const res = await fetch(`http://localhost:3001/api/carrinho/itens/${itemId}`, {
         method: "PUT",
         headers: {
           'Content-Type': 'application/json',
@@ -320,7 +320,7 @@ export const CartProvider = ({ children }) => {
     console.log("Limpando carrinho...");
     setLoading(true);
     try {
-      const res = await fetch("http://localhost:3001/carrinho", {
+      const res = await fetch("http://localhost:3001/api/carrinho", {
         method: "DELETE",
         headers: {
           'Content-Type': 'application/json',
@@ -364,7 +364,7 @@ export const CartProvider = ({ children }) => {
     setLoading(true);
     
     try {
-      const res = await fetch("http://localhost:3001/pedidos/finalizar", {
+      const res = await fetch("http://localhost:3001/api/pedidos", {
         method: "POST",
         headers: {
           'Content-Type': 'application/json',

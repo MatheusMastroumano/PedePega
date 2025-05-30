@@ -123,19 +123,6 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  // Verificar se o usuário é administrador
-  const isAdmin = () => {
-    if (!user || !token) return false;
-    
-    try {
-      const tokenData = JSON.parse(atob(token.split('.')[1]));
-      return tokenData.role === 'admin' || user.role === 'admin' || user.isAdmin === true;
-    } catch (error) {
-      console.error('Erro ao verificar role de admin:', error);
-      return false;
-    }
-  };
-
   // Função para fazer requisições autenticadas
   const authenticatedFetch = async (url, options = {}) => {
     if (!checkTokenValidity()) {
@@ -164,7 +151,6 @@ export const AuthProvider = ({ children }) => {
     user,
     loading,
     isAuthenticated,
-    isAdmin,
     login,
     logout,
     checkTokenValidity,

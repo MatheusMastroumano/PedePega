@@ -22,13 +22,13 @@ router.get("/", obterCarrinhoController);
 router.get("/count", contarItensCarrinhoController);
 
 // POST /carrinho/items - Adicionar item ao carrinho
-router.post("/items", adicionarItemController);
+router.post("/itens", adicionarItemController);
 
 // PUT /carrinho/items/:id - Atualizar quantidade de um item
-router.put("/items/:id", atualizarQuantidadeController);
+router.put("/itens/:id", atualizarQuantidadeController);
 
 // DELETE /carrinho/items/:id - Remover item específico do carrinho
-router.delete("/items/:id", removerItemController);
+router.delete("/itens/:id", removerItemController);
 
 // DELETE /carrinho - Limpar todo o carrinho
 router.delete("/", limparCarrinhoController);
