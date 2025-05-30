@@ -1,4 +1,4 @@
-import {Add commentMore actions
+import {
     obterCarrinho,
     adicionarItemCarrinho,
     atualizarQuantidadeItem,

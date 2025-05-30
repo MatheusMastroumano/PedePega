@@ -16,7 +16,7 @@ export default function ProdutosPage() {
         setError(null);
         console.log('Buscando produtos...');
         
-        const res = await fetch('http://localhost:3001/produtos', {
+        const res = await fetch('http://localhost:3001/api/produtos', {
           method: 'GET',
           headers: {
             'Content-Type': 'application/json',
@@ -207,7 +207,7 @@ export default function ProdutosPage() {
 
                     <button
                       className="w-full px-4 py-2 border-2 border-yellow-500 text-yellow-500 hover:bg-yellow-50 rounded-lg font-medium transition-colors"
-                      onClick={() => router.push(`/produto/${produto.id_produto}`)}
+                      onClick={() => router.push(`/api/produto/${produto.id_produto}`)}
                     >
                       Ver Detalhes
                     </button>
