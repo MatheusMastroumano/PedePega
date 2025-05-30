@@ -1,12 +1,10 @@
-// routes/carrinhoRotas.js
 import express from "express";
 import {
   obterCarrinhoController,
   adicionarItemController,
   atualizarQuantidadeController,
   removerItemController,
-  limparCarrinhoController,
-  contarItensCarrinhoController, // Adicionando este controller
+  limparCarrinhoController
 } from '../controllers/CarrinhoController.js';
 import authMiddleware from "../middlewares/authMiddleware.js";
 
@@ -17,9 +15,6 @@ router.use(authMiddleware);
 
 // GET /carrinho - Obter carrinho do usuário
 router.get("/", obterCarrinhoController);
-
-// GET /carrinho/count - Contar itens do carrinho
-router.get("/count", contarItensCarrinhoController);
 
 // POST /carrinho/items - Adicionar item ao carrinho
 router.post("/itens", adicionarItemController);
