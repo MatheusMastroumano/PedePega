@@ -9,6 +9,7 @@ export default function AuthPage() {
   const [isLogin, setIsLogin] = useState(true);
   const [form, setForm] = useState({ name: '', email: '', senha: '' });
   const [passwordStrength, setPasswordStrength] = useState('');
+  const [loading, setLoading] = useState(false);
   const router = useRouter();
   const { login } = useAuth();
 
@@ -34,38 +35,53 @@ export default function AuthPage() {
     setPasswordStrength('');
   };
 
-  
   const handleSubmit = async (e) => {
     e.preventDefault();
-  
-    const endpoint = isLogin ? '/auth/login' : '/auth/register';
+    setLoading(true);
+
+    // CORRIGIDO: endpoints baseados nas suas rotas da API
+    const endpoint = isLogin ? 'auth/login' : 'auth/register';
     const body = isLogin
       ? { email: form.email, senha: form.senha }
       : { name: form.name, email: form.email, senha: form.senha };
-  
+
     try {
+      console.log(`Fazendo requisição para: http://localhost:3001/api/${endpoint}`);
+      console.log('Dados enviados:', body);
+
       const response = await fetch(`http://localhost:3001/api/${endpoint}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(body),
       });
-  
+
+      console.log('Status da resposta:', response.status);
+
       const data = await response.json();
-  
+      console.log('Dados recebidos:', data);
+
       if (response.ok) {
-        localStorage.setItem('token', data.token);
-        login(data.token); // Atualiza o contexto corretamente
-        router.push('/PaginaCart'); // Redireciona
+        // CORRIGIDO: usar chave consistente para localStorage
+        localStorage.setItem('authToken', data.token);
+        
+        // CORRIGIDO: passar dados do usuário se disponível
+        login(data.token, data.user || data.usuario || null);
+        
+        console.log('Login realizado com sucesso');
+        router.push('/PaginaCart');
       } else {
-        alert(data.mensagem || 'Erro');
+        // MELHORADO: tratamento de erros mais robusto
+        const errorMessage = data.mensagem || data.message || data.error || 'Erro desconhecido';
+        console.error('Erro da API:', errorMessage);
+        alert(errorMessage);
       }
     } catch (error) {
-      alert('Erro na requisição');
+      console.error('Erro na requisição:', error);
+      alert('Erro na conexão com o servidor. Verifique se a API está funcionando.');
+    } finally {
+      setLoading(false);
     }
   };
-  
-
-
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-100 px-4">
@@ -87,6 +103,7 @@ export default function AuthPage() {
                   onChange={handleChange}
                   className="w-full outline-none"
                   required
+                  disabled={loading}
                 />
               </div>
             </div>
@@ -103,6 +120,7 @@ export default function AuthPage() {
                 onChange={handleChange}
                 className="w-full outline-none"
                 required
+                disabled={loading}
               />
             </div>
           </div>
@@ -118,6 +136,7 @@ export default function AuthPage() {
                 onChange={handleChange}
                 className="w-full outline-none"
                 required
+                disabled={loading}
               />
             </div>
             {!isLogin && (
@@ -137,9 +156,23 @@ export default function AuthPage() {
 
           <button
             type="submit"
-            className="w-full bg-yellow-500 hover:bg-yellow-600 text-black font-semibold py-2 rounded transition-all duration-200"
+            disabled={loading}
+            className={`w-full font-semibold py-2 rounded transition-all duration-200 ${
+              loading
+                ? 'bg-gray-300 cursor-not-allowed text-gray-500'
+                : 'bg-yellow-500 hover:bg-yellow-600 text-black'
+            }`}
           >
-            {isLogin ? 'Entrar' : 'Registrar'}
+            {loading ? (
+              <div className="flex items-center justify-center">
+                <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-gray-600 mr-2"></div>
+                {isLogin ? 'Entrando...' : 'Registrando...'}
+              </div>
+            ) : (
+              <>
+                {isLogin ? 'Entrar' : 'Registrar'}
+              </>
+            )}
           </button>
         </form>
 
@@ -147,11 +180,21 @@ export default function AuthPage() {
           {isLogin ? 'Não tem uma conta?' : 'Já tem uma conta?'}{' '}
           <button
             onClick={toggleMode}
-            className="text-blue-600 hover:underline font-medium"
+            disabled={loading}
+            className="text-blue-600 hover:underline font-medium disabled:opacity-50"
           >
             {isLogin ? 'Registrar' : 'Entrar'}
           </button>
         </p>
+
+        {/* DEBUG INFO - remover em produção */}
+        {process.env.NODE_ENV === 'development' && (
+          <div className="mt-4 p-2 bg-gray-100 rounded text-xs">
+            <strong>Debug:</strong><br/>
+            Endpoint: {isLogin ? 'auth/login' : 'auth/register'}<br/>
+            URL: http://localhost:3001/api/{isLogin ? 'auth/login' : 'auth/register'}
+          </div>
+        )}
       </div>
     </div>
   );

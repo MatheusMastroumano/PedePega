@@ -6,7 +6,7 @@ const criarPedido = async (usuarioId, itens, total) => {
         await connection.beginTransaction();
 
         const [result] = await connection.execute(
-            "INSERT INTO pedido (id_usuario, data, horario_pedido, status) VALUES (?, NOW(), CURTIME(), 'Pendente')",
+            "INSERT INTO pedidos (id_usuario, data, horario_pedido, status) VALUES (?, NOW(), CURTIME(), 'Pendente')",
             [usuarioId]
         );
         const pedidoId = result.insertId;
@@ -32,7 +32,7 @@ const criarPedido = async (usuarioId, itens, total) => {
 
 const listarPedidosPorUsuario = async (usuarioId) => {
     const sql = `
-        SELECT * FROM pedido 
+        SELECT * FROM pedidos 
         WHERE id_usuario = ? 
         ORDER BY data DESC
     `;
