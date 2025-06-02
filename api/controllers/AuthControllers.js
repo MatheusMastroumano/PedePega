@@ -4,7 +4,7 @@ import { read, compare, create } from '../config/database.js';
 import { JWT_SECRET } from '../config/jwt.js';
 
 const registerController = async (req, res) => {
-  const { name, email, senha } = req.body;
+  const { name, email, cpf, turma, turno, senha } = req.body;
 
   try {
     const usuario = await read('users', `email = ?`, [email]);
@@ -13,10 +13,16 @@ const registerController = async (req, res) => {
       return res.status(400).json({ mensagem: 'Email já cadastrado' });
     }
 
+    const usuarioCPF = await read('users', `cpf = ?`, [cpf]);
+
+    if (usuarioCPF) {
+      return res.status(400).json({mensagem: 'CPF já cadastrado'})
+    }
+
     const saltRounds = 10;
     const hashedSenha = await bcrypt.hash(senha, saltRounds);
 
-    const userData = { name, email, senha: hashedSenha };
+    const userData = { name, email, cpf, turma, turno, senha: hashedSenha };
     const userId = await create('users', userData);
 
     const token = jwt.sign({ id: userId }, JWT_SECRET, {
