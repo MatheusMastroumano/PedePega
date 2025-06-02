@@ -6,7 +6,7 @@ const criarPedido = async (usuarioId, itens, total) => {
         await connection.beginTransaction();
 
         const [result] = await connection.execute(
-            "INSERT INTO pedido (id_usuario, data, horario_pedido, status) VALUES (?, NOW(), CURTIME(), 'Pendente')",
+            "INSERT INTO pedidos (id_usuario, data, horario_pedido, status) VALUES (?, NOW(), CURTIME(), 'Pendente')",
             [usuarioId]
         );
         const pedidoId = result.insertId;
@@ -32,7 +32,7 @@ const criarPedido = async (usuarioId, itens, total) => {
 
 const listarPedidosPorUsuario = async (usuarioId) => {
     const sql = `
-        SELECT * FROM pedido 
+        SELECT * FROM pedidos
         WHERE id_usuario = ? 
         ORDER BY data DESC
     `;
@@ -47,9 +47,9 @@ const listarPedidosPorUsuario = async (usuarioId) => {
 
 const obterItensDoPedido = async (pedidoId) => {
     const sql = `
-        SELECT item_pedido.*, produto.nome, produto.preco, produto.id_produto
+        SELECT item_pedido.*, produtos.nome, produtos.preco, produtos.id_produto
         FROM item_pedido
-        JOIN produto ON item_pedido.id_produto = produto.id_produto
+        JOIN produtos ON item_pedido.id_produto = produtos.id_produto
         WHERE id_pedido = ?
     `;
     const connection = await getConnection();

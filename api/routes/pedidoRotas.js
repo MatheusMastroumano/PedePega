@@ -8,8 +8,8 @@ import {
 
 const router = express.Router();
 
-router.post("/pedido", authMiddleware, criarPedidoController);
-router.get("/pedido", authMiddleware, listarPedidosController);
-router.get("/pedido/:id/itens", authMiddleware, obterItensPedidoController);
+router.post("/", authMiddleware, criarPedidoController);
+router.get("/", authMiddleware, listarPedidosController);
+router.get("/:id/itens", authMiddleware, obterItensPedidoController);
 
 export default router;
