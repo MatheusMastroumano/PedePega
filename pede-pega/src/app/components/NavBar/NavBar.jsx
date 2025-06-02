@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Menu, X, ShoppingCart } from 'lucide-react';
+import { Menu, X, ShoppingCart, User } from 'lucide-react';
 import { useCart } from '../Cart/contextoCart.js';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '../AuthContexto/ContextoAuth.js';
@@ -10,7 +10,7 @@ export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
   const { getTotalPrice, getTotalItems, fetchCartFromAPI } = useCart();
   const router = useRouter();
-  const { token, logout } = useAuth();
+  const { token, user, logout } = useAuth();
   const [showNavbar, setShowNavbar] = useState(true);
   const [lastScrollY, setLastScrollY] = useState(0);
 
@@ -140,6 +140,28 @@ export default function Navbar() {
               <X size={24} className="text-black hover:text-yellow-600 transition-colors" />
             </button>
           </div>
+          
+          {/* Saudação do usuário */}
+          {token && user && (
+            <div className="px-6 py-4 border-b border-gray-200 bg-yellow-50">
+              <div className="flex items-center gap-3">
+                <div className="bg-yellow-500 rounded-full p-2">
+                  <User size={20} className="text-white" />
+                </div>
+                <div>
+                  <p className="text-sm text-gray-600">Bem-vindo!</p>
+                  <p className="font-semibold text-gray-800 text-lg">
+                    {user.name || 'Usuário'}
+                  </p>
+                  {user.turma && user.turno && (
+                    <p className="text-xs text-gray-500">
+                      {user.turma} - {user.turno}
+                    </p>
+                  )}
+                </div>
+              </div>
+            </div>
+          )}
           
           {/* Informações do carrinho no menu */}
           {token && (

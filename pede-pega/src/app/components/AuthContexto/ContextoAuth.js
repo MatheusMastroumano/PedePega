@@ -1,4 +1,3 @@
-// components/AuthContexto/ContextoAuth.js
 "use client";
 import { createContext, useContext, useState, useEffect } from 'react';
 
@@ -30,7 +29,7 @@ export const AuthProvider = ({ children }) => {
       });
 
       if (savedToken) {
-        // Verificar se o token não expirou
+        // Verificar se o token não expirou (validação simples do JWT)
         try {
           const tokenData = JSON.parse(atob(savedToken.split('.')[1]));
           const now = Date.now() / 1000;
@@ -140,10 +139,19 @@ export const AuthProvider = ({ children }) => {
 
     console.log('Fazendo requisição autenticada para:', url);
 
-    return fetch(url, {
+    const response = await fetch(url, {
       ...options,
       headers,
     });
+
+    // Se receber 401, token pode estar expirado
+    if (response.status === 401) {
+      console.log('Token expirado ou inválido, fazendo logout...');
+      logout();
+      throw new Error('Token expirado');
+    }
+
+    return response;
   };
 
   const value = {

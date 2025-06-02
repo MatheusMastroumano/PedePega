@@ -9,7 +9,7 @@ export default function ProdutosPage() {
   const [loadingProducts, setLoadingProducts] = useState(true);
   const [error, setError] = useState(null);
   const { addToCart, loading: cartLoading, isAddingItem } = useCart();
-  const { token, isAuthenticated } = useAuth();
+  const { token, isAuthenticated, API_BASE_URL } = useAuth();
   const router = useRouter();
 
   useEffect(() => {
@@ -18,7 +18,7 @@ export default function ProdutosPage() {
         setError(null);
         console.log('Buscando produtos...');
         
-        const res = await fetch('http://localhost:3001/api/produtos', {
+        const res = await fetch(`http://localhost:3001/api/produtos`, {
           method: 'GET',
           headers: {
             'Content-Type': 'application/json',
@@ -57,7 +57,7 @@ export default function ProdutosPage() {
     };
 
     fetchProdutos();
-  }, []);
+  }, [API_BASE_URL]);
 
   const handleAddToCart = async (produto) => {
     try {
@@ -87,7 +87,7 @@ export default function ProdutosPage() {
       
       if (success) {
         console.log('Produto adicionado com sucesso!');
-        // Mostrar feedback visual de sucesso (opcional)
+        // Mostrar feedback visual de sucesso
         const button = document.querySelector(`[data-product-id="${produto.id_produto}"]`);
         if (button) {
           const originalText = button.textContent;
@@ -202,7 +202,7 @@ export default function ProdutosPage() {
                     <div className="h-56 bg-gray-100 flex items-center justify-center relative overflow-hidden">
                       {produto.imagemPath ? (
                         <img 
-                          src={`http://localhost:3001/api/${produto.imagemPath}`}
+                          src={`${API_BASE_URL.replace('/api', '')}/${produto.imagemPath}`}
                           alt={produto.nome} 
                           className="h-full w-full object-cover transition-transform duration-300 hover:scale-105"
                           onError={(e) => {
