@@ -16,7 +16,11 @@ const registerController = async (req, res) => {
     const usuarioCPF = await read('users', `cpf = ?`, [cpf]);
 
     if (usuarioCPF) {
-      return res.status(400).json({mensagem: 'CPF já cadastrado'})
+      return res.status(400).json({mensagem: 'CPF já cadastrado'});
+    }
+
+    if (usuarioCPF < 11) {
+      return res.status(400).json({mensagem: 'Isso não é um CPF...'});
     }
 
     const saltRounds = 10;
