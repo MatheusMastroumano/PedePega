@@ -163,7 +163,7 @@ export default function AuthPage() {
         login(data.token, data.user || data.usuario || null);
         
         console.log('Login realizado com sucesso');
-        router.push('/PaginaCart');
+        router.push('/PaginaProdutos');
       } else {
         // Tratar erros específicos do servidor
         if (data.erro) {
