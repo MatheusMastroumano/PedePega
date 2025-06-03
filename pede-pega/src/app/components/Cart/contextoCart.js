@@ -131,7 +131,6 @@ export const CartProvider = ({ children }) => {
     }
   };
 
-  // CORRIGIDO Adicionar item ao carrinho
   const addToCart = async (product) => {
     if (!isAuthenticated) {
       alert("Você precisa estar logado para adicionar itens ao carrinho");

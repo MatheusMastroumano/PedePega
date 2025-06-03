@@ -8,25 +8,29 @@ export default function ProdutosPage() {
   const [produtos, setProdutos] = useState([]);
   const [loadingProducts, setLoadingProducts] = useState(true);
   const [error, setError] = useState(null);
-  const { addToCart, loading: cartLoading, isAddingItem } = useCart();
-  const { token, isAuthenticated, API_BASE_URL } = useAuth();
+  const { addToCart, loading: cartLoading } = useCart();
+  const { token, isAuthenticated } = useAuth();
   const router = useRouter();
+  const [addingItemId, setAddingItemId] = useState(null);
+  const [addedProductId, setAddedProductId] = useState(null);
+  const isAddingItem = (productId) => addingItemId === productId;
+  const isAddedItem = (productId) => addedProductId === productId;
 
   useEffect(() => {
     const fetchProdutos = async () => {
       try {
         setError(null);
         console.log('Buscando produtos...');
-        
+
         const res = await fetch(`http://localhost:3001/api/produtos`, {
           method: 'GET',
           headers: {
             'Content-Type': 'application/json',
           },
         });
-        
+
         console.log('Status resposta produtos:', res.status);
-        
+
         if (!res.ok) {
           let errorMessage = 'Erro ao buscar produtos';
           try {
@@ -37,16 +41,15 @@ export default function ProdutosPage() {
           }
           throw new Error(errorMessage);
         }
-        
+
         const data = await res.json();
         console.log('Produtos recebidos:', data);
-        
-        // Validar resposta
+
         if (!Array.isArray(data)) {
           console.error('Resposta não é um array:', data);
           throw new Error('Formato de dados inválido');
         }
-        
+
         setProdutos(data);
       } catch (err) {
         console.error('Erro ao buscar produtos:', err);
@@ -57,7 +60,7 @@ export default function ProdutosPage() {
     };
 
     fetchProdutos();
-  }, [API_BASE_URL]);
+  }, ['http://localhost:3001/produtos']);
 
   const handleAddToCart = async (produto) => {
     try {
@@ -81,28 +84,21 @@ export default function ProdutosPage() {
         return;
       }
 
+      setAddingItemId(produto.id_produto);
+
       console.log('Adicionando produto:', produto);
-      
+
       const success = await addToCart(produto);
-      
       if (success) {
-        console.log('Produto adicionado com sucesso!');
-        // Mostrar feedback visual de sucesso
-        const button = document.querySelector(`[data-product-id="${produto.id_produto}"]`);
-        if (button) {
-          const originalText = button.textContent;
-          button.textContent = '✓ Adicionado!';
-          button.className = button.className.replace('bg-yellow-500', 'bg-green-500');
-          setTimeout(() => {
-            button.textContent = originalText;
-            button.className = button.className.replace('bg-green-500', 'bg-yellow-500');
-          }, 2000);
-        }
+        setAddedProductId(produto.id_produto);
+        setTimeout(() => {
+          setAddedProductId(null);
+        }, 2000);
       }
-      
     } catch (error) {
-      console.error('Erro em handleAddToCart:', error);
-      alert(error.message || 'Erro ao adicionar produto ao carrinho');
+      alert('Erro ao adicionar ao carrinho');
+    } finally {
+      setAddingItemId(null);
     }
   };
 
@@ -151,7 +147,7 @@ export default function ProdutosPage() {
             <p className="text-gray-600 text-lg">
               {produtosDisponiveis.length} produtos disponíveis
             </p>
-            
+
             {/* Alerta para usuários não logados */}
             {!isAuthenticated && (
               <div className="mt-4 bg-blue-50 border border-blue-200 rounded-lg p-4">
@@ -192,7 +188,7 @@ export default function ProdutosPage() {
               {produtosDisponiveis.map((produto) => {
                 const isCurrentlyAdding = isAddingItem(produto.id_produto);
                 const hasStock = produto.estoque && produto.estoque > 0;
-                
+
                 return (
                   <div
                     key={produto.id_produto}
@@ -201,9 +197,9 @@ export default function ProdutosPage() {
                     {/* Imagem do produto */}
                     <div className="h-56 bg-gray-100 flex items-center justify-center relative overflow-hidden">
                       {produto.imagemPath ? (
-                        <img 
+                        <img
                           src={`${API_BASE_URL.replace('/api', '')}/${produto.imagemPath}`}
-                          alt={produto.nome} 
+                          alt={produto.nome}
                           className="h-full w-full object-cover transition-transform duration-300 hover:scale-105"
                           onError={(e) => {
                             e.target.style.display = 'none';
@@ -211,13 +207,13 @@ export default function ProdutosPage() {
                           }}
                         />
                       ) : null}
-                      <div 
-                        className="text-gray-400 text-5xl flex items-center justify-center h-full w-full" 
-                        style={{display: produto.imagemPath ? 'none' : 'flex'}}
+                      <div
+                        className="text-gray-400 text-5xl flex items-center justify-center h-full w-full"
+                        style={{ display: produto.imagemPath ? 'none' : 'flex' }}
                       >
                         📦
                       </div>
-                      
+
                       {/* Badge de estoque */}
                       {!hasStock && (
                         <div className="absolute top-3 right-3 bg-red-500 text-white px-2 py-1 rounded-lg text-xs font-semibold">
@@ -231,13 +227,13 @@ export default function ProdutosPage() {
                       <h2 className="text-xl font-semibold text-gray-800 mb-3 line-clamp-2 min-h-[3.5rem]">
                         {produto.nome || 'Produto sem nome'}
                       </h2>
-                      
+
                       <div className="mb-5">
                         <p className="text-3xl font-bold text-yellow-600 mb-1">
                           R$ {parseFloat(produto.preco || 0).toFixed(2)}
                         </p>
                         <p className={`text-sm ${hasStock ? 'text-gray-500' : 'text-red-500'}`}>
-                          {hasStock 
+                          {hasStock
                             ? `${produto.estoque} unidades disponíveis`
                             : 'Produto indisponível'
                           }
@@ -250,11 +246,12 @@ export default function ProdutosPage() {
                         {isAuthenticated ? (
                           <button
                             data-product-id={produto.id_produto}
-                            className={`w-full px-4 py-3 rounded-lg font-semibold transition-all duration-200 ${
-                              isCurrentlyAdding || !hasStock
+                            className={`w-full px-4 py-3 rounded-lg font-semibold transition-all duration-200 ${isCurrentlyAdding || !hasStock
                                 ? 'bg-gray-300 cursor-not-allowed text-gray-500'
-                                : 'bg-yellow-500 hover:bg-yellow-600 text-white transform hover:scale-105'
-                            }`}
+                                : isAddedItem(produto.id_produto)
+                                  ? 'bg-yellow-600 text-white'
+                                  : 'bg-yellow-500 hover:bg-yellow-600 text-white transform hover:scale-105'
+                              }`}
                             onClick={() => handleAddToCart(produto)}
                             disabled={isCurrentlyAdding || !hasStock}
                           >
@@ -263,6 +260,8 @@ export default function ProdutosPage() {
                                 <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-gray-400 mr-2"></div>
                                 Adicionando...
                               </div>
+                            ) : isAddedItem(produto.id_produto) ? (
+                              '✓ Adicionado!'
                             ) : !hasStock ? (
                               'Sem Estoque'
                             ) : (

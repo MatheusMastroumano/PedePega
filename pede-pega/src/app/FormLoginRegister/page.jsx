@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Mail, Lock, User, UserCheck, Clock, GraduationCap } from 'lucide-react';
 import { useAuth } from '../components/AuthContexto/ContextoAuth.js';
-import { validarEmail, ValidarCPF}
+
 export default function AuthPage() {
   const [isLogin, setIsLogin] = useState(true);
   const [form, setForm] = useState({ 
@@ -75,12 +75,6 @@ export default function AuthPage() {
       newErrors.email = 'Email é obrigatório';
     } else if (!validarEmail(form.email)) {
       newErrors.email = 'Email inválido';
-    }
-
-    if (!form.senha || !form.senha.trim()) {
-      newErrors.senha = 'Senha é obrigatória';
-    } else if (form.senha.length < 6) {
-      newErrors.senha = 'Senha deve ter no mínimo 6 caracteres';
     }
 
     setErrors(newErrors);

@@ -187,7 +187,7 @@ export default function Navbar() {
             </li>
             <li
               className="text-lg text-black cursor-pointer hover:text-yellow-600 transition-colors"
-              onClick={() => handleNavigation('../../PaginaCart')}
+              onClick={() => handleNavigation('../../PaginaProdutos')}
             >
               Produtos
             </li>
