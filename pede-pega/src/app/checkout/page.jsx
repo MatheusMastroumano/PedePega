@@ -59,10 +59,6 @@ const CheckoutPage = () => {
       }
     }
 
-    if (formaPagamento === 'paypal') {
-      if (!dadosPagamento.email) newErrors.email = 'Email do PayPal é obrigatório';
-    }
-
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -98,7 +94,7 @@ const CheckoutPage = () => {
     setLoading(true);
     
     try {
-      const response = await fetch('http://localhost:3001/pedidos/finalizar', {
+      const response = await fetch('http://localhost:3001/api/pedidos/finalizar', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -268,7 +264,7 @@ const CheckoutPage = () => {
               {/* Seleção da forma de pagamento */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Escolha a forma de pagamento *
+                  Escolha a forma de pagamento
                 </label>
                 <div className="space-y-2">
                   <label className="flex items-center p-3 border rounded-lg cursor-pointer hover:bg-gray-50">
@@ -280,7 +276,7 @@ const CheckoutPage = () => {
                       onChange={(e) => setFormaPagamento(e.target.value)}
                       className="mr-3"
                     />
-                    <span className="flex items-center">
+                    <span className="flex items-center text-black">
                       💳 Cartão de Crédito
                     </span>
                   </label>
@@ -294,7 +290,7 @@ const CheckoutPage = () => {
                       onChange={(e) => setFormaPagamento(e.target.value)}
                       className="mr-3"
                     />
-                    <span className="flex items-center">
+                    <span className="flex items-center text-black">
                       💳 Cartão de Débito
                     </span>
                   </label>
@@ -308,24 +304,11 @@ const CheckoutPage = () => {
                       onChange={(e) => setFormaPagamento(e.target.value)}
                       className="mr-3"
                     />
-                    <span className="flex items-center">
+                    <span className="flex items-center text-black">
                       🏦 PIX
                     </span>
                   </label>
 
-                  <label className="flex items-center p-3 border rounded-lg cursor-pointer hover:bg-gray-50">
-                    <input
-                      type="radio"
-                      name="forma_pagamento"
-                      value="paypal"
-                      checked={formaPagamento === 'paypal'}
-                      onChange={(e) => setFormaPagamento(e.target.value)}
-                      className="mr-3"
-                    />
-                    <span className="flex items-center">
-                      💰 PayPal
-                    </span>
-                  </label>
                 </div>
                 {errors.formaPagamento && (
                   <p className="text-red-500 text-sm mt-1">{errors.formaPagamento}</p>
@@ -338,60 +321,60 @@ const CheckoutPage = () => {
                   <h3 className="font-semibold text-gray-800">Dados do Cartão</h3>
                   
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Número do Cartão *
+                    <label className="block text-sm font-medium text-black mb-1">
+                      Número do Cartão
                     </label>
                     <input
                       type="text"
                       placeholder="1234 5678 9012 3456"
                       value={dadosPagamento.numero || ''}
                       onChange={(e) => handleInputChange('numero', formatCardNumber(e.target.value))}
-                      className={`w-full p-3 border rounded-lg ${errors.numero ? 'border-red-500' : 'border-gray-300'}`}
+                      className={`w-full p-3 border text-black rounded-lg ${errors.numero ? 'border-red-500' : 'border-gray-300'}`}
                       maxLength="19"
                     />
                     {errors.numero && <p className="text-red-500 text-sm mt-1">{errors.numero}</p>}
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Nome no Cartão *
+                    <label className="block text-sm font-medium text-black mb-1">
+                      Nome no Cartão
                     </label>
                     <input
                       type="text"
                       placeholder="Nome como está no cartão"
                       value={dadosPagamento.nome || ''}
                       onChange={(e) => handleInputChange('nome', e.target.value.toUpperCase())}
-                      className={`w-full p-3 border rounded-lg ${errors.nome ? 'border-red-500' : 'border-gray-300'}`}
+                      className={`w-full p-3 border text-black rounded-lg ${errors.nome ? 'border-red-500' : 'border-gray-300'}`}
                     />
                     {errors.nome && <p className="text-red-500 text-sm mt-1">{errors.nome}</p>}
                   </div>
 
                   <div className="grid grid-cols-2 gap-4">
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Validade *
+                      <label className="block text-sm font-medium text-black mb-1">
+                        Validade
                       </label>
                       <input
                         type="text"
                         placeholder="MM/AA"
                         value={dadosPagamento.validade || ''}
                         onChange={(e) => handleInputChange('validade', formatExpiry(e.target.value))}
-                        className={`w-full p-3 border rounded-lg ${errors.validade ? 'border-red-500' : 'border-gray-300'}`}
+                        className={`w-full p-3 border text-black rounded-lg ${errors.validade ? 'border-red-500' : 'border-gray-300'}`}
                         maxLength="5"
                       />
                       {errors.validade && <p className="text-red-500 text-sm mt-1">{errors.validade}</p>}
                     </div>
 
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
-                        CVV *
+                      <label className="block text-sm font-medium text-black mb-1">
+                        CVV
                       </label>
                       <input
                         type="text"
                         placeholder="123"
                         value={dadosPagamento.cvv || ''}
                         onChange={(e) => handleInputChange('cvv', e.target.value.replace(/\D/g, ''))}
-                        className={`w-full p-3 border rounded-lg ${errors.cvv ? 'border-red-500' : 'border-gray-300'}`}
+                        className={`w-full p-3 text-black border rounded-lg ${errors.cvv ? 'border-red-500' : 'border-gray-300'}`}
                         maxLength="4"
                       />
                       {errors.cvv && <p className="text-red-500 text-sm mt-1">{errors.cvv}</p>}
@@ -400,32 +383,11 @@ const CheckoutPage = () => {
                 </div>
               )}
 
-              {/* Campo específico para PayPal */}
-              {formaPagamento === 'paypal' && (
-                <div className="space-y-4 p-4 bg-gray-50 rounded-lg">
-                  <h3 className="font-semibold text-gray-800">Dados do PayPal</h3>
-                  
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Email do PayPal *
-                    </label>
-                    <input
-                      type="email"
-                      placeholder="seu@email.com"
-                      value={dadosPagamento.email || ''}
-                      onChange={(e) => handleInputChange('email', e.target.value)}
-                      className={`w-full p-3 border rounded-lg ${errors.email ? 'border-red-500' : 'border-gray-300'}`}
-                    />
-                    {errors.email && <p className="text-red-500 text-sm mt-1">{errors.email}</p>}
-                  </div>
-                </div>
-              )}
-
               {/* Informação para PIX */}
               {formaPagamento === 'pix' && (
-                <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg">
-                  <h3 className="font-semibold text-blue-800 mb-2">Pagamento via PIX</h3>
-                  <p className="text-blue-700 text-sm">
+                <div className="p-4 border border-yellow-200 rounded-lg">
+                  <h3 className="font-semibold text-black mb-2">Pagamento via PIX</h3>
+                  <p className="text-black text-sm">
                     Após confirmar o pedido, você receberá um código PIX e QR Code para realizar o pagamento.
                     O pagamento deve ser realizado em até 15 minutos.
                   </p>
