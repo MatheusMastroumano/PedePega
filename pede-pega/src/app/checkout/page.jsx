@@ -66,7 +66,7 @@ export default function Checkout() {
       
       // Redireciona para página de sucesso após 3 segundos
       setTimeout(() => {
-        router.push('/meus-pedidos');
+        router.push('./clientePedidos');
       }, 3000);
 
     } catch (err) {
@@ -310,7 +310,6 @@ export default function Checkout() {
                 
                 <div className="text-xs text-gray-500 text-center space-y-1">
                   <p>✅ Pedido será preparado para retirada</p>
-                  <p>✅ Pagamento no local</p>
                   <p>✅ Sem taxas adicionais</p>
                 </div>
               </div>
