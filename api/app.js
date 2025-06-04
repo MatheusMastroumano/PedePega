@@ -6,6 +6,7 @@ import produtoRotas from './routes/produtoRotas.js';
 import authRotas from './routes/authRotas.js';
 import carrinhoRotas from './routes/carrinhoRotas.js'; 
 import pedidoRotas from './routes/pedidoRotas.js';
+import pedidoAdminRotas from './routes/pedidoAdminRotas.js';
 
 const app = express();
 const port = 3001;
@@ -21,6 +22,8 @@ app.use('/api/produtos', produtoRotas);
 app.use('/api/auth', authRotas);
 app.use('/api/carrinho', carrinhoRotas);
 app.use('/api/pedido', pedidoRotas);
+app.use("/api/pedidos", pedidoRotas);
+app.use("/api/admin/pedidos", pedidoAdminRotas);
 
 app.get('/', (req, res) => {
     res.send('<h1>API PedePega</h1>');
