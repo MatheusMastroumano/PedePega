@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Menu, X, ShoppingCart, User } from 'lucide-react';
 import { useCart } from '../Cart/contextoCart.js';
 import { useRouter } from 'next/navigation';
@@ -13,10 +13,37 @@ export default function Navbar() {
   const { token, user, logout } = useAuth();
   const [showNavbar, setShowNavbar] = useState(true);
   const [lastScrollY, setLastScrollY] = useState(0);
+  const [navHeight, setNavHeight] = useState(0);
+  const navRef = useRef(null);
 
   // Valores do carrinho
   const totalPrice = getTotalPrice();
   const totalItems = getTotalItems();
+
+  // Medir altura da navbar e aplicar padding-top no body
+  useEffect(() => {
+    const updateNavHeight = () => {
+      if (navRef.current) {
+        const height = navRef.current.offsetHeight;
+        setNavHeight(height);
+        
+        // Adicionar padding-top ao body para compensar a navbar fixa
+        document.body.style.paddingTop = `${height}px`;
+      }
+    };
+
+    // Medir inicialmente
+    updateNavHeight();
+    
+    // Remeasurar quando a janela for redimensionada
+    window.addEventListener('resize', updateNavHeight);
+    
+    // Cleanup - remover padding quando componente for desmontado
+    return () => {
+      window.removeEventListener('resize', updateNavHeight);
+      document.body.style.paddingTop = '';
+    };
+  }, []);
 
   // Buscar carrinho quando a navbar é carregada e há token
   useEffect(() => {
@@ -72,6 +99,7 @@ export default function Navbar() {
   return (
     <>
       <nav
+        ref={navRef}
         className={`fixed top-0 left-0 right-0 z-50 bg-white shadow-md transition-transform duration-200 ${showNavbar ? 'translate-y-0' : '-translate-y-full'
           }`}
       >
@@ -94,7 +122,7 @@ export default function Navbar() {
           {/* Carrinho e menu */}
           <div className="flex items-center gap-4">
             <button
-              onClick={() => router.push('/carrinho')}
+              onClick={() => router.push('../../carrinho')}
               className="flex items-center gap-2 text-black font-semibold hover:text-yellow-600 transition-colors relative"
             >
               <div className="relative">
