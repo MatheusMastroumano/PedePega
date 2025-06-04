@@ -11,7 +11,7 @@ const listarProdutos = async () => {
 
 const obterProdutoPorId = async (id) => {
     try {
-        return await read('produtos', `id_produto = ${id}`)
+        return await read('produtos', `id_produto = ?`, [id]);
 
     } catch (err) {
         console.error('Erro ao obter produto por ID: ', err);
@@ -30,7 +30,7 @@ const criarProduto = async (produtoData) => {
 
 const atualizarProduto = async (id, produtoData) => {
     try {
-        return await update ('produtos', produtoData, `id_produto = ${id}`);
+        return await update ('produtos', produtoData, 'id_produto = ?', [id]);
     } catch (err) {
         console.error('Erro ao atualizar produto', err);
         throw err;
@@ -39,7 +39,7 @@ const atualizarProduto = async (id, produtoData) => {
 
 const deletarProduto = async (id) => {
     try {
-        return await deleteRecord('produtos', `id_produto = ${id}`);
+        return await deleteRecord('produtos', 'id_produto = ?', [id]);
     } catch (err) {
         console.error('Erro ao excluir produto...');
         throw err;

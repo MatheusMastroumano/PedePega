@@ -31,7 +31,7 @@ const criarPedido = async (usuarioId, itens, total) => {
 };
 
 const finalizarPedido = async (pedidoId, usuarioId) => {
-  const connection = getConnection();
+  const connection = await getConnection();
 
   try {
     const [pedidoExistente] = await connection.execute(
@@ -124,7 +124,7 @@ const listarPedidosAtivos = async (usuarioId) => {
     ORDER BY data DESC
     `;
 
-  const connection = getConnection();
+  const connection = await getConnection();
   try {
     const [rows] = await connection.execute(sql, [usuarioId]);
     return rows;
@@ -142,7 +142,7 @@ const listarTodosPedidosAtivos = async () => {
         WHERE p.status IN ('Pendente', 'Em_Preparo', 'Pronto')
         ORDER BY p.data DESC
     `;
-  const connection = getConnection();
+  const connection = await getConnection();
 
   try {
     const [rows] = await connection.execute(sql);
@@ -154,7 +154,7 @@ const listarTodosPedidosAtivos = async () => {
 
 //Função para admin
 const alterarStatusPedido = async (pedidoId, novoStatus) => {
-  const connection = getConnection();
+  const connection = await getConnection();
 
   try {
     const statusValidos = [

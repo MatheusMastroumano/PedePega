@@ -17,3 +17,5 @@ adminRouter.use(adminMiddleware);
 adminRouter.get("/ativos", listarTodosPedidosAtivosController);
 adminRouter.patch("/:id/status", alterarStatusPedidoController);
 adminRouter.get("/:id/itens", obterItensPedidoController);
+
+export default adminRouter;
