@@ -43,15 +43,15 @@ export const AuthProvider = ({ children }) => {
               setIsAuthenticated(true);
               
               if (savedUser) {
-                setUser(JSON.parse(savedUser));
-              }
-
-              // Verificar se é admin
-              if (savedIsAdmin === 'true') {
-                setIsAdmin(true);
-              } else {
-                // Verificar privilégios de admin fazendo uma requisição de teste
-                await checkAdminPrivileges(savedToken);
+                const userData = JSON.parse(savedUser);
+                setUser(userData);
+                
+                // Verificar se é admin baseado nos dados do usuário
+                const userIsAdmin = userData?.tipo === 'admin' || savedIsAdmin === 'true';
+                setIsAdmin(userIsAdmin);
+                
+                console.log('Dados do usuário:', userData);
+                console.log('É admin?', userIsAdmin);
               }
               
               console.log('Token válido carregado');
@@ -88,13 +88,25 @@ export const AuthProvider = ({ children }) => {
     setIsAdmin(false);
   };
 
-  // Função para verificar privilégios de admin
-  const checkAdminPrivileges = async (authToken = token) => {
+  // Função para verificar privilégios de admin através do perfil do usuário
+  const checkAdminPrivileges = async (authToken = token, userData = user) => {
     if (!authToken) return false;
 
     try {
       console.log('Verificando privilégios de admin...');
       
+      // Primeiro, verificar se já temos os dados do usuário
+      if (userData && userData.tipo === 'admin') {
+        console.log('Usuário já identificado como admin pelos dados locais');
+        setIsAdmin(true);
+        if (isHydrated) {
+          localStorage.setItem('isAdmin', 'true');
+        }
+        return true;
+      }
+
+      // Se não temos os dados ou não é admin, fazer uma verificação via API
+      // Vamos tentar fazer uma requisição simples para verificar se o usuário tem acesso admin
       const response = await fetch('http://localhost:3001/api/admin/pedidos/ativos', {
         method: 'GET',
         headers: { 
@@ -105,7 +117,7 @@ export const AuthProvider = ({ children }) => {
 
       const hasAdminPrivileges = response.ok;
       
-      console.log('Privilégios de admin:', hasAdminPrivileges);
+      console.log('Privilégios de admin verificados via API:', hasAdminPrivileges);
       
       setIsAdmin(hasAdminPrivileges);
       
@@ -139,9 +151,17 @@ export const AuthProvider = ({ children }) => {
         }
       }
 
-      // Verificar privilégios de admin após login (a menos que seja explicitamente pulado)
+      // Verificar privilégios de admin após login
       if (!skipAdminCheck) {
-        await checkAdminPrivileges(tokenData);
+        const userIsAdmin = userData?.tipo === 'admin';
+        if (userIsAdmin) {
+          setIsAdmin(true);
+          if (isHydrated) {
+            localStorage.setItem('isAdmin', 'true');
+          }
+        } else {
+          await checkAdminPrivileges(tokenData, userData);
+        }
       }
       
       console.log('Login realizado com sucesso');
@@ -169,7 +189,16 @@ export const AuthProvider = ({ children }) => {
       }
 
       // Verificar privilégios de admin
-      const hasAdminPrivileges = await checkAdminPrivileges(tokenData);
+      let hasAdminPrivileges = false;
+      
+      // Primeiro verificar pelos dados do usuário
+      if (userData && userData.tipo === 'admin') {
+        hasAdminPrivileges = true;
+        console.log('Usuário identificado como admin pelos dados do perfil');
+      } else {
+        // Se não, verificar via API
+        hasAdminPrivileges = await checkAdminPrivileges(tokenData, userData);
+      }
       
       if (!hasAdminPrivileges) {
         // Se não tem privilégios de admin, fazer logout
@@ -178,6 +207,11 @@ export const AuthProvider = ({ children }) => {
           success: false, 
           error: 'Usuário não possui privilégios de administrador' 
         };
+      }
+      
+      setIsAdmin(true);
+      if (isHydrated) {
+        localStorage.setItem('isAdmin', 'true');
       }
       
       console.log('Login de admin realizado com sucesso');
