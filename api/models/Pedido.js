@@ -136,11 +136,11 @@ const listarPedidosAtivos = async (usuarioId) => {
 //Função para admin
 const listarTodosPedidosAtivos = async () => {
   const sql = `
-        SELECT p.*, u.nome as nome_usuario, u.email
-        FROM pedidos p
-        JOIN usuarios u ON p.id_usuario = u.id_usuario
-        WHERE p.status IN ('Pendente', 'Em_Preparo', 'Pronto')
-        ORDER BY p.data DESC
+SELECT p.*, u.name AS name_usuario, u.email
+FROM pedidos p
+JOIN users u ON p.id_usuario = u.id
+WHERE p.status IN ('Pendente', 'Em_Preparo', 'Pronto')
+ORDER BY p.data DESC;
     `;
   const connection = await getConnection();
 
@@ -185,7 +185,7 @@ const alterarStatusPedido = async (pedidoId, novoStatus) => {
 
 const obterItensDoPedido = async (pedidoId) => {
   const sql = `
-        SELECT item_pedido.*, produtos.nome, produtos.preco, produtos.id_produto
+        SELECT item_pedido.*, produtos.name, produtos.preco, produtos.id_produto
         FROM item_pedido
         JOIN produtos ON item_pedido.id_produto = produtos.id_produto
         WHERE id_pedido = ?

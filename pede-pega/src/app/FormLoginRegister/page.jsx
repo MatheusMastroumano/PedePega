@@ -6,15 +6,8 @@ import { Mail, Lock, User, UserCheck, Clock, GraduationCap, Shield, Eye, EyeOff 
 import { useAuth } from '../components/AuthContexto/ContextoAuth.js';
 
 export default function AuthPage() {
-  const [activeTab, setActiveTab] = useState('login'); // 'login', 'register', 'admin'
-  const [form, setForm] = useState({ 
-    name: '', 
-    email: '', 
-    cpf: '', 
-    turma: '', 
-    turno: '', 
-    senha: '' 
-  });
+  const [activeTab, setActiveTab] = useState('login');
+  const [form, setForm] = useState({ name: '', email: '', cpf: '', turma: '', turno: '', senha: '' });
   const [errors, setErrors] = useState({});
   const [passwordStrength, setPasswordStrength] = useState('');
   const [loading, setLoading] = useState(false);
@@ -22,19 +15,8 @@ export default function AuthPage() {
   const router = useRouter();
   const { login } = useAuth();
 
-  // Validações baseadas no controller
-  const validarEmail = (email) => {
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    return emailRegex.test(email);
-  };
-
-  const validarCPF = (cpf) => {
-    if (!cpf || typeof cpf !== 'string') {
-      return false;
-    }
-    const cpfLimpo = cpf.replace(/\D/g, '');
-    return cpfLimpo.length === 11;
-  };
+  const validarEmail = (email) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+  const validarCPF = (cpf) => cpf?.replace(/\D/g, '').length === 11;
 
   const formatarCPF = (value) => {
     const numeros = value.replace(/\D/g, '');
@@ -47,42 +29,18 @@ export default function AuthPage() {
   const validarCampos = () => {
     const newErrors = {};
 
-    // Validações para registro
     if (activeTab === 'register') {
-      // Nome obrigatório
-      if (!form.name || !form.name.trim()) {
-        newErrors.name = 'Nome é obrigatório';
-      }
-
-      // CPF obrigatório e válido
-      if (!form.cpf || !form.cpf.trim()) {
-        newErrors.cpf = 'CPF é obrigatório';
-      } else if (!validarCPF(form.cpf)) {
-        newErrors.cpf = 'CPF deve ter 11 dígitos';
-      }
-
-      // Turma obrigatória
-      if (!form.turma || !form.turma.trim()) {
-        newErrors.turma = 'Turma é obrigatória';
-      }
-
-      // Turno obrigatório
-      if (!form.turno || !form.turno.trim()) {
-        newErrors.turno = 'Turno é obrigatório';
-      }
+      if (!form.name.trim()) newErrors.name = 'Nome é obrigatório';
+      if (!form.cpf.trim()) newErrors.cpf = 'CPF é obrigatório';
+      else if (!validarCPF(form.cpf)) newErrors.cpf = 'CPF inválido';
+      if (!form.turma.trim()) newErrors.turma = 'Turma é obrigatória';
+      if (!form.turno.trim()) newErrors.turno = 'Turno é obrigatório';
     }
 
-    // Email obrigatório para todos os tipos
-    if (!form.email || !form.email.trim()) {
-      newErrors.email = 'Email é obrigatório';
-    } else if (!validarEmail(form.email)) {
-      newErrors.email = 'Email inválido';
-    }
+    if (!form.email.trim()) newErrors.email = 'Email é obrigatório';
+    else if (!validarEmail(form.email)) newErrors.email = 'Email inválido';
 
-    // Senha obrigatória para todos os tipos
-    if (!form.senha || !form.senha.trim()) {
-      newErrors.senha = 'Senha é obrigatória';
-    }
+    if (!form.senha.trim()) newErrors.senha = 'Senha é obrigatória';
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
@@ -90,22 +48,12 @@ export default function AuthPage() {
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    
-    let processedValue = value;
-    
-    // Formatação especial para CPF
-    if (name === 'cpf') {
-      processedValue = formatarCPF(value);
-    }
+    const processedValue = name === 'cpf' ? formatarCPF(value) : value;
 
     setForm((prev) => ({ ...prev, [name]: processedValue }));
 
-    // Limpar erro do campo quando o usuário começar a digitar
-    if (errors[name]) {
-      setErrors((prev) => ({ ...prev, [name]: '' }));
-    }
+    if (errors[name]) setErrors((prev) => ({ ...prev, [name]: '' }));
 
-    // Calcular força da senha
     if (name === 'senha') {
       const strength = getPasswordStrength(value);
       setPasswordStrength(strength);
@@ -126,101 +74,87 @@ export default function AuthPage() {
     setShowPassword(false);
   };
 
-const handleSubmit = async (e) => {
-  e.preventDefault();
-  
-  // Validar campos antes de enviar
-  if (!validarCampos()) {
-    return;
-  }
+  const handleSubmit = async (e) => {
+    e.preventDefault();
 
-  setLoading(true);
+    if (!validarCampos()) return;
 
-  let endpoint, body;
-  
-  if (activeTab === 'register') {
-    endpoint = 'auth/register';
-    body = { 
-      name: form.name.trim(),
-      email: form.email.toLowerCase().trim(),
-      cpf: form.cpf.replace(/\D/g, ''),
-      turma: form.turma.trim(),
-      turno: form.turno.trim(),
-      senha: form.senha
-    };
-  } else {
-    // Para login normal e admin, usar o mesmo endpoint
-    endpoint = 'auth/login';
-    body = { 
-      email: form.email.toLowerCase().trim(), 
-      senha: form.senha 
-    };
-  }
+    setLoading(true);
 
+    let endpoint, body;
+    if (activeTab === 'register') {
+      endpoint = 'auth/register';
+      body = {
+        name: form.name.trim(),
+        email: form.email.toLowerCase().trim(),
+        cpf: form.cpf.replace(/\D/g, ''),
+        turma: form.turma.trim(),
+        turno: form.turno.trim(),
+        senha: form.senha,
+      };
+    } else {
+      endpoint = 'auth/login';
+      body = {
+        email: form.email.toLowerCase().trim(),
+        senha: form.senha,
+      };
+    }
 
     try {
-      console.log(`Fazendo requisição para: http://localhost:3001/api/${endpoint}`);
-      console.log('Dados enviados:', body);
-
       const response = await fetch(`http://localhost:3001/api/${endpoint}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(body),
       });
 
-      console.log('Status da resposta:', response.status);
-
       const data = await response.json();
-      console.log('Dados recebidos:', data);
 
       if (response.ok) {
-        // Decidir qual função de login usar baseado na aba ativa
-        let loginResult;
-        
+        login(data.token, data.user || data.usuario || null);
+
         if (activeTab === 'admin') {
-          // Usar loginAsAdmin para verificar privilégios
-          loginResult = await loginAsAdmin(data.token, data.user || data.usuario || null);
-        } else {
-          // Login normal
-          loginResult = await login(data.token, data.user || data.usuario || null);
-        }
-  
-        if (loginResult.success) {
-          // Redirecionar baseado no tipo de login
-          if (activeTab === 'admin') {
-            console.log('Login de admin realizado com sucesso');
-            router.push('/admin'); // ou a página que você criar para admin
-          } else {
-            console.log('Login realizado com sucesso');
-            router.push('/PaginaProdutos');
-          }
-        } else {
-          // Erro no login (ex: não é admin)
-          if (activeTab === 'admin') {
-            setErrors({ 
-              email: loginResult.error || 'Usuário não possui privilégios de administrador',
-              senha: loginResult.error || 'Usuário não possui privilégios de administrador'
+          try {
+            const adminTestResponse = await fetch('http://localhost:3001/api/admin/pedidos/ativos', {
+              method: 'GET',
+              headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${data.token}`,
+              },
             });
-          } else {
-            setErrors({ email: loginResult.error, senha: loginResult.error });
+
+            if (adminTestResponse.ok) {
+              router.push('/admin');
+            } else if (adminTestResponse.status === 403) {
+              setErrors({
+                email: 'Usuário não possui privilégios de administrador',
+                senha: 'Usuário não possui privilégios de administrador',
+              });
+              localStorage.removeItem('authToken');
+            } else {
+              throw new Error('Erro ao verificar privilégios de admin');
+            }
+          } catch (adminError) {
+            console.error('Erro ao verificar admin:', adminError);
+            setErrors({
+              email: 'Erro ao verificar privilégios de administrador',
+              senha: 'Erro ao verificar privilégios de administrador',
+            });
+            localStorage.removeItem('authToken');
           }
+        } else {
+          router.push('/PaginaProdutos');
         }
       } else {
-        // Tratar erros específicos do servidor
         if (data.erro) {
           if (data.erro.includes('Email já cadastrado')) {
             setErrors({ email: 'Este email já está cadastrado' });
           } else if (data.erro.includes('CPF já cadastrado')) {
             setErrors({ cpf: 'Este CPF já está cadastrado' });
           } else if (data.erro.includes('Email ou senha incorretos')) {
-            if (activeTab === 'admin') {
-              setErrors({ 
-                email: 'Email, senha incorretos ou usuário não é administrador', 
-                senha: 'Email, senha incorretos ou usuário não é administrador' 
-              });
-            } else {
-              setErrors({ email: 'Email ou senha incorretos', senha: 'Email ou senha incorretos' });
-            }
+            const msg = activeTab === 'admin'
+              ? 'Email, senha incorretos ou usuário não é administrador'
+              : 'Email ou senha incorretos';
+            setErrors({ email: msg, senha: msg });
           } else {
             alert(data.erro);
           }
