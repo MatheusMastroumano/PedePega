@@ -13,7 +13,7 @@ export default function AuthPage() {
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const router = useRouter();
-  const { login } = useAuth();
+  const { login, loginAsAdmin } = useAuth();
 
   const validarEmail = (email) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
   const validarCPF = (cpf) => cpf?.replace(/\D/g, '').length === 11;
@@ -110,39 +110,34 @@ export default function AuthPage() {
       const data = await response.json();
 
       if (response.ok) {
-        login(data.token, data.user || data.usuario || null);
-
+        // Usar loginAsAdmin para login de admin
         if (activeTab === 'admin') {
-          try {
-            const adminTestResponse = await fetch('http://localhost:3001/api/admin/pedidos/ativos', {
-              method: 'GET',
-              headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${data.token}`,
-              },
-            });
-
-            if (adminTestResponse.ok) {
-              router.push('/admin');
-            } else if (adminTestResponse.status === 403) {
-              setErrors({
-                email: 'Usuário não possui privilégios de administrador',
-                senha: 'Usuário não possui privilégios de administrador',
-              });
-              localStorage.removeItem('authToken');
-            } else {
-              throw new Error('Erro ao verificar privilégios de admin');
-            }
-          } catch (adminError) {
-            console.error('Erro ao verificar admin:', adminError);
+          const result = await loginAsAdmin(data.token, data.user || data.usuario || null);
+          
+          if (result.success) {
+            router.push('/admin');
+          } else {
             setErrors({
-              email: 'Erro ao verificar privilégios de administrador',
-              senha: 'Erro ao verificar privilégios de administrador',
+              email: result.error || 'Erro ao verificar privilégios de administrador',
+              senha: result.error || 'Erro ao verificar privilégios de administrador',
             });
-            localStorage.removeItem('authToken');
           }
         } else {
-          router.push('/PaginaProdutos');
+          // Login normal para usuários comuns
+          const result = await login(data.token, data.user || data.usuario || null);
+          
+          if (result.success) {
+            if (activeTab === 'register') {
+              router.push('/PaginaProdutos');
+            } else {
+              router.push('/PaginaProdutos');
+            }
+          } else {
+            setErrors({
+              email: result.error || 'Erro ao fazer login',
+              senha: result.error || 'Erro ao fazer login',
+            });
+          }
         }
       } else {
         if (data.erro) {
