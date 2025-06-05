@@ -8,6 +8,7 @@ export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(false);
   const [isHydrated, setIsHydrated] = useState(false);
 
   // Verificar se está no cliente (hidratação)
@@ -19,48 +20,111 @@ export const AuthProvider = ({ children }) => {
   useEffect(() => {
     if (!isHydrated) return;
 
-    try {
-      const savedToken = localStorage.getItem('authToken');
-      const savedUser = localStorage.getItem('userData');
-      
-      console.log('Carregando dados salvos:', { 
-        hasToken: !!savedToken, 
-        hasUser: !!savedUser 
-      });
+    const loadAuthData = async () => {
+      try {
+        const savedToken = localStorage.getItem('authToken');
+        const savedUser = localStorage.getItem('userData');
+        const savedIsAdmin = localStorage.getItem('isAdmin');
+        
+        console.log('Carregando dados salvos:', { 
+          hasToken: !!savedToken, 
+          hasUser: !!savedUser,
+          savedIsAdmin: savedIsAdmin
+        });
 
-      if (savedToken) {
-        // Verificar se o token não expirou (validação simples do JWT)
-        try {
-          const tokenData = JSON.parse(atob(savedToken.split('.')[1]));
-          const now = Date.now() / 1000;
-          
-          if (tokenData.exp && tokenData.exp > now) {
-            setToken(savedToken);
-            setIsAuthenticated(true);
+        if (savedToken) {
+          // Verificar se o token não expirou (validação simples do JWT)
+          try {
+            const tokenData = JSON.parse(atob(savedToken.split('.')[1]));
+            const now = Date.now() / 1000;
             
-            if (savedUser) {
-              setUser(JSON.parse(savedUser));
+            if (tokenData.exp && tokenData.exp > now) {
+              setToken(savedToken);
+              setIsAuthenticated(true);
+              
+              if (savedUser) {
+                setUser(JSON.parse(savedUser));
+              }
+
+              // Verificar se é admin
+              if (savedIsAdmin === 'true') {
+                setIsAdmin(true);
+              } else {
+                // Verificar privilégios de admin fazendo uma requisição de teste
+                await checkAdminPrivileges(savedToken);
+              }
+              
+              console.log('Token válido carregado');
+            } else {
+              console.log('Token expirado, removendo...');
+              clearAuthData();
             }
-            console.log('Token válido carregado');
-          } else {
-            console.log('Token expirado, removendo...');
-            localStorage.removeItem('authToken');
-            localStorage.removeItem('userData');
+          } catch (err) {
+            console.error('Erro ao verificar token:', err);
+            clearAuthData();
           }
-        } catch (err) {
-          console.error('Erro ao verificar token:', err);
-          localStorage.removeItem('authToken');
-          localStorage.removeItem('userData');
         }
+      } catch (error) {
+        console.error('Erro ao carregar dados de autenticação:', error);
+        clearAuthData();
+      } finally {
+        setLoading(false);
       }
-    } catch (error) {
-      console.error('Erro ao carregar dados de autenticação:', error);
-    } finally {
-      setLoading(false);
-    }
+    };
+
+    loadAuthData();
   }, [isHydrated]);
 
-  const login = (tokenData, userData) => {
+  // Função para limpar dados de autenticação
+  const clearAuthData = () => {
+    if (isHydrated) {
+      localStorage.removeItem('authToken');
+      localStorage.removeItem('userData');
+      localStorage.removeItem('isAdmin');
+    }
+    setToken(null);
+    setUser(null);
+    setIsAuthenticated(false);
+    setIsAdmin(false);
+  };
+
+  // Função para verificar privilégios de admin
+  const checkAdminPrivileges = async (authToken = token) => {
+    if (!authToken) return false;
+
+    try {
+      console.log('Verificando privilégios de admin...');
+      
+      const response = await fetch('http://localhost:3001/api/admin/pedidos/ativos', {
+        method: 'GET',
+        headers: { 
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${authToken}`
+        },
+      });
+
+      const hasAdminPrivileges = response.ok;
+      
+      console.log('Privilégios de admin:', hasAdminPrivileges);
+      
+      setIsAdmin(hasAdminPrivileges);
+      
+      if (isHydrated) {
+        localStorage.setItem('isAdmin', hasAdminPrivileges.toString());
+      }
+      
+      return hasAdminPrivileges;
+    } catch (error) {
+      console.error('Erro ao verificar privilégios de admin:', error);
+      setIsAdmin(false);
+      if (isHydrated) {
+        localStorage.setItem('isAdmin', 'false');
+      }
+      return false;
+    }
+  };
+
+  const login = async (tokenData, userData, skipAdminCheck = false) => {
     try {
       console.log('Fazendo login:', { hasToken: !!tokenData, hasUser: !!userData });
       
@@ -74,10 +138,54 @@ export const AuthProvider = ({ children }) => {
           localStorage.setItem('userData', JSON.stringify(userData));
         }
       }
+
+      // Verificar privilégios de admin após login (a menos que seja explicitamente pulado)
+      if (!skipAdminCheck) {
+        await checkAdminPrivileges(tokenData);
+      }
       
       console.log('Login realizado com sucesso');
+      
+      return { success: true };
     } catch (error) {
       console.error('Erro ao fazer login:', error);
+      return { success: false, error: error.message };
+    }
+  };
+
+  const loginAsAdmin = async (tokenData, userData) => {
+    try {
+      console.log('Fazendo login como admin:', { hasToken: !!tokenData, hasUser: !!userData });
+      
+      setToken(tokenData);
+      setUser(userData);
+      setIsAuthenticated(true);
+      
+      if (isHydrated) {
+        localStorage.setItem('authToken', tokenData);
+        if (userData) {
+          localStorage.setItem('userData', JSON.stringify(userData));
+        }
+      }
+
+      // Verificar privilégios de admin
+      const hasAdminPrivileges = await checkAdminPrivileges(tokenData);
+      
+      if (!hasAdminPrivileges) {
+        // Se não tem privilégios de admin, fazer logout
+        logout();
+        return { 
+          success: false, 
+          error: 'Usuário não possui privilégios de administrador' 
+        };
+      }
+      
+      console.log('Login de admin realizado com sucesso');
+      return { success: true };
+    } catch (error) {
+      console.error('Erro ao fazer login como admin:', error);
+      logout();
+      return { success: false, error: error.message };
     }
   };
 
@@ -85,14 +193,7 @@ export const AuthProvider = ({ children }) => {
     try {
       console.log('Fazendo logout...');
       
-      setToken(null);
-      setUser(null);
-      setIsAuthenticated(false);
-      
-      if (isHydrated) {
-        localStorage.removeItem('authToken');
-        localStorage.removeItem('userData');
-      }
+      clearAuthData();
       
       console.log('Logout realizado com sucesso');
     } catch (error) {
@@ -151,7 +252,31 @@ export const AuthProvider = ({ children }) => {
       throw new Error('Token expirado');
     }
 
+    // Se receber 403 em uma rota admin, atualizar status de admin
+    if (response.status === 403 && url.includes('/admin/')) {
+      console.log('Acesso negado para rota admin, atualizando status...');
+      setIsAdmin(false);
+      if (isHydrated) {
+        localStorage.setItem('isAdmin', 'false');
+      }
+    }
+
     return response;
+  };
+
+  // Função para fazer requisições de admin
+  const adminFetch = async (url, options = {}) => {
+    if (!isAdmin) {
+      throw new Error('Usuário não possui privilégios de administrador');
+    }
+    
+    return authenticatedFetch(url, options);
+  };
+
+  // Função para forçar rechecagem de privilégios de admin
+  const recheckAdminStatus = async () => {
+    if (!token) return false;
+    return await checkAdminPrivileges();
   };
 
   const value = {
@@ -159,10 +284,15 @@ export const AuthProvider = ({ children }) => {
     user,
     loading,
     isAuthenticated,
+    isAdmin,
     login,
+    loginAsAdmin,
     logout,
     checkTokenValidity,
     authenticatedFetch,
+    adminFetch,
+    checkAdminPrivileges,
+    recheckAdminStatus,
     isHydrated,
   };
 

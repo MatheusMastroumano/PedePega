@@ -126,36 +126,37 @@ export default function AuthPage() {
     setShowPassword(false);
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    
-    // Validar campos antes de enviar
-    if (!validarCampos()) {
-      return;
-    }
+const handleSubmit = async (e) => {
+  e.preventDefault();
+  
+  // Validar campos antes de enviar
+  if (!validarCampos()) {
+    return;
+  }
 
-    setLoading(true);
+  setLoading(true);
 
-    let endpoint, body;
-    
-    if (activeTab === 'register') {
-      endpoint = 'auth/register';
-      body = { 
-        name: form.name.trim(),
-        email: form.email.toLowerCase().trim(),
-        cpf: form.cpf.replace(/\D/g, ''),
-        turma: form.turma.trim(),
-        turno: form.turno.trim(),
-        senha: form.senha
-      };
-    } else {
-      // Para login normal e admin, usar o mesmo endpoint
-      endpoint = 'auth/login';
-      body = { 
-        email: form.email.toLowerCase().trim(), 
-        senha: form.senha 
-      };
-    }
+  let endpoint, body;
+  
+  if (activeTab === 'register') {
+    endpoint = 'auth/register';
+    body = { 
+      name: form.name.trim(),
+      email: form.email.toLowerCase().trim(),
+      cpf: form.cpf.replace(/\D/g, ''),
+      turma: form.turma.trim(),
+      turno: form.turno.trim(),
+      senha: form.senha
+    };
+  } else {
+    // Para login normal e admin, usar o mesmo endpoint
+    endpoint = 'auth/login';
+    body = { 
+      email: form.email.toLowerCase().trim(), 
+      senha: form.senha 
+    };
+  }
+
 
     try {
       console.log(`Fazendo requisição para: http://localhost:3001/api/${endpoint}`);
@@ -173,52 +174,36 @@ export default function AuthPage() {
       console.log('Dados recebidos:', data);
 
       if (response.ok) {
-        localStorage.setItem('authToken', data.token);
+        // Decidir qual função de login usar baseado na aba ativa
+        let loginResult;
         
-        // Fazer login no contexto
-        login(data.token, data.user || data.usuario || null);
-        
-        // Se for login de admin, verificar se o usuário tem permissões de admin
         if (activeTab === 'admin') {
-          try {
-            // Testar acesso a rota admin para verificar se o usuário é admin
-            const adminTestResponse = await fetch('http://localhost:3001/api/admin/pedidos/ativos', {
-              method: 'GET',
-              headers: { 
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${data.token}`
-              },
-            });
-
-            if (adminTestResponse.ok) {
-              console.log('Usuário tem privilégios de admin');
-              // Redirecionar para página de admin (você pode criar uma página específica)
-              router.push('/admin'); // ou outra página que você criar para admin
-            } else if (adminTestResponse.status === 403) {
-              // Usuário não é admin
-              setErrors({ 
-                email: 'Usuário não possui privilégios de administrador',
-                senha: 'Usuário não possui privilégios de administrador'
-              });
-              // Fazer logout já que não é admin
-              localStorage.removeItem('authToken');
-              return;
-            } else {
-              throw new Error('Erro ao verificar privilégios de admin');
-            }
-          } catch (adminError) {
-            console.error('Erro ao verificar admin:', adminError);
-            setErrors({ 
-              email: 'Erro ao verificar privilégios de administrador',
-              senha: 'Erro ao verificar privilégios de administrador'
-            });
-            localStorage.removeItem('authToken');
-            return;
+          // Usar loginAsAdmin para verificar privilégios
+          loginResult = await loginAsAdmin(data.token, data.user || data.usuario || null);
+        } else {
+          // Login normal
+          loginResult = await login(data.token, data.user || data.usuario || null);
+        }
+  
+        if (loginResult.success) {
+          // Redirecionar baseado no tipo de login
+          if (activeTab === 'admin') {
+            console.log('Login de admin realizado com sucesso');
+            router.push('/admin'); // ou a página que você criar para admin
+          } else {
+            console.log('Login realizado com sucesso');
+            router.push('/PaginaProdutos');
           }
         } else {
-          // Login normal, redirecionar para produtos
-          console.log('Login realizado com sucesso');
-          router.push('/PaginaProdutos');
+          // Erro no login (ex: não é admin)
+          if (activeTab === 'admin') {
+            setErrors({ 
+              email: loginResult.error || 'Usuário não possui privilégios de administrador',
+              senha: loginResult.error || 'Usuário não possui privilégios de administrador'
+            });
+          } else {
+            setErrors({ email: loginResult.error, senha: loginResult.error });
+          }
         }
       } else {
         // Tratar erros específicos do servidor
