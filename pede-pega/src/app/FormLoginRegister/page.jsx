@@ -2,11 +2,11 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { Mail, Lock, User, UserCheck, Clock, GraduationCap } from 'lucide-react';
+import { Mail, Lock, User, UserCheck, Clock, GraduationCap, Shield, Eye, EyeOff } from 'lucide-react';
 import { useAuth } from '../components/AuthContexto/ContextoAuth.js';
 
 export default function AuthPage() {
-  const [isLogin, setIsLogin] = useState(true);
+  const [activeTab, setActiveTab] = useState('login'); // 'login', 'register', 'admin'
   const [form, setForm] = useState({ 
     name: '', 
     email: '', 
@@ -18,6 +18,7 @@ export default function AuthPage() {
   const [errors, setErrors] = useState({});
   const [passwordStrength, setPasswordStrength] = useState('');
   const [loading, setLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
   const router = useRouter();
   const { login } = useAuth();
 
@@ -47,7 +48,7 @@ export default function AuthPage() {
     const newErrors = {};
 
     // Validações para registro
-    if (!isLogin) {
+    if (activeTab === 'register') {
       // Nome obrigatório
       if (!form.name || !form.name.trim()) {
         newErrors.name = 'Nome é obrigatório';
@@ -71,10 +72,16 @@ export default function AuthPage() {
       }
     }
 
+    // Email obrigatório para todos os tipos
     if (!form.email || !form.email.trim()) {
       newErrors.email = 'Email é obrigatório';
     } else if (!validarEmail(form.email)) {
       newErrors.email = 'Email inválido';
+    }
+
+    // Senha obrigatória para todos os tipos
+    if (!form.senha || !form.senha.trim()) {
+      newErrors.senha = 'Senha é obrigatória';
     }
 
     setErrors(newErrors);
@@ -111,11 +118,12 @@ export default function AuthPage() {
     return 'média';
   };
 
-  const toggleMode = () => {
-    setIsLogin(!isLogin);
+  const switchTab = (tab) => {
+    setActiveTab(tab);
     setForm({ name: '', email: '', cpf: '', turma: '', turno: '', senha: '' });
     setErrors({});
     setPasswordStrength('');
+    setShowPassword(false);
   };
 
   const handleSubmit = async (e) => {
@@ -128,20 +136,26 @@ export default function AuthPage() {
 
     setLoading(true);
 
-    const endpoint = isLogin ? 'auth/login' : 'auth/register';
-    const body = isLogin
-      ? { 
-          email: form.email.toLowerCase().trim(), 
-          senha: form.senha 
-        }
-      : { 
-          name: form.name.trim(),
-          email: form.email.toLowerCase().trim(),
-          cpf: form.cpf.replace(/\D/g, ''), // Remover formatação do CPF
-          turma: form.turma.trim(),
-          turno: form.turno.trim(),
-          senha: form.senha
-        };
+    let endpoint, body;
+    
+    if (activeTab === 'register') {
+      endpoint = 'auth/register';
+      body = { 
+        name: form.name.trim(),
+        email: form.email.toLowerCase().trim(),
+        cpf: form.cpf.replace(/\D/g, ''),
+        turma: form.turma.trim(),
+        turno: form.turno.trim(),
+        senha: form.senha
+      };
+    } else {
+      // Para login normal e admin, usar o mesmo endpoint
+      endpoint = 'auth/login';
+      body = { 
+        email: form.email.toLowerCase().trim(), 
+        senha: form.senha 
+      };
+    }
 
     try {
       console.log(`Fazendo requisição para: http://localhost:3001/api/${endpoint}`);
@@ -160,10 +174,52 @@ export default function AuthPage() {
 
       if (response.ok) {
         localStorage.setItem('authToken', data.token);
+        
+        // Fazer login no contexto
         login(data.token, data.user || data.usuario || null);
         
-        console.log('Login realizado com sucesso');
-        router.push('/PaginaProdutos');
+        // Se for login de admin, verificar se o usuário tem permissões de admin
+        if (activeTab === 'admin') {
+          try {
+            // Testar acesso a rota admin para verificar se o usuário é admin
+            const adminTestResponse = await fetch('http://localhost:3001/api/admin/pedidos/ativos', {
+              method: 'GET',
+              headers: { 
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${data.token}`
+              },
+            });
+
+            if (adminTestResponse.ok) {
+              console.log('Usuário tem privilégios de admin');
+              // Redirecionar para página de admin (você pode criar uma página específica)
+              router.push('/admin'); // ou outra página que você criar para admin
+            } else if (adminTestResponse.status === 403) {
+              // Usuário não é admin
+              setErrors({ 
+                email: 'Usuário não possui privilégios de administrador',
+                senha: 'Usuário não possui privilégios de administrador'
+              });
+              // Fazer logout já que não é admin
+              localStorage.removeItem('authToken');
+              return;
+            } else {
+              throw new Error('Erro ao verificar privilégios de admin');
+            }
+          } catch (adminError) {
+            console.error('Erro ao verificar admin:', adminError);
+            setErrors({ 
+              email: 'Erro ao verificar privilégios de administrador',
+              senha: 'Erro ao verificar privilégios de administrador'
+            });
+            localStorage.removeItem('authToken');
+            return;
+          }
+        } else {
+          // Login normal, redirecionar para produtos
+          console.log('Login realizado com sucesso');
+          router.push('/PaginaProdutos');
+        }
       } else {
         // Tratar erros específicos do servidor
         if (data.erro) {
@@ -172,7 +228,14 @@ export default function AuthPage() {
           } else if (data.erro.includes('CPF já cadastrado')) {
             setErrors({ cpf: 'Este CPF já está cadastrado' });
           } else if (data.erro.includes('Email ou senha incorretos')) {
-            setErrors({ email: 'Email ou senha incorretos', senha: 'Email ou senha incorretos' });
+            if (activeTab === 'admin') {
+              setErrors({ 
+                email: 'Email, senha incorretos ou usuário não é administrador', 
+                senha: 'Email, senha incorretos ou usuário não é administrador' 
+              });
+            } else {
+              setErrors({ email: 'Email ou senha incorretos', senha: 'Email ou senha incorretos' });
+            }
           } else {
             alert(data.erro);
           }
@@ -192,12 +255,60 @@ export default function AuthPage() {
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-100 px-4">
       <div className="bg-white shadow-2xl rounded-2xl p-8 w-full max-w-md text-black transition-all duration-300">
-        <h1 className="text-3xl font-bold mb-6 text-center">
-          {isLogin ? 'Entrar na conta' : 'Criar conta'}
-        </h1>
+        
+        {/* Tabs de navegação */}
+        <div className="flex mb-6 bg-gray-100 rounded-lg p-1">
+          <button
+            onClick={() => switchTab('login')}
+            className={`flex-1 py-2 px-4 rounded-md text-sm font-medium transition-all duration-200 ${
+              activeTab === 'login'
+                ? 'bg-white text-black shadow-sm'
+                : 'text-gray-600 hover:text-black'
+            }`}
+          >
+            Entrar
+          </button>
+          <button
+            onClick={() => switchTab('register')}
+            className={`flex-1 py-2 px-4 rounded-md text-sm font-medium transition-all duration-200 ${
+              activeTab === 'register'
+                ? 'bg-white text-black shadow-sm'
+                : 'text-gray-600 hover:text-black'
+            }`}
+          >
+            Registrar
+          </button>
+          <button
+            onClick={() => switchTab('admin')}
+            className={`flex-1 py-2 px-4 rounded-md text-sm font-medium transition-all duration-200 ${
+              activeTab === 'admin'
+                ? 'bg-white text-black shadow-sm'
+                : 'text-gray-600 hover:text-black'
+            }`}
+          >
+            Admin
+          </button>
+        </div>
+
+        {/* Título dinâmico */}
+        <div className="text-center mb-6">
+          <div className="flex items-center justify-center mb-2">
+            {activeTab === 'admin' && <Shield className="text-red-600 mr-2" size={24} />}
+            <h1 className="text-3xl font-bold">
+              {activeTab === 'login' && 'Entrar na conta'}
+              {activeTab === 'register' && 'Criar conta'}
+              {activeTab === 'admin' && 'Acesso Admin'}
+            </h1>
+          </div>
+          {activeTab === 'admin' && (
+            <p className="text-sm text-red-600 font-medium">
+              Área restrita para administradores
+            </p>
+          )}
+        </div>
 
         <form onSubmit={handleSubmit} className="space-y-4">
-          {!isLogin && (
+          {activeTab === 'register' && (
             <>
               {/* Campo Nome */}
               <div className="relative">
@@ -296,7 +407,9 @@ export default function AuthPage() {
 
           {/* Campo Email */}
           <div className="relative">
-            <label className="block mb-1 font-medium">Email</label>
+            <label className="block mb-1 font-medium">
+              {activeTab === 'admin' ? 'Email do Administrador' : 'Email'}
+            </label>
             <div className={`flex items-center border rounded p-2 ${
               errors.email ? 'border-red-500' : 'border-gray-300'
             }`}>
@@ -307,7 +420,7 @@ export default function AuthPage() {
                 value={form.email}
                 onChange={handleChange}
                 className="w-full outline-none"
-                placeholder="seu@email.com"
+                placeholder={activeTab === 'admin' ? 'admin@exemplo.com' : 'seu@email.com'}
                 disabled={loading}
               />
             </div>
@@ -318,25 +431,35 @@ export default function AuthPage() {
 
           {/* Campo Senha */}
           <div className="relative">
-            <label className="block mb-1 font-medium">Senha</label>
+            <label className="block mb-1 font-medium">
+              {activeTab === 'admin' ? 'Senha do Administrador' : 'Senha'}
+            </label>
             <div className={`flex items-center border rounded p-2 ${
               errors.senha ? 'border-red-500' : 'border-gray-300'
             }`}>
               <Lock size={20} className="text-gray-400 mr-2" />
               <input
-                type="password"
+                type={showPassword ? 'text' : 'password'}
                 name="senha"
                 value={form.senha}
                 onChange={handleChange}
                 className="w-full outline-none"
-                placeholder="Mínimo 6 caracteres"
+                placeholder={activeTab === 'register' ? 'Mínimo 6 caracteres' : 'Sua senha'}
                 disabled={loading}
               />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="text-gray-400 hover:text-gray-600 ml-1"
+                disabled={loading}
+              >
+                {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+              </button>
             </div>
             {errors.senha && (
               <p className="text-red-500 text-sm mt-1">{errors.senha}</p>
             )}
-            {!isLogin && form.senha && (
+            {activeTab === 'register' && form.senha && (
               <p
                 className={`text-sm mt-1 font-medium ${
                   passwordStrength === 'forte'
@@ -358,32 +481,40 @@ export default function AuthPage() {
             className={`w-full font-semibold py-3 rounded transition-all duration-200 ${
               loading
                 ? 'bg-gray-300 cursor-not-allowed text-gray-500'
+                : activeTab === 'admin'
+                ? 'bg-red-600 hover:bg-red-700 text-white hover:shadow-lg'
                 : 'bg-yellow-500 hover:bg-yellow-600 text-black hover:shadow-lg'
             }`}
           >
             {loading ? (
               <div className="flex items-center justify-center">
                 <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-gray-600 mr-2"></div>
-                {isLogin ? 'Entrando...' : 'Registrando...'}
+                {activeTab === 'register' ? 'Registrando...' : 'Entrando...'}
               </div>
             ) : (
               <>
-                {isLogin ? 'Entrar' : 'Registrar'}
+                {activeTab === 'login' && 'Entrar'}
+                {activeTab === 'register' && 'Registrar'}
+                {activeTab === 'admin' && (
+                  <div className="flex items-center justify-center">
+                    <Shield size={20} className="mr-2" />
+                    Acessar Admin
+                  </div>
+                )}
               </>
             )}
           </button>
         </form>
 
-        <p className="text-center mt-6">
-          {isLogin ? 'Não tem uma conta?' : 'Já tem uma conta?'}{' '}
-          <button
-            onClick={toggleMode}
-            disabled={loading}
-            className="text-blue-600 hover:underline font-medium disabled:opacity-50"
-          >
-            {isLogin ? 'Registrar' : 'Entrar'}
-          </button>
-        </p>
+        {/* Aviso adicional para admin */}
+        {activeTab === 'admin' && (
+          <div className="mt-4 p-3 bg-red-50 border border-red-200 rounded-lg">
+            <p className="text-xs text-red-700">
+              <strong>Atenção:</strong> Esta área é restrita apenas para usuários com privilégios de administrador. 
+              Será verificado automaticamente se você possui as permissões necessárias.
+            </p>
+          </div>
+        )}
       </div>
     </div>
   );
