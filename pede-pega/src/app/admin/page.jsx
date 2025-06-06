@@ -25,8 +25,8 @@ export default function AdminPage() {
     const carregarPedidosAtivos = async () => {
         try {
             setLoadingData(true);
-            const response = await authenticatedFetch('http://localhost:3001/api/pedidos/ativos');
-            
+            const response = await authenticatedFetch('http://localhost:3001/api/admin/pedidos/ativos');
+
             if (response.ok) {
                 const data = await response.json();
                 setPedidosAtivos(data.pedidos || data || []);
@@ -43,7 +43,7 @@ export default function AdminPage() {
 
     const alterarStatusPedido = async (pedidoId, novoStatus) => {
         try {
-            const response = await authenticatedFetch(`http://localhost:3001/api/pedidos/${pedidoId}/status`, {
+            const response = await authenticatedFetch(`http://localhost:3001/api/admin/pedidos/${pedidoId}/status`, {
                 method: 'PATCH',
                 headers: {
                     'Content-Type': 'application/json'
@@ -55,11 +55,12 @@ export default function AdminPage() {
                 await carregarPedidosAtivos();
                 alert('Status alterado com sucesso!');
             } else {
-                throw new Error('Erro ao alterar status');
+                const errorData = await response.json();
+                throw new Error(errorData.mensagem || 'Erro ao alterar status');
             }
         } catch (error) {
             console.error('Erro ao alterar status:', error);
-            alert('Erro ao alterar status do pedido');
+            alert(error.message || 'Erro ao alterar status do pedido');
         }
     };
 
@@ -81,7 +82,14 @@ export default function AdminPage() {
     };
 
     const formatarData = (data) => {
-        return new Date(data).toLocaleString('pt-BR');
+        if (!data) return 'Data não disponível';
+        return new Date(data).toLocaleString('pt-BR', {
+            year: 'numeric',
+            month: '2-digit',
+            day: '2-digit',
+            hour: '2-digit',
+            minute: '2-digit'
+        });
     };
 
     const formatarPreco = (preco) => {
@@ -178,7 +186,7 @@ export default function AdminPage() {
                     ) : (
                         <div className="divide-y divide-gray-200">
                             {pedidosAtivos.map((pedido) => (
-                                <div key={pedido.id} className="p-6">
+                                <div key={`pedido-${pedido.id}-${pedido.status}`} className="p-6">
                                     <div className="flex items-center justify-between">
                                         <div className="flex-1">
                                             <div className="flex items-center gap-3 mb-2">
@@ -188,15 +196,16 @@ export default function AdminPage() {
                                                 </span>
                                             </div>
                                             <div className="text-sm text-gray-600 space-y-1">
-                                                <p>Cliente: {pedido.usuario?.name || pedido.nomeUsuario || 'N/A'}</p>
-                                                <p>Data: {formatarData(pedido.createdAt || pedido.data_pedido)}</p>
-                                                <p className="font-semibold text-gray-900">Total: {formatarPreco(pedido.valor_total)}</p>
+                                                <p>Cliente: {pedido.usuario?.name || pedido.nomeUsuario || pedido.nome_usuario || 'N/A'}</p>
+                                                <p>Data: {formatarData(pedido.createdAt || pedido.data_pedido || pedido.created_at)}</p>
+                                                <p className="font-semibold text-gray-900">Total: {formatarPreco(pedido.valor_total || pedido.total)}</p>
                                             </div>
                                         </div>
 
                                         <div className="flex flex-col gap-2">
                                             {pedido.status === 'pendente' && (
                                                 <button
+                                                    key={`btn-preparar-${pedido.id}`}
                                                     onClick={() => alterarStatusPedido(pedido.id, 'preparando')}
                                                     className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm flex items-center gap-2"
                                                 >
@@ -206,6 +215,7 @@ export default function AdminPage() {
                                             )}
                                             {pedido.status === 'preparando' && (
                                                 <button
+                                                    key={`btn-pronto-${pedido.id}`}
                                                     onClick={() => alterarStatusPedido(pedido.id, 'pronto')}
                                                     className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg text-sm flex items-center gap-2"
                                                 >
@@ -215,6 +225,7 @@ export default function AdminPage() {
                                             )}
                                             {pedido.status === 'pronto' && (
                                                 <button
+                                                    key={`btn-finalizar-${pedido.id}`}
                                                     onClick={() => alterarStatusPedido(pedido.id, 'finalizado')}
                                                     className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg text-sm flex items-center gap-2"
                                                 >
@@ -224,6 +235,7 @@ export default function AdminPage() {
                                             )}
                                             {(pedido.status === 'pendente' || pedido.status === 'preparando') && (
                                                 <button
+                                                    key={`btn-cancelar-${pedido.id}`}
                                                     onClick={() => alterarStatusPedido(pedido.id, 'cancelado')}
                                                     className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg text-sm flex items-center gap-2"
                                                 >

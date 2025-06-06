@@ -33,7 +33,13 @@ export default function ClientePedidos() {
       
       if (response.ok) {
         const data = await response.json();
-        setPedidos(data.pedidos || data || []);
+        // Ordenar pedidos por data mais recente primeiro
+        const pedidosOrdenados = (data.pedidos || data || []).sort((a, b) => {
+          const dataA = new Date(a.data_pedido || a.createdAt || a.created_at);
+          const dataB = new Date(b.data_pedido || b.createdAt || b.created_at);
+          return dataB - dataA;
+        });
+        setPedidos(pedidosOrdenados);
       } else {
         const errorData = await response.json();
         setError(errorData.mensagem || 'Erro ao carregar pedidos');
@@ -102,7 +108,14 @@ export default function ClientePedidos() {
   };
 
   const formatDate = (dateString) => {
-    return new Date(dateString).toLocaleString('pt-BR');
+    if (!dateString) return 'Data não disponível';
+    return new Date(dateString).toLocaleString('pt-BR', {
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+      hour: '2-digit',
+      minute: '2-digit'
+    });
   };
 
   const formatPrice = (price) => {
@@ -178,8 +191,8 @@ export default function ClientePedidos() {
               </button>
             </div>
           ) : (
-            pedidos.map((pedido) => (
-              <div key={pedido.id} className="bg-white rounded-lg shadow-sm border p-6">
+            pedidos.map((pedido, index) => (
+              <div key={`pedido-${pedido.id}-${index}-${pedido.status}`} className="bg-white rounded-lg shadow-sm border p-6">
                 <div className="flex items-center justify-between">
                   {/* Informações do Pedido */}
                   <div className="flex-1">
@@ -201,7 +214,7 @@ export default function ClientePedidos() {
                     </div>
                     
                     <div className="text-gray-600 space-y-1">
-                      <p>Data: {formatDate(pedido.data_pedido || pedido.createdAt)}</p>
+                      <p>Data: {formatDate(pedido.data_pedido || pedido.createdAt || pedido.created_at)}</p>
                       <p className="font-semibold text-lg text-gray-800">
                         Total: {formatPrice(pedido.valor_total || pedido.total)}
                       </p>
@@ -211,6 +224,7 @@ export default function ClientePedidos() {
                   {/* Botão de Cancelar */}
                   {pedido.status === 'pendente' && (
                     <button
+                      key={`btn-cancelar-${pedido.id}-${index}`}
                       onClick={() => cancelarPedido(pedido.id)}
                       className="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg flex items-center gap-2"
                     >
