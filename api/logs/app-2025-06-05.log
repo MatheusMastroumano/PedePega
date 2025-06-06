@@ -469,3 +469,55 @@
 [2025-06-05T20:07:51.846Z] GET /api/carrinho 304 - 15ms
 [2025-06-05T20:08:02.814Z] GET /api/admin/pedidos/undefined/itens
 [2025-06-05T20:08:02.821Z] GET /api/admin/pedidos/undefined/itens 500 - 5ms
+[2025-06-05T20:09:08.791Z] GET /api/carrinho
+[2025-06-05T20:09:08.795Z] GET /api/carrinho 304 - 3ms
+[2025-06-05T20:09:08.796Z] GET /api/carrinho
+[2025-06-05T20:09:08.799Z] GET /api/carrinho 304 - 2ms
+[2025-06-05T20:09:12.484Z] GET /api/carrinho
+[2025-06-05T20:09:12.487Z] GET /api/produtos
+[2025-06-05T20:09:12.489Z] GET /api/admin/pedidos/ativos
+[2025-06-05T20:09:12.501Z] GET /api/produtos 304 - 13ms
+[2025-06-05T20:09:12.502Z] GET /api/carrinho 304 - 18ms
+[2025-06-05T20:09:12.505Z] GET /api/carrinho
+[2025-06-05T20:09:12.512Z] GET /api/carrinho 304 - 6ms
+[2025-06-05T20:09:12.514Z] GET /api/admin/pedidos/ativos 304 - 24ms
+[2025-06-05T20:09:20.424Z] GET /api/produtos
+[2025-06-05T20:09:20.434Z] GET /api/produtos 304 - 8ms
+[2025-06-05T20:09:20.436Z] GET /api/produtos
+[2025-06-05T20:09:20.439Z] GET /api/produtos 304 - 3ms
+[2025-06-05T20:09:21.742Z] POST /api/carrinho/itens
+[2025-06-05T20:09:21.760Z] POST /api/carrinho/itens 201 - 18ms
+[2025-06-05T20:09:21.767Z] GET /api/carrinho
+[2025-06-05T20:09:21.773Z] GET /api/carrinho 200 - 5ms
+[2025-06-05T20:09:22.229Z] POST /api/carrinho/itens
+[2025-06-05T20:09:22.236Z] POST /api/carrinho/itens 201 - 6ms
+[2025-06-05T20:09:22.245Z] GET /api/carrinho
+[2025-06-05T20:09:22.253Z] GET /api/carrinho 200 - 8ms
+[2025-06-05T20:09:23.624Z] GET /api/carrinho
+[2025-06-05T20:09:23.633Z] GET /api/carrinho 304 - 7ms
+[2025-06-05T20:09:23.634Z] GET /api/carrinho
+[2025-06-05T20:09:23.640Z] GET /api/carrinho 304 - 5ms
+[2025-06-05T20:09:24.818Z] GET /api/carrinho
+[2025-06-05T20:09:24.823Z] GET /api/carrinho 304 - 5ms
+[2025-06-05T20:09:24.824Z] GET /api/carrinho
+[2025-06-05T20:09:24.828Z] GET /api/carrinho 304 - 4ms
+[2025-06-05T20:09:25.429Z] POST /api/pedidos
+[2025-06-05T20:09:25.458Z] POST /api/pedidos 201 - 27ms
+[2025-06-05T20:09:28.578Z] GET /api/pedidos
+[2025-06-05T20:09:28.594Z] GET /api/pedidos/ativos
+[2025-06-05T20:09:28.599Z] GET /api/pedidos 200 - 18ms
+[2025-06-05T20:09:28.599Z] GET /api/pedidos
+[2025-06-05T20:09:28.602Z] GET /api/pedidos/ativos 200 - 8ms
+[2025-06-05T20:09:28.604Z] GET /api/pedidos 304 - 4ms
+[2025-06-05T20:09:28.605Z] GET /api/pedidos/ativos
+[2025-06-05T20:09:28.610Z] GET /api/pedidos/ativos 304 - 2ms
+[2025-06-05T20:09:40.227Z] GET /api/carrinho
+[2025-06-05T20:09:40.230Z] GET /api/admin/pedidos/ativos
+[2025-06-05T20:09:40.235Z] GET /api/produtos
+[2025-06-05T20:09:40.241Z] GET /api/carrinho 200 - 11ms
+[2025-06-05T20:09:40.237Z] GET /api/produtos 304 - 1ms
+[2025-06-05T20:09:40.242Z] GET /api/carrinho
+[2025-06-05T20:09:40.250Z] GET /api/admin/pedidos/ativos 200 - 19ms
+[2025-06-05T20:09:40.254Z] GET /api/carrinho 304 - 11ms
+[2025-06-05T20:09:55.118Z] GET /api/admin/pedidos/undefined/itens
+[2025-06-05T20:09:55.127Z] GET /api/admin/pedidos/undefined/itens 500 - 8ms
