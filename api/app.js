@@ -13,8 +13,6 @@ const port = 3001;
 
 app.use(cors());
 app.use(express.json());
-
-// Usar o middleware de logging com Chalk
 app.use(logger);
 
 // Rotas existentes
