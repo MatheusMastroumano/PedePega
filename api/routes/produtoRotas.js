@@ -1,6 +1,7 @@
 import express from 'express';
 import { listarProdutosController, obterProdutoPorIdController, criarProdutoController, atualizarProdutoController, deletarProdutoController } from '../controllers/ProdutoController.js';
 import authMiddleware from '../middlewares/authMiddleware.js';
+import adminMiddleware from '../middlewares/authMiddleware.js';
 import multer from 'multer';
 import path from 'path';
 import { fileURLToPath } from 'url';
@@ -86,19 +87,21 @@ router.get('/:id', obterProdutoPorIdController);
 
 // Rotas protegidas com autenticação
 router.post('/', 
-    authMiddleware, 
+    authMiddleware(['admin']),
     upload.single('capa'), 
     handleMulterError,
     criarProdutoController
 );
 
 router.put('/:id', 
-    authMiddleware,
+    authMiddleware(['admin']),
     upload.single('capa'), 
     handleMulterError,
     atualizarProdutoController
 );
 
-router.delete('/:id', authMiddleware, deletarProdutoController);
+router.delete('/:id',
+     authMiddleware(['admin']),
+     deletarProdutoController);
 
 export default router;

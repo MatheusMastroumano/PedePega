@@ -185,7 +185,7 @@ const alterarStatusPedido = async (pedidoId, novoStatus) => {
 
 const obterItensDoPedido = async (pedidoId) => {
   const sql = `
-        SELECT item_pedido.*, produtos.name, produtos.preco, produtos.id_produto
+        SELECT item_pedido.*, produtos.nome, produtos.preco, produtos.id_produto
         FROM item_pedido
         JOIN produtos ON item_pedido.id_produto = produtos.id_produto
         WHERE id_pedido = ?
