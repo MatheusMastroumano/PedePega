@@ -10,10 +10,11 @@ import {
 
 const adminRouter = express.Router();
 
+//Usando os middlewares de autenticação
 adminRouter.use(authMiddleware);
 adminRouter.use(adminMiddleware);
 
-//Rotas administrativas
+//Rotas somente para administradores
 adminRouter.get("/ativos", listarTodosPedidosAtivosController);
 adminRouter.patch("/:id/status", alterarStatusPedidoController);
 adminRouter.get("/:id/itens", obterItensPedidoController);

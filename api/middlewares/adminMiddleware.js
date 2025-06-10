@@ -1,5 +1,6 @@
 import { read } from "../config/database.js";
 
+//verifica se o usuario é admin
 const adminMiddleware = async (req, res, next) => {
   try {
     const usuario = await read("users", `id = ?`, [req.usuarioId]);

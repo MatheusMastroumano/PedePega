@@ -23,15 +23,18 @@ app.use('/api/pedido', pedidoRotas);
 app.use("/api/pedidos", pedidoRotas);
 app.use("/api/admin/pedidos", pedidoAdminRotas);
 
+//Rota principal API
 app.get('/', (req, res) => {
     res.send('<h1>API PedePega</h1>');
 });
 
+//Configuração do CORS
 app.options('/', (req, res) => {
     res.setHeader('Allow', 'GET, OPTIONS');
     res.status(204).send();
 });
 
+//Mensagem padrão para rotas inexistentes
 app.use((req, res) => {
     res.status(404).json({mensagem: 'Rota não encontrada...'});
 });

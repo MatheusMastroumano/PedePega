@@ -47,7 +47,7 @@ const fileFilter = (req, file, cb) => {
     if (allowedMimes.includes(file.mimetype)) {
         cb(null, true);
     } else {
-        cb(new Error('Apenas arquivos de imagem são permitidos (JPEG, PNG, GIF, WebP)'), false);
+        cb(new Error('Apenas arquivos de imagem são permitidos (JPEG, PNG, GIF, WebP, JFIF, AVIF)'), false);
     }
 };
 
@@ -85,7 +85,7 @@ const handleMulterError = (err, req, res, next) => {
 router.get('/', listarProdutosController);
 router.get('/:id', obterProdutoPorIdController);
 
-// Rotas protegidas com autenticação
+// Rotas protegidas com autenticação admin
 router.post('/', 
     authMiddleware(['admin']),
     upload.single('capa'), 
