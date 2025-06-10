@@ -31,7 +31,7 @@ Na **ETEC Manoel Teodoro**, a cantina da escola, administrada por **Dona Alice**
 
 ## 👨‍💻 Desenvolvedores
 
-- **FrontEnd**: Vinicius Cavalcante & Matheus Mastroumano
+- **FrontEnd**: Gustavo Grelhus & Matheus Mastroumano
 - **BackEnd**: Gustavo Grelhus
 - **Banco de Dados**: Gustavo Grelhus
 
