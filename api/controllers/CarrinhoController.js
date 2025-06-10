@@ -8,6 +8,7 @@ import {
   calcularTotalCarrinho 
 } from '../models/Carrinho.js';
 
+//Função para obter carrinho
 const obterCarrinhoController = async (req, res) => {
   try {
       const usuarioId = req.usuarioId;
@@ -24,6 +25,7 @@ const obterCarrinhoController = async (req, res) => {
   }
 };
 
+//função para adicionar item ao carrinho
 const adicionarItemController = async (req, res) => {
   try {
       const usuarioId = req.usuarioId;
@@ -56,6 +58,7 @@ const adicionarItemController = async (req, res) => {
   }
 };
 
+//funcao para atualizar quantidade de algum produto no carrinho
 const atualizarQuantidadeController = async (req, res) => {
   try {
       const usuarioId = req.usuarioId;
@@ -79,6 +82,7 @@ const atualizarQuantidadeController = async (req, res) => {
   }
 };
 
+//funcao para remover item do carrinho
 const removerItemController = async (req, res) => {
   try {
       const usuarioId = req.usuarioId;
@@ -97,6 +101,7 @@ const removerItemController = async (req, res) => {
   }
 };
 
+//funcao para limpar todo carrinho
 const limparCarrinhoController = async (req, res) => {
   try {
       const usuarioId = req.usuarioId;

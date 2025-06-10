@@ -11,10 +11,12 @@ const pool = mysql.createPool({
   queueLimit: 0,
 });
 
+//Conectar ao banco de dados
 async function getConnection() {
   return pool.getConnection();
 }
 
+//Função para ler todos os dados de alguma tabela
 async function readAll(table, where = null, params = []) {
   const connection = await getConnection();
   try {
@@ -33,6 +35,7 @@ async function readAll(table, where = null, params = []) {
   }
 }
 
+//Função para ler dados específicos de alguma tabela
 async function read(table, where = null, params = []) {
   const connection = await getConnection();
   try {
@@ -51,6 +54,7 @@ async function read(table, where = null, params = []) {
   }
 }
 
+//Função para adicionar informações em alguma tabela
 async function create(table, data) {
   const connection = await getConnection();
   try {
@@ -71,6 +75,7 @@ async function create(table, data) {
   }
 }
 
+//Função para atualizar alguma infomação do MySQL
 async function update(table, data, where, params = []) {
   const connection = await getConnection();
   try {
@@ -90,6 +95,7 @@ async function update(table, data, where, params = []) {
   }
 }
 
+//Função para deletar dados de uma tabela
 async function deleteRecord(table, where, params = []) {
   const connection = await getConnection();
   try {

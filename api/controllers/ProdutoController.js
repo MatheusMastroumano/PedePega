@@ -12,6 +12,7 @@ import fs from "fs";
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
+//funcao para listar produtos
 const listarProdutosController = async (req, res) => {
   try {
     const produtos = await listarProdutos();
@@ -22,6 +23,7 @@ const listarProdutosController = async (req, res) => {
   }
 };
 
+//funcao para listar produto especifico pelo id
 const obterProdutoPorIdController = async (req, res) => {
   try {
     const produto = await obterProdutoPorId(req.params.id);
@@ -36,6 +38,7 @@ const obterProdutoPorIdController = async (req, res) => {
   }
 };
 
+//funcao para criar produto (necessario login admin)
 const criarProdutoController = async (req, res) => {
   try {
     const { nome, preco, disponivel, estoque } = req.body;
@@ -78,6 +81,7 @@ const criarProdutoController = async (req, res) => {
   }
 };
 
+//funcao para atualizar produto (necessario login admin)
 const atualizarProdutoController = async (req, res) => {
   try {
     const produtoId = req.params.id;
@@ -152,6 +156,7 @@ const atualizarProdutoController = async (req, res) => {
   }
 };
 
+//funcao para deletar produto (necessario login admin)
 const deletarProdutoController = async (req, res) => {
   try {
     const produtoId = req.params.id;
