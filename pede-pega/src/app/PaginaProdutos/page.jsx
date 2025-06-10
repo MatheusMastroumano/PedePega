@@ -4,6 +4,9 @@ import { useCart } from '../components/Cart/contextoCart';
 import { useAuth } from '../components/AuthContexto/ContextoAuth';
 import { useRouter } from 'next/navigation';
 
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || ''; 
+
+
 export default function ProdutosPage() {
   const [produtos, setProdutos] = useState([]);
   const [loadingProducts, setLoadingProducts] = useState(true);

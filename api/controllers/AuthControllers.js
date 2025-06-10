@@ -167,7 +167,8 @@ const loginController = async (req, res) => {
         name: usuario.name,
         email: usuario.email,
         turma: usuario.turma,
-        turno: usuario.turno
+        turno: usuario.turno,
+        tipo: usuario.tipo
       }
     });
 
