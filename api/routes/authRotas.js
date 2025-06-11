@@ -3,6 +3,7 @@ import { loginController, registerController } from '../controllers/AuthControll
 
 const router = express.Router();
 
+//Rotas de registro e login
 router.post('/register', registerController)
 router.post('/login', loginController);
 

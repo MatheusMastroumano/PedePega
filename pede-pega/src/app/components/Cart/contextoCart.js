@@ -9,9 +9,9 @@ export const CartProvider = ({ children }) => {
   const [loading, setLoading] = useState(false);
   const [total, setTotal] = useState(0);
   const [addingItemId, setAddingItemId] = useState(null);
-  const { token, isAuthenticated, checkTokenValidity } = useAuth();
+  const { token, isAuthenticated, checkTokenValidity, authenticatedFetch } = useAuth();
 
-  // Vai Carregar o carrinho quando fizer login ou logout
+  // Carregar o carrinho quando fizer login ou logout
   useEffect(() => {
     if (isAuthenticated && checkTokenValidity()) {
       fetchCartFromAPI();
@@ -22,34 +22,18 @@ export const CartProvider = ({ children }) => {
     }
   }, [isAuthenticated, token]);
 
+  // Usar a função authenticatedFetch do contexto de auth em vez de criar uma nova
   const makeAuthenticatedRequest = async (url, options = {}) => {
     if (!isAuthenticated || !checkTokenValidity()) {
       throw new Error('Não autenticado ou token inválido');
     }
 
-    const headers = {
-      'Content-Type': 'application/json',
-      'Authorization': `Bearer ${token}`,
-      ...options.headers,
-    };
-
-    const response = await fetch(url, {
-      ...options,
-      headers,
-    });
-
-    if (!response.ok) {
-      let errorMessage = 'Erro na requisição';
-      try {
-        const errorData = await response.json();
-        errorMessage = errorData.mensagem || errorData.message || errorMessage;
-      } catch (e) {
-        console.log('Erro ao parsear resposta de erro:', e);
-      }
-      throw new Error(errorMessage);
+    try {
+      return await authenticatedFetch(url, options);
+    } catch (error) {
+      // Se for erro de token expirado, o AuthContext já fará o logout
+      throw error;
     }
-
-    return response;
   };
 
   const fetchCartFromAPI = async () => {
@@ -64,10 +48,12 @@ export const CartProvider = ({ children }) => {
     try {
       console.log("Buscando carrinho da API...");
       
-      //GET /api/carrinho
-      const response = await makeAuthenticatedRequest("http://localhost:3001/api/carrinho");
+      // GET /api/carrinho - usando a URL correta
+      const response = await makeAuthenticatedRequest("http://localhost:3001/api/carrinho", {
+        method: "GET"
+      });
+      
       const data = await response.json();
-
       console.log("Dados do carrinho recebidos:", data);
       
       let items = [];
@@ -102,7 +88,7 @@ export const CartProvider = ({ children }) => {
           preco: parseFloat(item.preco || item.produto_preco) || 0,
           quantidade: parseInt(item.quantidade) || 1,
           estoque: parseInt(item.estoque || item.produto_estoque) || 0,
-          imagem: item.imagemPath ? `http://localhost:3001/api/${item.imagemPath}` : null,
+          imagem: item.imagemPath ? `http://localhost:3001${item.imagemPath}` : null,
         };
       }).filter(item => item !== null);
 
@@ -123,7 +109,7 @@ export const CartProvider = ({ children }) => {
       setTotal(0);
       
       // Se erro de autenticação, não mostrar alert
-      if (!err.message.includes('autenticado') && !err.message.includes('401')) {
+      if (!err.message.includes('autenticado') && !err.message.includes('401') && !err.message.includes('Token')) {
         alert(err.message || 'Erro ao carregar carrinho');
       }
     } finally {
@@ -160,6 +146,7 @@ export const CartProvider = ({ children }) => {
 
       console.log("Enviando dados para API:", requestBody);
 
+      // POST /api/carrinho/itens - corrigindo a URL da rota
       const response = await makeAuthenticatedRequest("http://localhost:3001/api/carrinho/itens", {
         method: "POST",
         body: JSON.stringify(requestBody),
@@ -168,7 +155,7 @@ export const CartProvider = ({ children }) => {
       const responseData = await response.json();
       console.log("Dados da resposta:", responseData);
 
-      // Vai recarrega o carrinho após adicionar
+      // Recarregar o carrinho após adicionar
       await fetchCartFromAPI();
       
       console.log("Item adicionado ao carrinho com sucesso!");
@@ -183,18 +170,19 @@ export const CartProvider = ({ children }) => {
     }
   };
 
-  // remove o item do carrinho
+  // Remove o item do carrinho
   const removeFromCart = async (itemId) => {
     if (!isAuthenticated || !checkTokenValidity()) return;
 
     console.log("Removendo item do carrinho:", itemId);
     setLoading(true);
     try {
+      // DELETE /api/carrinho/itens/:id
       await makeAuthenticatedRequest(`http://localhost:3001/api/carrinho/itens/${itemId}`, {
         method: "DELETE",
       });
 
-      // recarega o carrinho apos remover algum item
+      // Recarregar o carrinho após remover algum item
       await fetchCartFromAPI();
       
     } catch (err) {
@@ -211,12 +199,13 @@ export const CartProvider = ({ children }) => {
     console.log("Atualizando quantidade:", { itemId, newQuantidade: newQuantity });
     setLoading(true);
     try {
+      // PUT /api/carrinho/itens/:id
       await makeAuthenticatedRequest(`http://localhost:3001/api/carrinho/itens/${itemId}`, {
         method: "PUT",
         body: JSON.stringify({ quantidade: newQuantity }),
       });
 
-      // recarrega o carrinho apos atualizar
+      // Recarregar o carrinho após atualizar
       await fetchCartFromAPI();
 
     } catch (err) {
@@ -227,7 +216,7 @@ export const CartProvider = ({ children }) => {
     }
   };
 
-  // aumentar quantidade
+  // Aumentar quantidade
   const increaseQuantity = async (itemId) => {
     const item = cartItems.find((item) => item.id === itemId);
     if (item && item.quantidade < item.estoque) {
@@ -237,7 +226,7 @@ export const CartProvider = ({ children }) => {
     }
   };
 
-  // diminuir quantidade
+  // Diminuir quantidade
   const decreaseQuantity = async (itemId) => {
     const item = cartItems.find((item) => item.id === itemId);
     if (item && item.quantidade > 1) {
@@ -251,6 +240,7 @@ export const CartProvider = ({ children }) => {
     console.log("Limpando carrinho...");
     setLoading(true);
     try {
+      // DELETE /api/carrinho
       await makeAuthenticatedRequest("http://localhost:3001/api/carrinho", {
         method: "DELETE",
       });
@@ -266,7 +256,6 @@ export const CartProvider = ({ children }) => {
     }
   };
 
-
   const finalizarCompra = async (dadosPagamento = {}) => {
     if (!isAuthenticated || !checkTokenValidity()) {
       throw new Error("Você precisa estar logado para finalizar a compra");
@@ -280,6 +269,7 @@ export const CartProvider = ({ children }) => {
     setLoading(true);
     
     try {
+      // POST /api/pedido
       const response = await makeAuthenticatedRequest("http://localhost:3001/api/pedido", {
         method: "POST",
         body: JSON.stringify(dadosPagamento),
@@ -305,7 +295,10 @@ export const CartProvider = ({ children }) => {
     }
 
     try {
-      const response = await makeAuthenticatedRequest("http://localhost:3001/api/pedido");
+      // GET /api/pedido
+      const response = await makeAuthenticatedRequest("http://localhost:3001/api/pedido", {
+        method: "GET"
+      });
       const pedidos = await response.json();
       
       console.log("Pedidos recebidos:", pedidos);
@@ -323,7 +316,10 @@ export const CartProvider = ({ children }) => {
     }
 
     try {
-      const response = await makeAuthenticatedRequest(`http://localhost:3001/api/pedido/${pedidoId}/itens`);
+      // GET /api/pedido/:id/itens
+      const response = await makeAuthenticatedRequest(`http://localhost:3001/api/pedido/${pedidoId}/itens`, {
+        method: "GET"
+      });
       const itens = await response.json();
       
       console.log("Itens do pedido recebidos:", itens);
@@ -335,17 +331,17 @@ export const CartProvider = ({ children }) => {
     }
   };
 
-  // obter total de itens
+  // Obter total de itens
   const getTotalItems = () => {
     return cartItems.reduce((total, item) => total + (item.quantidade || 0), 0);
   };
 
-  // obter preço total
+  // Obter preço total
   const getTotalPrice = () => {
     return total;
   };
 
-  // verifica se um item específico está sendo adicionado
+  // Verifica se um item específico está sendo adicionado
   const isAddingItem = (productId) => {
     return addingItemId === productId;
   };

@@ -1,5 +1,6 @@
 import { read } from "../config/database.js";
 
+//verifica se o usuario é admin
 const adminMiddleware = async (req, res, next) => {
   try {
     const usuario = await read("users", `id = ?`, [req.usuarioId]);
@@ -8,17 +9,15 @@ const adminMiddleware = async (req, res, next) => {
         return res.status(401).json({mensagem: "Usuário não encontrado"});
     }
 
-    const adminEmails = ['admin@pedepega.com', 'admin@example.com', 'gustavoAdmin@pedepega.com', 'matheus@pedepega.com', 'matheusAdmin@pedepega.com', 'gustavo@gmail.com'];
-
-    if (!adminEmails.includes(usuario.email)) {
-        return res.status(403).json({mensagem: "Acesso negado. Apenas administradores"});
+    if(usuario.tipo !== 'admin') {
+      return res.status(403).json({mensagem: "Acesso negado. Apenas administradores"});
     }
 
     req.usuario = usuario;
     next();
   } catch (err) {
     console.error('Erro no middleware de admin:', err);
-    return res.status(403).json({mensagem: "Erro na verificação de permissões"});
+    return res.status(500).json({mensagem: "Erro na verificação de permissões"});
   }
 };
 

@@ -11,6 +11,8 @@ import {
 
 const router = express.Router();
 
+
+//Todas as rotas relacionadas a pedidos, todas precisam de autenticação
 router.post("/", authMiddleware, criarPedidoController);
 router.get("/", authMiddleware, listarPedidosController);
 router.get("/ativos", authMiddleware, listarPedidosAtivosController);

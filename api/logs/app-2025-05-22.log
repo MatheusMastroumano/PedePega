@@ -1,8 +1,0 @@
-[2025-05-22T20:09:37.922Z] POST /auth/login
-[2025-05-22T20:09:38.018Z] POST /auth/login 200 - 93ms
-[2025-05-22T20:10:49.568Z] GET /carrinho
-[2025-05-22T20:10:49.617Z] GET /carrinho 500 - 46ms
-[2025-05-22T20:13:27.912Z] POST /auth/register
-[2025-05-22T20:13:28.016Z] POST /auth/register 201 - 103ms
-[2025-05-22T20:13:58.357Z] POST /auth/login
-[2025-05-22T20:13:58.417Z] POST /auth/login 200 - 59ms

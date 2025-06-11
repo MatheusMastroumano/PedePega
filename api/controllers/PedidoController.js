@@ -14,6 +14,7 @@ import {
   obterItensDoPedido,
 } from "../models/Pedido.js";
 
+//funcao para criar pedido
 const criarPedidoController = async (req, res) => {
   const usuarioId = req.usuarioId;
   try {
@@ -40,6 +41,7 @@ const criarPedidoController = async (req, res) => {
   }
 };
 
+//funcao para finalizar pedido
 const finalizarPedidoController = async (req, res) => {
   const usuarioId = req.usuarioId;
   const pedidoId = req.params.id;
@@ -59,6 +61,7 @@ const finalizarPedidoController = async (req, res) => {
   }
 };
 
+//funcao para cancelar pedido
 const cancelarPedidoController = async (req, res) => {
   const usuarioId = req.usuarioId;
   const pedidoId = req.params.id;
@@ -72,15 +75,14 @@ const cancelarPedidoController = async (req, res) => {
       res.status(404).json({ mensagem: "Pedido não encontrado" });
     }
     if (err.message === "Apenas pedidos pendentes podem ser cancelados") {
-      return res
-        .status(400)
-        .json({ mensagem: "Apenas pedidos pendentes podem ser cancelados" });
+      return res.status(400).json({ mensagem: "Apenas pedidos pendentes podem ser cancelados" });
     }
 
     return res.status(500).json({ mensagem: "Erro ao cancelar pedido" });
   }
 };
 
+//funcao para listar pedidos do usuario logado
 const listarPedidosController = async (req, res) => {
   const usuarioId = req.usuarioId;
   try {
@@ -92,6 +94,7 @@ const listarPedidosController = async (req, res) => {
   }
 };
 
+//funcao para listar pedidos com status ativo do usuario logado
 const listarPedidosAtivosController = async (req, res) => {
   const usuarioId = req.usuarioId;
   try {
@@ -103,7 +106,7 @@ const listarPedidosAtivosController = async (req, res) => {
   }
 };
 
-//Controller para admin
+//funcao para o admin ver todos pedidos ativos (necessario login admin)
 const listarTodosPedidosAtivosController = async (req, res) => {
   try {
     const pedidos = await listarTodosPedidosAtivos();
@@ -114,7 +117,7 @@ const listarTodosPedidosAtivosController = async (req, res) => {
   }
 };
 
-//Controller para admin
+//funcao para o admin alterar status de algum pedido (necessario login admin)
 const alterarStatusPedidoController = async (req, res) => {
   const pedidoId = req.params.id;
   const { status } = req.body;
@@ -131,6 +134,7 @@ const alterarStatusPedidoController = async (req, res) => {
   }
 };
 
+//funcao para listar os itens pedidos
 const obterItensPedidoController = async (req, res) => {
   const pedidoId = req.params.id;
   try {
