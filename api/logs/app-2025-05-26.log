@@ -1,0 +1,78 @@
+[2025-05-26T16:49:26.609Z] POST /auth/login
+[2025-05-26T16:49:27.007Z] POST /auth/login 200 - 373ms
+[2025-05-26T16:55:40.685Z] GET /produtos
+[2025-05-26T16:55:40.704Z] GET /produtos 200 - 18ms
+[2025-05-26T16:56:47.166Z] GET /carrinho
+[2025-05-26T16:56:47.168Z] GET /carrinho 403 - 2ms
+[2025-05-26T16:57:04.526Z] GET /carrinho
+[2025-05-26T16:57:04.546Z] GET /carrinho 500 - 19ms
+[2025-05-26T17:13:10.183Z] POST /carrinho/items
+[2025-05-26T17:13:10.192Z] POST /carrinho/items 500 - 9ms
+[2025-05-26T17:18:12.452Z] POST /carrinho/items
+[2025-05-26T17:18:12.554Z] POST /carrinho/items 201 - 100ms
+[2025-05-26T17:19:21.901Z] POST /carrinho/items
+[2025-05-26T17:19:21.907Z] POST /carrinho/items 201 - 5ms
+[2025-05-26T17:20:03.981Z] POST /carrinho/items
+[2025-05-26T17:20:03.984Z] POST /carrinho/items 400 - 2ms
+[2025-05-26T17:22:44.005Z] POST /carrinho/items
+[2025-05-26T17:22:44.009Z] POST /carrinho/items 201 - 2ms
+[2025-05-26T17:29:30.066Z] POST /carrinho/items
+[2025-05-26T17:29:30.097Z] POST /carrinho/items 404 - 29ms
+[2025-05-26T17:35:33.388Z] POST /carrinho/items
+[2025-05-26T17:35:33.405Z] POST /carrinho/items 201 - 16ms
+[2025-05-26T17:40:47.827Z] POST /carrinho/items
+[2025-05-26T17:40:47.861Z] POST /carrinho/items 201 - 31ms
+[2025-05-26T17:41:39.234Z] POST /carrinho/items
+[2025-05-26T17:41:39.266Z] POST /carrinho/items 400 - 30ms
+[2025-05-26T17:44:27.763Z] GET /carrinho
+[2025-05-26T17:44:27.766Z] GET /carrinho 401 - 1ms
+[2025-05-26T17:44:50.580Z] GET /carrinho
+[2025-05-26T17:44:50.595Z] GET /carrinho 500 - 15ms
+[2025-05-26T17:53:38.016Z] GET /carrinho
+[2025-05-26T17:53:38.070Z] GET /carrinho 500 - 52ms
+[2025-05-26T18:33:58.796Z] GET /carrinho
+[2025-05-26T18:33:58.854Z] GET /carrinho 500 - 56ms
+[2025-05-26T18:36:59.643Z] GET /carrinho
+[2025-05-26T18:36:59.686Z] GET /carrinho 200 - 41ms
+[2025-05-26T18:38:24.874Z] POST /carrinho/items
+[2025-05-26T18:38:24.883Z] POST /carrinho/items 400 - 7ms
+[2025-05-26T18:38:28.359Z] POST /carrinho/items
+[2025-05-26T18:38:28.378Z] POST /carrinho/items 201 - 17ms
+[2025-05-26T18:41:39.989Z] PUT /carrinho/items/5
+[2025-05-26T18:41:40.028Z] PUT /carrinho/items/5 404 - 37ms
+[2025-05-26T18:44:50.344Z] PUT /carrinho/items/1
+[2025-05-26T18:44:50.404Z] PUT /carrinho/items/1 200 - 58ms
+[2025-05-26T18:45:03.998Z] PUT /carrinho/items/1
+[2025-05-26T18:45:04.010Z] PUT /carrinho/items/1 200 - 12ms
+[2025-05-26T18:48:59.364Z] PUT /carrinho/items/1
+[2025-05-26T18:48:59.399Z] PUT /carrinho/items/1 400 - 34ms
+[2025-05-26T18:49:03.716Z] PUT /carrinho/items/1
+[2025-05-26T18:49:03.720Z] PUT /carrinho/items/1 400 - 3ms
+[2025-05-26T18:50:49.806Z] POST /carrinho/items
+[2025-05-26T18:50:49.811Z] POST /carrinho/items 400 - 5ms
+[2025-05-26T19:09:58.945Z] POST /carrinho/items
+[2025-05-26T19:09:58.984Z] POST /carrinho/items 400 - 38ms
+[2025-05-26T19:10:57.468Z] POST /carrinho/items
+[2025-05-26T19:10:57.502Z] POST /carrinho/items 400 - 32ms
+[2025-05-26T19:13:12.896Z] GET /carrinho
+[2025-05-26T19:13:12.988Z] GET /carrinho 200 - 90ms
+[2025-05-26T19:13:27.719Z] POST /carrinho/items
+[2025-05-26T19:13:27.743Z] POST /carrinho/items 201 - 23ms
+[2025-05-26T19:13:31.772Z] GET /carrinho
+[2025-05-26T19:13:31.780Z] GET /carrinho 200 - 7ms
+[2025-05-26T19:14:30.735Z] PUT /carrinho/items/1
+[2025-05-26T19:14:30.745Z] PUT /carrinho/items/1 200 - 8ms
+[2025-05-26T19:15:37.846Z] POST /carrinho/items
+[2025-05-26T19:15:37.852Z] POST /carrinho/items 400 - 4ms
+[2025-05-26T19:16:02.125Z] POST /carrinho/items
+[2025-05-26T19:16:02.189Z] POST /carrinho/items 201 - 62ms
+[2025-05-26T19:16:09.029Z] POST /carrinho/items
+[2025-05-26T19:16:09.035Z] POST /carrinho/items 400 - 5ms
+[2025-05-26T19:19:49.765Z] DELETE /carrinho/items/1
+[2025-05-26T19:19:49.773Z] DELETE /carrinho/items/1 200 - 6ms
+[2025-05-26T19:21:11.509Z] DELETE /carrinho
+[2025-05-26T19:21:11.523Z] DELETE /carrinho 200 - 13ms
+[2025-05-26T19:22:22.981Z] GET /carrinho
+[2025-05-26T19:22:22.988Z] GET /carrinho 200 - 5ms
+[2025-05-26T19:26:02.314Z] POST /carrinho/items
+[2025-05-26T19:26:02.362Z] POST /carrinho/items 201 - 46ms
