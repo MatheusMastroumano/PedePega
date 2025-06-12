@@ -1,0 +1,370 @@
+[2025-06-12T00:12:10.201Z] GET /api/carrinho
+[2025-06-12T00:12:10.215Z] GET /api/carrinho 304 - 9ms
+[2025-06-12T00:12:10.270Z] GET /api/pedido/horarios-disponiveis?turno=Manh%C3%A3
+[2025-06-12T00:12:10.272Z] GET /api/pedido/horarios-disponiveis?turno=Manh%C3%A3 200 - 1ms
+[2025-06-12T00:30:26.416Z] GET /api/carrinho
+[2025-06-12T00:30:26.658Z] GET /api/carrinho 304 - 237ms
+[2025-06-12T00:30:26.665Z] GET /api/carrinho
+[2025-06-12T00:30:26.686Z] GET /api/carrinho 304 - 16ms
+[2025-06-12T00:30:28.305Z] GET /api/carrinho
+[2025-06-12T00:30:28.338Z] GET /api/carrinho 304 - 31ms
+[2025-06-12T00:30:29.481Z] GET /api/carrinho
+[2025-06-12T00:30:29.489Z] GET /api/carrinho 304 - 7ms
+[2025-06-12T00:30:30.040Z] GET /api/carrinho
+[2025-06-12T00:30:30.061Z] GET /api/carrinho 304 - 21ms
+[2025-06-12T00:30:30.443Z] GET /api/carrinho
+[2025-06-12T00:30:30.458Z] GET /api/carrinho 304 - 11ms
+[2025-06-12T00:30:30.884Z] GET /api/carrinho
+[2025-06-12T00:30:30.899Z] GET /api/carrinho 304 - 14ms
+[2025-06-12T00:30:31.143Z] GET /api/carrinho
+[2025-06-12T00:30:31.210Z] GET /api/carrinho 304 - 53ms
+[2025-06-12T00:30:31.356Z] GET /api/carrinho
+[2025-06-12T00:30:31.367Z] GET /api/carrinho 304 - 9ms
+[2025-06-12T00:30:31.747Z] GET /api/carrinho
+[2025-06-12T00:30:31.759Z] GET /api/carrinho 304 - 9ms
+[2025-06-12T00:30:32.131Z] GET /api/carrinho
+[2025-06-12T00:30:32.141Z] GET /api/carrinho 304 - 8ms
+[2025-06-12T00:30:32.890Z] GET /api/carrinho
+[2025-06-12T00:30:32.903Z] GET /api/carrinho 304 - 13ms
+[2025-06-12T00:33:36.661Z] GET /api/carrinho
+[2025-06-12T00:33:36.672Z] GET /api/carrinho 304 - 10ms
+[2025-06-12T00:33:36.674Z] GET /api/carrinho
+[2025-06-12T00:33:36.681Z] GET /api/carrinho 304 - 5ms
+[2025-06-12T00:33:36.681Z] GET /api/carrinho
+[2025-06-12T00:33:36.691Z] GET /api/carrinho 304 - 9ms
+[2025-06-12T00:33:36.696Z] GET /api/pedido/horarios-disponiveis?turno=Manh%C3%A3
+[2025-06-12T00:33:36.698Z] GET /api/pedido/horarios-disponiveis?turno=Manh%C3%A3 304 - 1ms
+[2025-06-12T00:34:34.395Z] GET /api/carrinho
+[2025-06-12T00:34:34.789Z] GET /api/carrinho 304 - 385ms
+[2025-06-12T00:34:34.789Z] GET /api/carrinho
+[2025-06-12T00:34:34.846Z] GET /api/carrinho 304 - 47ms
+[2025-06-12T00:34:34.856Z] GET /api/carrinho
+[2025-06-12T00:34:34.865Z] GET /api/pedido/horarios-disponiveis?turno=Manh%C3%A3
+[2025-06-12T00:34:34.875Z] GET /api/pedido/horarios-disponiveis?turno=Manh%C3%A3 304 - 1ms
+[2025-06-12T00:34:34.889Z] GET /api/carrinho 304 - 26ms
+[2025-06-12T00:40:20.084Z] GET /api/carrinho
+[2025-06-12T00:40:20.141Z] GET /api/carrinho 304 - 34ms
+[2025-06-12T00:40:20.142Z] GET /api/carrinho
+[2025-06-12T00:40:20.191Z] GET /api/carrinho 304 - 47ms
+[2025-06-12T00:40:20.195Z] GET /api/carrinho
+[2025-06-12T00:40:20.207Z] GET /api/pedido/horarios-disponiveis?turno=Manh%C3%A3
+[2025-06-12T00:40:20.212Z] GET /api/pedido/horarios-disponiveis?turno=Manh%C3%A3 304 - 0ms
+[2025-06-12T00:40:20.236Z] GET /api/carrinho 304 - 36ms
+[2025-06-12T00:50:20.544Z] GET /api/carrinho
+[2025-06-12T00:50:20.599Z] GET /api/carrinho 304 - 44ms
+[2025-06-12T00:50:20.602Z] GET /api/carrinho
+[2025-06-12T00:50:20.667Z] GET /api/carrinho 304 - 51ms
+[2025-06-12T00:50:22.121Z] GET /api/carrinho
+[2025-06-12T00:50:22.551Z] GET /api/carrinho 304 - 427ms
+[2025-06-12T00:50:23.313Z] GET /api/carrinho
+[2025-06-12T00:50:23.341Z] GET /api/carrinho 304 - 27ms
+[2025-06-12T00:50:23.844Z] GET /api/carrinho
+[2025-06-12T00:50:23.856Z] GET /api/carrinho 304 - 12ms
+[2025-06-12T00:50:24.168Z] GET /api/carrinho
+[2025-06-12T00:50:24.174Z] GET /api/carrinho 304 - 5ms
+[2025-06-12T00:50:24.383Z] GET /api/carrinho
+[2025-06-12T00:50:24.390Z] GET /api/carrinho 304 - 6ms
+[2025-06-12T00:50:24.585Z] GET /api/carrinho
+[2025-06-12T00:50:24.850Z] GET /api/carrinho 304 - 265ms
+[2025-06-12T00:50:24.965Z] GET /api/carrinho
+[2025-06-12T00:50:24.973Z] GET /api/carrinho 304 - 7ms
+[2025-06-12T00:50:25.454Z] GET /api/carrinho
+[2025-06-12T00:50:25.461Z] GET /api/carrinho 304 - 5ms
+[2025-06-12T00:50:54.864Z] GET /api/carrinho
+[2025-06-12T00:50:54.871Z] GET /api/carrinho 304 - 6ms
+[2025-06-12T00:50:54.872Z] GET /api/carrinho
+[2025-06-12T00:50:54.881Z] GET /api/carrinho 304 - 7ms
+[2025-06-12T00:53:04.480Z] GET /api/carrinho
+[2025-06-12T00:53:04.537Z] GET /api/carrinho 304 - 32ms
+[2025-06-12T00:53:04.540Z] GET /api/carrinho
+[2025-06-12T00:53:04.574Z] GET /api/carrinho 304 - 20ms
+[2025-06-12T00:53:04.575Z] GET /api/carrinho
+[2025-06-12T00:53:04.590Z] GET /api/carrinho 304 - 11ms
+[2025-06-12T00:54:51.014Z] GET /api/carrinho
+[2025-06-12T00:54:51.078Z] GET /api/carrinho 304 - 44ms
+[2025-06-12T00:54:51.093Z] GET /api/carrinho
+[2025-06-12T00:54:51.137Z] GET /api/carrinho 304 - 37ms
+[2025-06-12T00:54:51.149Z] GET /api/carrinho
+[2025-06-12T00:54:51.193Z] GET /api/carrinho 304 - 38ms
+[2025-06-12T00:54:51.296Z] GET /api/pedido/horarios-disponiveis?turno=Manh%C3%A3
+[2025-06-12T00:54:51.297Z] GET /api/pedido/horarios-disponiveis?turno=Manh%C3%A3 304 - 1ms
+[2025-06-12T00:54:52.142Z] GET /api/carrinho
+[2025-06-12T00:54:52.152Z] GET /api/carrinho 304 - 6ms
+[2025-06-12T00:54:52.153Z] GET /api/carrinho
+[2025-06-12T00:54:52.159Z] GET /api/carrinho 304 - 4ms
+[2025-06-12T00:54:52.159Z] GET /api/carrinho
+[2025-06-12T00:54:52.165Z] GET /api/carrinho 304 - 6ms
+[2025-06-12T00:54:52.186Z] GET /api/pedido/horarios-disponiveis?turno=Manh%C3%A3
+[2025-06-12T00:54:52.188Z] GET /api/pedido/horarios-disponiveis?turno=Manh%C3%A3 304 - 0ms
+[2025-06-12T00:55:08.148Z] GET /api/pedido/horarios-disponiveis?turno=Manh%C3%A3
+[2025-06-12T00:55:08.151Z] GET /api/pedido/horarios-disponiveis?turno=Manh%C3%A3 304 - 1ms
+[2025-06-12T00:55:23.761Z] GET /api/carrinho
+[2025-06-12T00:55:23.790Z] GET /api/carrinho 304 - 11ms
+[2025-06-12T00:55:23.791Z] GET /api/carrinho
+[2025-06-12T00:55:23.898Z] GET /api/carrinho 304 - 107ms
+[2025-06-12T00:55:24.907Z] GET /api/carrinho
+[2025-06-12T00:55:24.937Z] GET /api/carrinho 304 - 29ms
+[2025-06-12T00:55:25.180Z] GET /api/carrinho
+[2025-06-12T00:55:25.190Z] GET /api/carrinho 304 - 8ms
+[2025-06-12T00:55:25.190Z] GET /api/carrinho
+[2025-06-12T00:55:25.196Z] GET /api/carrinho 304 - 5ms
+[2025-06-12T00:55:25.210Z] GET /api/pedido/horarios-disponiveis?turno=Manh%C3%A3
+[2025-06-12T00:55:25.211Z] GET /api/pedido/horarios-disponiveis?turno=Manh%C3%A3 304 - 1ms
+[2025-06-12T00:55:25.213Z] GET /api/pedido/horarios-disponiveis?turno=Manh%C3%A3
+[2025-06-12T00:55:25.214Z] GET /api/pedido/horarios-disponiveis?turno=Manh%C3%A3 304 - 1ms
+[2025-06-12T00:58:55.239Z] GET /api/carrinho
+[2025-06-12T00:58:55.255Z] GET /api/carrinho 304 - 12ms
+[2025-06-12T00:58:55.403Z] GET /api/pedido/horarios-disponiveis?turno=Manh%C3%A3
+[2025-06-12T00:58:55.405Z] GET /api/pedido/horarios-disponiveis?turno=Manh%C3%A3 304 - 1ms
+[2025-06-12T01:02:59.904Z] GET /api/pedido/horarios-disponiveis?turno=Manh%C3%A3
+[2025-06-12T01:02:59.910Z] GET /api/pedido/horarios-disponiveis?turno=Manh%C3%A3 304 - 2ms
+[2025-06-12T01:03:17.111Z] GET /api/pedido/horarios-disponiveis?turno=Tarde
+[2025-06-12T01:03:17.113Z] GET /api/pedido/horarios-disponiveis?turno=Tarde 200 - 2ms
+[2025-06-12T01:03:17.790Z] GET /api/pedido/horarios-disponiveis?turno=Noite
+[2025-06-12T01:03:17.793Z] GET /api/pedido/horarios-disponiveis?turno=Noite 200 - 2ms
+[2025-06-12T01:03:18.476Z] GET /api/pedido/horarios-disponiveis?turno=Tarde
+[2025-06-12T01:03:18.477Z] GET /api/pedido/horarios-disponiveis?turno=Tarde 304 - 1ms
+[2025-06-12T01:03:19.063Z] GET /api/pedido/horarios-disponiveis?turno=Manh%C3%A3
+[2025-06-12T01:03:19.065Z] GET /api/pedido/horarios-disponiveis?turno=Manh%C3%A3 304 - 0ms
+[2025-06-12T01:03:22.135Z] GET /api/pedido/horarios-disponiveis?turno=Tarde
+[2025-06-12T01:03:22.137Z] GET /api/pedido/horarios-disponiveis?turno=Tarde 304 - 0ms
+[2025-06-12T01:03:24.625Z] GET /api/pedido/horarios-disponiveis?turno=Noite
+[2025-06-12T01:03:24.629Z] GET /api/pedido/horarios-disponiveis?turno=Noite 304 - 1ms
+[2025-06-12T01:03:25.961Z] GET /api/pedido/horarios-disponiveis?turno=Tarde
+[2025-06-12T01:03:25.963Z] GET /api/pedido/horarios-disponiveis?turno=Tarde 304 - 0ms
+[2025-06-12T01:03:26.540Z] GET /api/pedido/horarios-disponiveis?turno=Manh%C3%A3
+[2025-06-12T01:03:26.544Z] GET /api/pedido/horarios-disponiveis?turno=Manh%C3%A3 304 - 1ms
+[2025-06-12T01:03:27.245Z] GET /api/pedido/horarios-disponiveis?turno=Tarde
+[2025-06-12T01:03:27.249Z] GET /api/pedido/horarios-disponiveis?turno=Tarde 304 - 0ms
+[2025-06-12T01:12:33.297Z] GET /api/carrinho
+[2025-06-12T01:12:33.332Z] GET /api/carrinho 401 - 23ms
+[2025-06-12T01:12:33.334Z] GET /api/carrinho
+[2025-06-12T01:12:33.339Z] GET /api/carrinho 401 - 3ms
+[2025-06-12T01:12:33.363Z] GET /api/carrinho
+[2025-06-12T01:12:33.372Z] GET /api/carrinho 401 - 7ms
+[2025-06-12T01:12:37.760Z] GET /api/pedido/horarios-disponiveis?turno=Manh%C3%A3
+[2025-06-12T01:12:37.762Z] GET /api/pedido/horarios-disponiveis?turno=Manh%C3%A3 304 - 1ms
+[2025-06-12T01:12:43.862Z] GET /api/produtos
+[2025-06-12T01:12:43.886Z] GET /api/produtos 200 - 20ms
+[2025-06-12T01:12:43.888Z] GET /api/produtos
+[2025-06-12T01:12:43.897Z] GET /api/produtos 304 - 9ms
+[2025-06-12T01:13:43.542Z] GET /api/produtos
+[2025-06-12T01:13:43.614Z] GET /api/produtos 304 - 58ms
+[2025-06-12T01:13:43.624Z] GET /api/carrinho
+[2025-06-12T01:13:43.661Z] GET /api/carrinho 401 - 18ms
+[2025-06-12T01:13:43.662Z] GET /api/carrinho
+[2025-06-12T01:13:43.676Z] GET /api/carrinho 401 - 11ms
+[2025-06-12T01:14:55.459Z] GET /api/produtos
+[2025-06-12T01:14:55.462Z] GET /api/produtos 304 - 1ms
+[2025-06-12T01:14:55.841Z] GET /api/carrinho
+[2025-06-12T01:14:55.845Z] GET /api/carrinho 401 - 2ms
+[2025-06-12T01:14:55.846Z] GET /api/carrinho
+[2025-06-12T01:14:55.850Z] GET /api/carrinho 401 - 4ms
+[2025-06-12T01:15:36.703Z] GET /api/produtos
+[2025-06-12T01:15:36.711Z] GET /api/produtos 304 - 4ms
+[2025-06-12T01:15:36.900Z] GET /api/carrinho
+[2025-06-12T01:15:36.905Z] GET /api/carrinho
+[2025-06-12T01:15:36.905Z] GET /api/carrinho 401 - 3ms
+[2025-06-12T01:15:36.909Z] GET /api/carrinho 401 - 3ms
+[2025-06-12T01:18:25.795Z] POST /api/auth/login
+[2025-06-12T01:18:25.809Z] POST /api/auth/login 401 - 10ms
+[2025-06-12T01:18:30.064Z] POST /api/auth/login
+[2025-06-12T01:18:30.068Z] POST /api/auth/login 401 - 4ms
+[2025-06-12T01:18:31.996Z] POST /api/auth/login
+[2025-06-12T01:18:32.000Z] POST /api/auth/login 401 - 2ms
+[2025-06-12T01:22:24.636Z] POST /api/auth/register
+[2025-06-12T01:22:26.269Z] POST /api/auth/register 201 - 1630ms
+[2025-06-12T01:22:26.298Z] GET /api/admin/pedidos/ativos
+[2025-06-12T01:22:26.312Z] GET /api/admin/pedidos/ativos 403 - 11ms
+[2025-06-12T01:22:26.316Z] GET /api/carrinho
+[2025-06-12T01:22:26.330Z] GET /api/carrinho 200 - 11ms
+[2025-06-12T01:22:26.332Z] GET /api/carrinho
+[2025-06-12T01:22:26.396Z] GET /api/carrinho 304 - 50ms
+[2025-06-12T01:22:26.615Z] GET /api/produtos
+[2025-06-12T01:22:26.617Z] GET /api/produtos 304 - 1ms
+[2025-06-12T01:22:26.618Z] GET /api/produtos
+[2025-06-12T01:22:26.620Z] GET /api/produtos 304 - 2ms
+[2025-06-12T01:22:27.750Z] POST /api/carrinho/itens
+[2025-06-12T01:22:27.771Z] POST /api/carrinho/itens 201 - 21ms
+[2025-06-12T01:22:27.774Z] GET /api/carrinho
+[2025-06-12T01:22:27.783Z] GET /api/carrinho 200 - 6ms
+[2025-06-12T01:22:28.285Z] POST /api/carrinho/itens
+[2025-06-12T01:22:28.307Z] POST /api/carrinho/itens 201 - 20ms
+[2025-06-12T01:22:28.311Z] GET /api/carrinho
+[2025-06-12T01:22:28.319Z] GET /api/carrinho 200 - 6ms
+[2025-06-12T01:22:31.564Z] GET /api/carrinho
+[2025-06-12T01:22:31.913Z] GET /api/carrinho 304 - 348ms
+[2025-06-12T01:22:31.914Z] GET /api/carrinho
+[2025-06-12T01:22:31.921Z] GET /api/carrinho 304 - 7ms
+[2025-06-12T01:22:33.842Z] GET /api/carrinho
+[2025-06-12T01:22:33.850Z] GET /api/carrinho 304 - 7ms
+[2025-06-12T01:22:34.202Z] GET /api/carrinho
+[2025-06-12T01:22:34.209Z] GET /api/carrinho 304 - 5ms
+[2025-06-12T01:22:34.210Z] GET /api/carrinho
+[2025-06-12T01:22:34.224Z] GET /api/carrinho 304 - 13ms
+[2025-06-12T01:22:34.245Z] GET /api/pedido/horarios-disponiveis?turno=Manh%C3%A3
+[2025-06-12T01:22:34.247Z] GET /api/pedido/horarios-disponiveis?turno=Manh%C3%A3 304 - 0ms
+[2025-06-12T01:22:34.248Z] GET /api/pedido/horarios-disponiveis?turno=Manh%C3%A3
+[2025-06-12T01:22:34.249Z] GET /api/pedido/horarios-disponiveis?turno=Manh%C3%A3 304 - 1ms
+[2025-06-12T01:22:36.716Z] GET /api/pedido/horarios-disponiveis?turno=Manh%C3%A3
+[2025-06-12T01:22:36.718Z] GET /api/pedido/horarios-disponiveis?turno=Manh%C3%A3 304 - 1ms
+[2025-06-12T01:22:53.860Z] GET /api/pedido/horarios-disponiveis?turno=Tarde
+[2025-06-12T01:22:53.863Z] GET /api/pedido/horarios-disponiveis?turno=Tarde 304 - 1ms
+[2025-06-12T01:22:54.600Z] GET /api/pedido/horarios-disponiveis?turno=Manh%C3%A3
+[2025-06-12T01:22:54.602Z] GET /api/pedido/horarios-disponiveis?turno=Manh%C3%A3 304 - 0ms
+[2025-06-12T01:26:11.993Z] GET /api/carrinho
+[2025-06-12T01:26:12.034Z] GET /api/carrinho 304 - 32ms
+[2025-06-12T01:26:12.035Z] GET /api/carrinho
+[2025-06-12T01:26:12.074Z] GET /api/carrinho 304 - 33ms
+[2025-06-12T01:26:12.076Z] GET /api/carrinho
+[2025-06-12T01:26:12.109Z] GET /api/pedido/horarios-disponiveis?turno=Manh%C3%A3
+[2025-06-12T01:26:12.120Z] GET /api/pedido/horarios-disponiveis?turno=Manh%C3%A3 304 - 1ms
+[2025-06-12T01:26:12.153Z] GET /api/carrinho 304 - 58ms
+[2025-06-12T01:26:40.188Z] GET /api/pedido/horarios-disponiveis?turno=Manh%C3%A3
+[2025-06-12T01:26:40.189Z] GET /api/pedido/horarios-disponiveis?turno=Manh%C3%A3 304 - 1ms
+[2025-06-12T01:26:47.279Z] GET /api/pedido/horarios-disponiveis?turno=Tarde
+[2025-06-12T01:26:47.281Z] GET /api/pedido/horarios-disponiveis?turno=Tarde 304 - 1ms
+[2025-06-12T01:26:47.742Z] GET /api/pedido/horarios-disponiveis?turno=Noite
+[2025-06-12T01:26:47.744Z] GET /api/pedido/horarios-disponiveis?turno=Noite 304 - 0ms
+[2025-06-12T01:29:28.366Z] GET /api/pedido/horarios-disponiveis?turno=Tarde
+[2025-06-12T01:29:28.369Z] GET /api/pedido/horarios-disponiveis?turno=Tarde 304 - 0ms
+[2025-06-12T01:29:29.123Z] GET /api/pedido/horarios-disponiveis?turno=Manh%C3%A3
+[2025-06-12T01:29:29.124Z] GET /api/pedido/horarios-disponiveis?turno=Manh%C3%A3 304 - 1ms
+[2025-06-12T01:30:36.993Z] GET /api/carrinho
+[2025-06-12T01:30:37.000Z] GET /api/carrinho 304 - 6ms
+[2025-06-12T01:30:37.025Z] GET /api/pedido/horarios-disponiveis?turno=Manh%C3%A3
+[2025-06-12T01:30:37.028Z] GET /api/pedido/horarios-disponiveis?turno=Manh%C3%A3 304 - 1ms
+[2025-06-12T01:32:52.665Z] GET /api/pedido/horarios-disponiveis?turno=Manh%C3%A3
+[2025-06-12T01:32:52.670Z] GET /api/pedido/horarios-disponiveis?turno=Manh%C3%A3 304 - 1ms
+[2025-06-12T01:32:54.367Z] GET /api/pedido/horarios-disponiveis?turno=Tarde
+[2025-06-12T01:32:54.374Z] GET /api/pedido/horarios-disponiveis?turno=Tarde 304 - 1ms
+[2025-06-12T01:32:54.893Z] GET /api/pedido/horarios-disponiveis?turno=Manh%C3%A3
+[2025-06-12T01:32:54.896Z] GET /api/pedido/horarios-disponiveis?turno=Manh%C3%A3 304 - 1ms
+[2025-06-12T01:34:51.335Z] GET /api/pedido/horarios-disponiveis?turno=Tarde
+[2025-06-12T01:34:51.339Z] GET /api/pedido/horarios-disponiveis?turno=Tarde 304 - 2ms
+[2025-06-12T01:34:52.031Z] GET /api/pedido/horarios-disponiveis?turno=Noite
+[2025-06-12T01:34:52.034Z] GET /api/pedido/horarios-disponiveis?turno=Noite 304 - 1ms
+[2025-06-12T01:34:52.979Z] GET /api/pedido/horarios-disponiveis?turno=Manh%C3%A3
+[2025-06-12T01:34:52.983Z] GET /api/pedido/horarios-disponiveis?turno=Manh%C3%A3 304 - 1ms
+[2025-06-12T01:35:11.322Z] GET /api/pedido/horarios-disponiveis?turno=Manh%C3%A3
+[2025-06-12T01:35:11.325Z] GET /api/pedido/horarios-disponiveis?turno=Manh%C3%A3 304 - 1ms
+[2025-06-12T01:35:11.921Z] GET /api/pedido/horarios-disponiveis?turno=Tarde
+[2025-06-12T01:35:11.925Z] GET /api/pedido/horarios-disponiveis?turno=Tarde 304 - 1ms
+[2025-06-12T01:35:12.493Z] GET /api/pedido/horarios-disponiveis?turno=Manh%C3%A3
+[2025-06-12T01:35:12.494Z] GET /api/pedido/horarios-disponiveis?turno=Manh%C3%A3 304 - 1ms
+[2025-06-12T01:37:01.217Z] GET /api/carrinho
+[2025-06-12T01:37:01.286Z] GET /api/carrinho 304 - 22ms
+[2025-06-12T01:37:01.287Z] GET /api/carrinho
+[2025-06-12T01:37:01.415Z] GET /api/carrinho 304 - 83ms
+[2025-06-12T01:37:01.433Z] GET /api/carrinho
+[2025-06-12T01:37:01.519Z] GET /api/carrinho 304 - 65ms
+[2025-06-12T01:37:01.540Z] GET /api/pedido/horarios-disponiveis?turno=Manh%C3%A3
+[2025-06-12T01:37:01.550Z] GET /api/pedido/horarios-disponiveis?turno=Manh%C3%A3 304 - 1ms
+[2025-06-12T01:37:03.197Z] GET /api/pedido/horarios-disponiveis?turno=Manh%C3%A3
+[2025-06-12T01:37:03.199Z] GET /api/pedido/horarios-disponiveis?turno=Manh%C3%A3 304 - 1ms
+[2025-06-12T01:37:15.645Z] GET /api/pedido/horarios-disponiveis?turno=Tarde
+[2025-06-12T01:37:15.648Z] GET /api/pedido/horarios-disponiveis?turno=Tarde 304 - 1ms
+[2025-06-12T01:42:04.069Z] GET /api/carrinho
+[2025-06-12T01:42:04.149Z] GET /api/carrinho 304 - 63ms
+[2025-06-12T01:42:04.161Z] GET /api/carrinho
+[2025-06-12T01:42:04.242Z] GET /api/carrinho 304 - 74ms
+[2025-06-12T01:42:04.248Z] GET /api/carrinho
+[2025-06-12T01:42:04.310Z] GET /api/pedido/horarios-disponiveis?turno=Manh%C3%A3
+[2025-06-12T01:42:04.339Z] GET /api/pedido/horarios-disponiveis?turno=Manh%C3%A3 304 - 0ms
+[2025-06-12T01:42:04.434Z] GET /api/carrinho 304 - 100ms
+[2025-06-12T01:42:06.007Z] GET /api/pedido/horarios-disponiveis?turno=Manh%C3%A3
+[2025-06-12T01:42:06.011Z] GET /api/pedido/horarios-disponiveis?turno=Manh%C3%A3 304 - 1ms
+[2025-06-12T01:45:37.485Z] GET /api/pedido/horarios-disponiveis?turno=Tarde
+[2025-06-12T01:45:37.491Z] GET /api/pedido/horarios-disponiveis?turno=Tarde 304 - 2ms
+[2025-06-12T01:45:38.059Z] GET /api/pedido/horarios-disponiveis?turno=Noite
+[2025-06-12T01:45:38.062Z] GET /api/pedido/horarios-disponiveis?turno=Noite 304 - 1ms
+[2025-06-12T01:45:38.689Z] GET /api/pedido/horarios-disponiveis?turno=Manh%C3%A3
+[2025-06-12T01:45:38.694Z] GET /api/pedido/horarios-disponiveis?turno=Manh%C3%A3 304 - 1ms
+[2025-06-12T01:47:21.603Z] GET /api/pedido/horarios-disponiveis?turno=Tarde
+[2025-06-12T01:47:21.609Z] GET /api/pedido/horarios-disponiveis?turno=Tarde 304 - 1ms
+[2025-06-12T01:47:22.691Z] GET /api/pedido/horarios-disponiveis?turno=Manh%C3%A3
+[2025-06-12T01:47:22.694Z] GET /api/pedido/horarios-disponiveis?turno=Manh%C3%A3 304 - 1ms
+[2025-06-12T01:48:41.781Z] GET /api/carrinho
+[2025-06-12T01:48:41.955Z] GET /api/carrinho 304 - 92ms
+[2025-06-12T01:48:41.956Z] GET /api/carrinho
+[2025-06-12T01:48:42.121Z] GET /api/carrinho 304 - 136ms
+[2025-06-12T01:48:42.155Z] GET /api/carrinho
+[2025-06-12T01:48:42.180Z] GET /api/pedido/horarios-disponiveis?turno=manh%C3%A3
+[2025-06-12T01:48:42.183Z] GET /api/pedido/horarios-disponiveis?turno=manh%C3%A3 200 - 1ms
+[2025-06-12T01:48:42.193Z] GET /api/carrinho 304 - 18ms
+[2025-06-12T01:48:44.682Z] GET /api/pedido/horarios-disponiveis?turno=manh%C3%A3
+[2025-06-12T01:48:44.690Z] GET /api/pedido/horarios-disponiveis?turno=manh%C3%A3 304 - 0ms
+[2025-06-12T01:48:46.527Z] GET /api/pedido/horarios-disponiveis?turno=tarde
+[2025-06-12T01:48:46.529Z] GET /api/pedido/horarios-disponiveis?turno=tarde 200 - 0ms
+[2025-06-12T01:48:48.303Z] GET /api/pedido/horarios-disponiveis?turno=noite
+[2025-06-12T01:48:48.305Z] GET /api/pedido/horarios-disponiveis?turno=noite 200 - 1ms
+[2025-06-12T01:49:20.071Z] GET /api/pedido/horarios-disponiveis?turno=manh%C3%A3
+[2025-06-12T01:49:20.152Z] GET /api/pedido/horarios-disponiveis?turno=manh%C3%A3 404 - 78ms
+[2025-06-12T01:54:14.653Z] GET /api/carrinho
+[2025-06-12T01:54:14.792Z] GET /api/carrinho 304 - 111ms
+[2025-06-12T01:54:14.793Z] GET /api/carrinho
+[2025-06-12T01:54:14.820Z] GET /api/carrinho 304 - 22ms
+[2025-06-12T01:54:14.830Z] GET /api/carrinho
+[2025-06-12T01:54:14.879Z] GET /api/pedido/horarios-disponiveis?turno=manh%C3%A3
+[2025-06-12T01:54:14.910Z] GET /api/pedido/horarios-disponiveis?turno=manh%C3%A3 404 - 2ms
+[2025-06-12T01:54:14.997Z] GET /api/carrinho 304 - 126ms
+[2025-06-12T01:56:36.602Z] GET /api/carrinho
+[2025-06-12T01:56:36.687Z] GET /api/carrinho 304 - 60ms
+[2025-06-12T01:56:36.700Z] GET /api/carrinho
+[2025-06-12T01:56:37.102Z] GET /api/carrinho 304 - 253ms
+[2025-06-12T01:56:37.107Z] GET /api/carrinho
+[2025-06-12T01:56:37.134Z] GET /api/pedido/horarios-disponiveis?turno=manh%C3%A3
+[2025-06-12T01:56:37.138Z] GET /api/pedido/horarios-disponiveis?turno=manh%C3%A3 404 - 1ms
+[2025-06-12T01:56:37.170Z] GET /api/carrinho 304 - 41ms
+[2025-06-12T01:58:38.374Z] GET /api/carrinho
+[2025-06-12T01:58:38.475Z] GET /api/carrinho 304 - 75ms
+[2025-06-12T01:58:38.482Z] GET /api/carrinho
+[2025-06-12T01:58:38.507Z] GET /api/carrinho 304 - 21ms
+[2025-06-12T01:58:38.525Z] GET /api/carrinho
+[2025-06-12T01:58:38.542Z] GET /api/pedido/horarios-disponiveis?turno=manh%C3%A3
+[2025-06-12T01:58:38.550Z] GET /api/pedido/horarios-disponiveis?turno=manh%C3%A3 404 - 1ms
+[2025-06-12T01:58:38.581Z] GET /api/carrinho 304 - 36ms
+[2025-06-12T02:00:08.817Z] GET /api/carrinho
+[2025-06-12T02:00:08.903Z] GET /api/carrinho 304 - 50ms
+[2025-06-12T02:03:51.659Z] POST /api/pedido/criar
+[2025-06-12T02:03:51.661Z] POST /api/pedido/criar 404 - 1ms
+[2025-06-12T02:05:10.691Z] GET /api/carrinho
+[2025-06-12T02:05:10.825Z] GET /api/carrinho 304 - 113ms
+[2025-06-12T02:05:10.826Z] GET /api/carrinho
+[2025-06-12T02:05:10.889Z] GET /api/carrinho 304 - 42ms
+[2025-06-12T02:05:10.912Z] GET /api/carrinho
+[2025-06-12T02:05:10.963Z] GET /api/carrinho 304 - 31ms
+[2025-06-12T02:05:27.761Z] POST /api/pedido
+[2025-06-12T02:05:27.786Z] POST /api/pedido 400 - 22ms
+[2025-06-12T02:05:32.723Z] GET /api/carrinho
+[2025-06-12T02:05:32.742Z] GET /api/carrinho 304 - 16ms
+[2025-06-12T02:05:32.742Z] GET /api/carrinho
+[2025-06-12T02:05:32.757Z] GET /api/carrinho 304 - 13ms
+[2025-06-12T02:05:34.133Z] GET /api/carrinho
+[2025-06-12T02:05:34.246Z] GET /api/carrinho 304 - 100ms
+[2025-06-12T02:05:34.620Z] GET /api/carrinho
+[2025-06-12T02:05:34.630Z] GET /api/carrinho 304 - 9ms
+[2025-06-12T02:05:34.631Z] GET /api/carrinho
+[2025-06-12T02:05:34.642Z] GET /api/carrinho 304 - 6ms
+[2025-06-12T02:05:52.379Z] POST /api/pedido
+[2025-06-12T02:05:52.393Z] POST /api/pedido 400 - 13ms
+[2025-06-12T02:07:46.578Z] GET /api/carrinho
+[2025-06-12T02:07:46.713Z] GET /api/carrinho 304 - 112ms
+[2025-06-12T02:07:46.716Z] GET /api/carrinho
+[2025-06-12T02:07:46.760Z] GET /api/carrinho 304 - 21ms
+[2025-06-12T02:07:46.760Z] GET /api/carrinho
+[2025-06-12T02:07:46.803Z] GET /api/carrinho 304 - 38ms
+[2025-06-12T02:08:11.764Z] POST /api/pedido
+[2025-06-12T02:08:11.770Z] POST /api/pedido 400 - 5ms
+[2025-06-12T02:08:15.342Z] GET /api/carrinho
+[2025-06-12T02:08:15.371Z] GET /api/carrinho 304 - 8ms
+[2025-06-12T02:08:15.372Z] GET /api/carrinho
+[2025-06-12T02:08:15.382Z] GET /api/carrinho 304 - 8ms
+[2025-06-12T02:08:18.664Z] GET /api/carrinho
+[2025-06-12T02:08:18.676Z] GET /api/carrinho 304 - 11ms
+[2025-06-12T02:08:18.972Z] GET /api/carrinho
+[2025-06-12T02:08:18.988Z] GET /api/carrinho 304 - 14ms
+[2025-06-12T02:08:18.988Z] GET /api/carrinho
+[2025-06-12T02:08:18.995Z] GET /api/carrinho 304 - 5ms
+[2025-06-12T02:09:02.252Z] POST /api/pedido
+[2025-06-12T02:09:02.274Z] POST /api/pedido 500 - 18ms

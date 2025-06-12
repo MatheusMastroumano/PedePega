@@ -8,9 +8,7 @@ const adminMiddleware = async (req, res, next) => {
         return res.status(401).json({mensagem: "Usuário não encontrado"});
     }
 
-    const adminEmails = ['admin@pedepega.com', 'admin@example.com', 'gustavoAdmin@pedepega.com', 'matheus@pedepega.com', 'matheusAdmin@pedepega.com', 'gustavo@gmail.com'];
-
-    if (!adminEmails.includes(usuario.email)) {
+    if (usuario.tipo !== 'admin') {
         return res.status(403).json({mensagem: "Acesso negado. Apenas administradores"});
     }
 

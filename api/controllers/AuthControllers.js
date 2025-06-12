@@ -101,14 +101,18 @@ const registerController = async (req, res) => {
       cpf: cpfLimpo,
       turma: turma.trim(),
       turno: turno.trim(),
-      senha: hashedSenha
+      senha: hashedSenha,
+      tipo: 'usuario' // Definindo tipo padrão como 'usuario'
     };
     
     const userId = await create('users', userData);
     
     // Gerar token
     const token = jwt.sign(
-      { id: userId },
+      { 
+        id: userId,
+        tipo: userData.tipo
+      },
       JWT_SECRET,
       { expiresIn: '24h' }
     );
@@ -121,7 +125,8 @@ const registerController = async (req, res) => {
         name: userData.name,
         email: userData.email,
         turma: userData.turma,
-        turno: userData.turno
+        turno: userData.turno,
+        tipo: userData.tipo
       }
     });
     
@@ -135,26 +140,25 @@ const loginController = async (req, res) => {
   try {
     const { email, senha } = req.body;
 
-    // Verificar campos obrigatórios
     if (!email || !senha) {
       return res.status(400).json({ erro: 'Email e senha são obrigatórios' });
     }
 
-    // Buscar usuário
     const usuario = await read('users', `email = ?`, [email.toLowerCase()]);
     if (!usuario) {
       return res.status(401).json({ erro: 'Email ou senha incorretos' });
     }
 
-    // Verificar senha
     const senhaCorreta = await bcrypt.compare(senha, usuario.senha);
     if (!senhaCorreta) {
       return res.status(401).json({ erro: 'Email ou senha incorretos' });
     }
 
-    // Gerar token
     const token = jwt.sign(
-      { id: usuario.id }, 
+      { 
+        id: usuario.id,
+        tipo: usuario.tipo || 'usuario'
+      }, 
       JWT_SECRET, 
       { expiresIn: '24h' }
     );
@@ -167,13 +171,17 @@ const loginController = async (req, res) => {
         name: usuario.name,
         email: usuario.email,
         turma: usuario.turma,
-        turno: usuario.turno
+        turno: usuario.turno,
+        tipo: usuario.tipo || 'usuario'
       }
     });
 
   } catch (err) {
     console.error('Erro ao fazer login:', err);
-    res.status(500).json({ erro: 'Erro interno do servidor' });
+    res.status(500).json({ 
+      erro: 'Erro interno do servidor',
+      detalhes: process.env.NODE_ENV === 'development' ? err.message : undefined
+    });
   }
 };
 

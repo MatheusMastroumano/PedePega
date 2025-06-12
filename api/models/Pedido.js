@@ -1,20 +1,43 @@
-import { getConnection } from "../config/database.js";
+import { getConnection, validarHorarioRetirada } from "../config/database.js";
 
-const criarPedido = async (usuarioId, itens, total) => {
+const criarPedido = async (usuarioId, itens, total, dataRetirada, horarioRetirada, formaPagamento, dadosCartao) => {
+  // Validar horário de retirada
+  const horarioValido = await validarHorarioRetirada(horarioRetirada);
+  if (!horarioValido) {
+    throw new Error('Horário de retirada inválido');
+  }
+
   const connection = await getConnection();
   try {
     await connection.beginTransaction();
 
     const [result] = await connection.execute(
-      "INSERT INTO pedidos (id_usuario, data, horario_pedido, status) VALUES (?, NOW(), CURTIME(), 'Pendente')",
-      [usuarioId]
+      `INSERT INTO pedidos (
+        id_usuario, 
+        data, 
+        horario_pedido, 
+        status, 
+        total,
+        data_retirada,
+        horario_retirada,
+        forma_pagamento,
+        dados_cartao
+      ) VALUES (?, NOW(), CURTIME(), 'Pendente', ?, ?, ?, ?, ?)`,
+      [
+        usuarioId, 
+        total, 
+        dataRetirada, 
+        horarioRetirada,
+        formaPagamento,
+        dadosCartao ? JSON.stringify(dadosCartao) : null
+      ]
     );
     const pedidoId = result.insertId;
 
     for (const item of itens) {
       await connection.execute(
         `INSERT INTO item_pedido (id_pedido, id_produto, quantidade, preco_unitario) 
-                 VALUES (?, ?, ?, ?)`,
+         VALUES (?, ?, ?, ?)`,
         [pedidoId, item.id_produto, item.quantidade, item.preco]
       );
     }
@@ -43,12 +66,12 @@ const finalizarPedido = async (pedidoId, usuarioId) => {
       throw new Error("Pedido não encontrado");
     }
 
-    if (pedidoExistente[0].status === "Finalizado") {
-      throw new Error("Pedido já foi finalizado");
+    if (pedidoExistente[0].status === "Entregue") {
+      throw new Error("Pedido já foi entregue");
     }
 
     await connection.execute(
-      "UPDATE pedidos SET status = 'Finalizado', data_finalizacao = NOW() WHERE id_pedido = ?",
+      "UPDATE pedidos SET status = 'Entregue', data_finalizacao = NOW() WHERE id_pedido = ?",
       [pedidoId]
     );
 
@@ -92,26 +115,18 @@ const cancelarPedido = async (pedidoId, usuarioId) => {
   }
 };
 
-const listarPedidosPorUsuario = async (
-  usuarioId,
-  incluirFinalizados = true
-) => {
-  let sql = `
-        SELECT * FROM pedidos
-        WHERE id_usuario = ?
-    `;
-
-  //Opção para filtrar pedidos finalizados
-  if (!incluirFinalizados) {
-    sql += "AND status != 'Finalizado'";
-  }
-
-  sql += "ORDER BY data DESC";
-
+const listarPedidosPorUsuario = async (usuarioId) => {
   const connection = await getConnection();
   try {
-    const [rows] = await connection.execute(sql, [usuarioId]);
-    return rows;
+    const [pedidos] = await connection.execute(
+      `SELECT p.*, u.name as nome_usuario, u.turma, u.turno
+       FROM pedidos p 
+       JOIN users u ON p.id_usuario = u.id 
+       WHERE p.id_usuario = ? 
+       ORDER BY p.data DESC`,
+      [usuarioId]
+    );
+    return pedidos;
   } finally {
     connection.release();
   }
@@ -119,9 +134,11 @@ const listarPedidosPorUsuario = async (
 
 const listarPedidosAtivos = async (usuarioId) => {
   const sql = `
-    SELECT *FROM pedidos
-    WHERE id_usuario = ? AND status IN ('Pendente', 'Em_Preparo', 'Pronto')
-    ORDER BY data DESC
+    SELECT p.*, u.name as nome_usuario, u.turma, u.turno
+    FROM pedidos p
+    JOIN users u ON p.id_usuario = u.id
+    WHERE p.id_usuario = ? AND p.status IN ('Pendente', 'Em Preparo', 'Pronto')
+    ORDER BY p.data DESC, p.horario_retirada ASC
     `;
 
   const connection = await getConnection();
@@ -133,51 +150,45 @@ const listarPedidosAtivos = async (usuarioId) => {
   }
 };
 
-//Função para admin
 const listarTodosPedidosAtivos = async () => {
-  const sql = `
-SELECT p.*, u.name AS name_usuario, u.email
-FROM pedidos p
-JOIN users u ON p.id_usuario = u.id
-WHERE p.status IN ('Pendente', 'Em_Preparo', 'Pronto')
-ORDER BY p.data DESC;
-    `;
   const connection = await getConnection();
-
   try {
-    const [rows] = await connection.execute(sql);
-    return rows;
+    const [pedidos] = await connection.execute(
+      `SELECT p.*, u.name as nome_usuario, u.turma, u.turno
+       FROM pedidos p 
+       JOIN users u ON p.id_usuario = u.id 
+       WHERE p.status IN ('Pendente', 'Em Preparo', 'Pronto')
+       ORDER BY p.data DESC, p.horario_retirada ASC`
+    );
+    return pedidos;
   } finally {
-    connection.release;
+    connection.release();
   }
 };
 
-//Função para admin
-const alterarStatusPedido = async (pedidoId, novoStatus) => {
+const alterarStatusPedido = async (pedidoId, status) => {
+  const statusValidos = ['Pendente', 'Em Preparo', 'Pronto', 'Entregue', 'Cancelado'];
+  if (!statusValidos.includes(status)) {
+    throw new Error('Status inválido');
+  }
+
   const connection = await getConnection();
-
   try {
-    const statusValidos = [
-      "Pendente",
-      "Em_Preparo",
-      "Pronto",
-      "Finalizado",
-      "Cancelado",
-    ];
-
-    if (!statusValidos.includes(novoStatus)) {
-      throw new Error("Status inválido");
-    }
-
-    await connection.execute(
-      "UPDATE pedidos SET status = ? WHERE id_pedido = ?",
-      [novoStatus, pedidoId]
+    const [result] = await connection.execute(
+      `UPDATE pedidos 
+       SET status = ?, 
+           data_finalizacao = CASE 
+             WHEN ? = 'Entregue' THEN NOW() 
+             ELSE data_finalizacao 
+           END,
+           data_cancelamento = CASE 
+             WHEN ? = 'Cancelado' THEN NOW() 
+             ELSE data_cancelamento 
+           END
+       WHERE id_pedido = ?`,
+      [status, status, status, pedidoId]
     );
-
-    return true;
-  } catch (err) {
-    console.error("Erro ao alterar status do pedido", err);
-    throw err;
+    return result.affectedRows > 0;
   } finally {
     connection.release();
   }
@@ -185,11 +196,11 @@ const alterarStatusPedido = async (pedidoId, novoStatus) => {
 
 const obterItensDoPedido = async (pedidoId) => {
   const sql = `
-        SELECT item_pedido.*, produtos.name, produtos.preco, produtos.id_produto
-        FROM item_pedido
-        JOIN produtos ON item_pedido.id_produto = produtos.id_produto
-        WHERE id_pedido = ?
-    `;
+    SELECT item_pedido.*, produtos.nome, produtos.preco, produtos.id_produto
+    FROM item_pedido
+    JOIN produtos ON item_pedido.id_produto = produtos.id_produto
+    WHERE id_pedido = ?
+  `;
   const connection = await getConnection();
   try {
     const [rows] = await connection.execute(sql, [pedidoId]);

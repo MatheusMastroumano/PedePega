@@ -60,7 +60,7 @@ export default function ProdutosPage() {
     };
 
     fetchProdutos();
-  }, ['http://localhost:3001/produtos']);
+  }, []);
 
   const handleAddToCart = async (produto) => {
     try {

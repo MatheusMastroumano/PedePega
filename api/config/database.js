@@ -1,6 +1,56 @@
 import mysql from "mysql2/promise";
 import bcrypt from "bcrypt";
 
+// Função para gerar horários disponíveis
+const gerarHorariosDisponiveis = () => {
+  const horarios = [];
+  // Intervalos de 15 minutos entre 7:00 e 12:35
+  for (let hora = 7; hora <= 12; hora++) {
+    for (let minuto = 0; minuto < 60; minuto += 15) {
+      // Pular horários após 12:35
+      if (hora === 12 && minuto > 35) continue;
+      
+      const horario = `${hora.toString().padStart(2, '0')}:${minuto.toString().padStart(2, '0')}`;
+      horarios.push(horario);
+    }
+  }
+  return horarios;
+};
+
+// Função para validar horário de retirada
+const validarHorarioRetirada = async (horario) => {
+  const connection = await getConnection();
+  try {
+    // Converter o horário para o formato HH:mm:ss
+    const [hora, minuto] = horario.split(':');
+    const horarioFormatado = `${hora.padStart(2, '0')}:${minuto.padStart(2, '0')}:00`;
+
+    // Verificar se o horário existe na tabela horarios
+    const [rows] = await connection.execute(
+      "SELECT COUNT(*) as total FROM horarios WHERE horario = ?",
+      [horarioFormatado]
+    );
+
+    if (rows[0].total === 0) {
+      return false;
+    }
+
+    // Verificar se o horário está disponível (não excedeu o limite de pedidos)
+    const [pedidos] = await connection.execute(
+      "SELECT COUNT(*) as total FROM pedidos WHERE horario_retirada = ? AND status != 'Cancelado'",
+      [horarioFormatado]
+    );
+
+    const limiteAlunos = 5; // Limite de alunos por horário
+    return pedidos[0].total < limiteAlunos;
+  } catch (err) {
+    console.error("Erro ao validar horário:", err);
+    throw err;
+  } finally {
+    connection.release();
+  }
+};
+
 const pool = mysql.createPool({
   host: "localhost",
   user: "root",
@@ -11,8 +61,25 @@ const pool = mysql.createPool({
   queueLimit: 0,
 });
 
+// Testar conexão inicial
+pool.getConnection()
+  .then(connection => {
+    console.log('Conexão com o banco de dados estabelecida com sucesso');
+    connection.release();
+  })
+  .catch(err => {
+    console.error('Erro ao conectar com o banco de dados:', err);
+    process.exit(1);
+  });
+
 async function getConnection() {
-  return pool.getConnection();
+  try {
+    const connection = await pool.getConnection();
+    return connection;
+  } catch (err) {
+    console.error('Erro ao obter conexão do pool:', err);
+    throw new Error('Erro ao conectar com o banco de dados');
+  }
 }
 
 async function readAll(table, where = null, params = []) {
@@ -27,7 +94,7 @@ async function readAll(table, where = null, params = []) {
     return rows;
   } catch (err) {
     console.error("Erro ao ler registros:", err);
-    throw err;
+    throw new Error(`Erro ao ler registros da tabela ${table}: ${err.message}`);
   } finally {
     connection.release();
   }
@@ -45,7 +112,7 @@ async function read(table, where = null, params = []) {
     return rows[0] || null;
   } catch (err) {
     console.error("Erro ao ler registro:", err);
-    throw err;
+    throw new Error(`Erro ao ler registro da tabela ${table}: ${err.message}`);
   } finally {
     connection.release();
   }
@@ -56,16 +123,14 @@ async function create(table, data) {
   try {
     const columns = Object.keys(data).join(", ");
     const placeholders = Array(Object.keys(data).length).fill("?").join(", ");
-    const sql = `INSERT INTO ${mysql.escapeId(
-      table
-    )} (${columns}) VALUES (${placeholders})`;
+    const sql = `INSERT INTO ${mysql.escapeId(table)} (${columns}) VALUES (${placeholders})`;
     const values = Object.values(data);
     console.log("Query:", sql, "Params:", values);
     const [result] = await connection.execute(sql, values);
     return result.insertId;
   } catch (err) {
-    console.error("Erro ao inserir registros:", err);
-    throw err;
+    console.error("Erro ao inserir registro:", err);
+    throw new Error(`Erro ao inserir registro na tabela ${table}: ${err.message}`);
   } finally {
     connection.release();
   }
@@ -83,8 +148,8 @@ async function update(table, data, where, params = []) {
     const [result] = await connection.execute(sql, values);
     return result.affectedRows;
   } catch (err) {
-    console.error("Erro ao atualizar registros:", err);
-    throw err;
+    console.error("Erro ao atualizar registro:", err);
+    throw new Error(`Erro ao atualizar registro na tabela ${table}: ${err.message}`);
   } finally {
     connection.release();
   }
@@ -98,8 +163,8 @@ async function deleteRecord(table, where, params = []) {
     const [result] = await connection.execute(sql, params);
     return result.affectedRows;
   } catch (err) {
-    console.error("Erro ao excluir registros:", err);
-    throw err;
+    console.error("Erro ao excluir registro:", err);
+    throw new Error(`Erro ao excluir registro da tabela ${table}: ${err.message}`);
   } finally {
     connection.release();
   }
@@ -114,4 +179,14 @@ async function compare(senha, hash) {
   }
 }
 
-export { readAll, read, create, update, deleteRecord, compare, getConnection };
+export { 
+  readAll, 
+  read, 
+  create, 
+  update, 
+  deleteRecord, 
+  compare, 
+  getConnection,
+  validarHorarioRetirada,
+  gerarHorariosDisponiveis 
+};

@@ -26,19 +26,13 @@ export default function Navbar() {
       if (navRef.current) {
         const height = navRef.current.offsetHeight;
         setNavHeight(height);
-        
-        // Adicionar padding-top ao body para compensar a navbar fixa
         document.body.style.paddingTop = `${height}px`;
       }
     };
 
-    // Medir inicialmente
     updateNavHeight();
-    
-    // Remeasurar quando a janela for redimensionada
     window.addEventListener('resize', updateNavHeight);
     
-    // Cleanup - remover padding quando componente for desmontado
     return () => {
       window.removeEventListener('resize', updateNavHeight);
       document.body.style.paddingTop = '';
@@ -86,8 +80,8 @@ export default function Navbar() {
 
   // Navegar com fechamento de menu
   const handleNavigation = (path) => {
-    router.push(path);
     setIsOpen(false);
+    router.push(path);
   };
 
   const handleLogout = () => {
@@ -100,8 +94,7 @@ export default function Navbar() {
     <>
       <nav
         ref={navRef}
-        className={`fixed top-0 left-0 right-0 z-50 bg-white shadow-md transition-transform duration-200 ${showNavbar ? 'translate-y-0' : '-translate-y-full'
-          }`}
+        className={`fixed top-0 left-0 right-0 z-50 bg-white shadow-md transition-transform duration-200 ${showNavbar ? 'translate-y-0' : '-translate-y-full'}`}
       >
         <div className="flex items-center justify-between px-4 py-3 relative">
           {/* Logo à esquerda */}
@@ -122,7 +115,7 @@ export default function Navbar() {
           {/* Carrinho e menu */}
           <div className="flex items-center gap-4">
             <button
-              onClick={() => router.push('../../carrinho')}
+              onClick={() => router.push('/carrinho')}
               className="flex items-center gap-2 text-black font-semibold hover:text-yellow-600 transition-colors relative"
             >
               <div className="relative">
@@ -160,8 +153,7 @@ export default function Navbar() {
 
         {/* Painel lateral deslizante */}
         <div
-          className={`fixed top-0 right-0 h-full w-64 bg-white shadow-lg transform transition-transform duration-300 ease-in-out menu-panel z-50 ${isOpen ? 'translate-x-0' : 'translate-x-full'
-            }`}
+          className={`fixed top-0 right-0 h-full w-64 bg-white shadow-lg transform transition-transform duration-300 ease-in-out menu-panel z-50 ${isOpen ? 'translate-x-0' : 'translate-x-full'}`}
         >
           <div className="flex justify-end p-4">
             <button onClick={() => setIsOpen(false)} aria-label="Fechar menu">
@@ -215,14 +207,14 @@ export default function Navbar() {
             </li>
             <li
               className="text-lg text-black cursor-pointer hover:text-yellow-600 transition-colors"
-              onClick={() => handleNavigation('../../PaginaProdutos')}
+              onClick={() => handleNavigation('/PaginaProdutos')}
             >
               Produtos
             </li>
             {token && (
               <li
                 className="text-lg text-black cursor-pointer hover:text-yellow-600 transition-colors"
-                onClick={() => handleNavigation('../../carrinho')}
+                onClick={() => handleNavigation('/carrinho')}
               >
                 Carrinho
               </li>

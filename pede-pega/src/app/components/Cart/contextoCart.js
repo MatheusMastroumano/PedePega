@@ -14,11 +14,15 @@ export const CartProvider = ({ children }) => {
   // Vai Carregar o carrinho quando fizer login ou logout
   useEffect(() => {
     if (isAuthenticated && checkTokenValidity()) {
-      fetchCartFromAPI();
+      setLoading(true);
+      fetchCartFromAPI().finally(() => {
+        setLoading(false);
+      });
     } else {
       // Se não tem token válido limpa o carrinho atual
       setCartItems([]);
       setTotal(0);
+      setLoading(false);
     }
   }, [isAuthenticated, token]);
 
@@ -27,29 +31,43 @@ export const CartProvider = ({ children }) => {
       throw new Error('Não autenticado ou token inválido');
     }
 
-    const headers = {
-      'Content-Type': 'application/json',
-      'Authorization': `Bearer ${token}`,
-      ...options.headers,
-    };
+    try {
+      const headers = {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`,
+        ...options.headers,
+      };
 
-    const response = await fetch(url, {
-      ...options,
-      headers,
-    });
+      console.log('Fazendo requisição para:', url);
+      console.log('Headers:', headers);
+      console.log('Options:', options);
 
-    if (!response.ok) {
-      let errorMessage = 'Erro na requisição';
-      try {
-        const errorData = await response.json();
-        errorMessage = errorData.mensagem || errorData.message || errorMessage;
-      } catch (e) {
-        console.log('Erro ao parsear resposta de erro:', e);
+      const response = await fetch(url, {
+        ...options,
+        headers,
+      });
+
+      console.log('Resposta recebida:', response.status, response.statusText);
+
+      if (!response.ok) {
+        let errorMessage = 'Erro na requisição';
+        try {
+          const errorData = await response.json();
+          errorMessage = errorData.erro || errorData.mensagem || errorData.message || errorMessage;
+        } catch (e) {
+          console.log('Erro ao parsear resposta de erro:', e);
+        }
+        throw new Error(errorMessage);
       }
-      throw new Error(errorMessage);
-    }
 
-    return response;
+      return response;
+    } catch (error) {
+      console.error('Erro na requisição:', error);
+      if (error.message === 'Failed to fetch') {
+        throw new Error('Erro de conexão com o servidor. Verifique se o servidor está rodando.');
+      }
+      throw error;
+    }
   };
 
   const fetchCartFromAPI = async () => {
@@ -128,6 +146,15 @@ export const CartProvider = ({ children }) => {
       }
     } finally {
       setLoading(false);
+    }
+  };
+
+  // Função para recarregar o carrinho
+  const recarregarCarrinho = async () => {
+    try {
+      await fetchCartFromAPI();
+    } catch (error) {
+      console.error('Erro ao recarregar carrinho:', error);
     }
   };
 
@@ -365,6 +392,7 @@ export const CartProvider = ({ children }) => {
         getTotalItems,
         getTotalPrice,
         fetchCartFromAPI,
+        recarregarCarrinho,
         finalizarCompra,
         isAddingItem,
         obterItensPedido,

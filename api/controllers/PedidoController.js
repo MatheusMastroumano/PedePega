@@ -1,154 +1,158 @@
-import {
-  obterCarrinho,
-  calcularTotalCarrinho,
-  limparCarrinho,
-} from "../models/Carrinho.js";
-import {
-  criarPedido,
-  finalizarPedido,
-  cancelarPedido,
-  listarPedidosPorUsuario,
-  listarPedidosAtivos,
-  listarTodosPedidosAtivos,
-  alterarStatusPedido,
-  obterItensDoPedido,
-} from "../models/Pedido.js";
+import { create, readAll, read, update, remove } from "../models/Pedido.js";
+import { obterCarrinho, limparCarrinho } from "../models/Carrinho.js";
 
-const criarPedidoController = async (req, res) => {
-  const usuarioId = req.usuarioId;
+// Função para criar um novo pedido
+export const criarPedido = async (req, res) => {
   try {
-    const carrinho = await obterCarrinho(usuarioId);
-    if (!carrinho || carrinho.length === 0) {
-      return res.status(400).json({ mensagem: "Carrinho vazio" });
+    const usuarioId = req.usuarioId;
+    const { dataRetirada, horarioRetirada, formaPagamento, dadosCartao } = req.body;
+
+    console.log('Dados recebidos:', {
+      usuarioId,
+      dataRetirada,
+      horarioRetirada,
+      formaPagamento,
+      dadosCartao
+    });
+
+    // Validações básicas
+    if (!dataRetirada || !horarioRetirada || !formaPagamento) {
+      return res.status(400).json({ erro: "Data, horário e forma de pagamento são obrigatórios" });
     }
 
-    const total = await calcularTotalCarrinho(usuarioId);
+    // Validar formato da data (YYYY-MM-DD)
+    const dataRegex = /^\d{4}-\d{2}-\d{2}$/;
+    if (!dataRegex.test(dataRetirada)) {
+      return res.status(400).json({
+        erro: "Formato de data inválido. Use YYYY-MM-DD"
+      });
+    }
 
-    const itens = carrinho.map((item) => ({
-      id_produto: item.id_produto,
-      quantidade: item.quantidade,
-      preco: item.preco,
-    }));
+    // Validar formato do horário (HH:mm)
+    const horarioRegex = /^([01]?[0-9]|2[0-3]):[0-5][0-9]$/;
+    if (!horarioRegex.test(horarioRetirada)) {
+      return res.status(400).json({
+        erro: "Formato de horário inválido. Use HH:mm"
+      });
+    }
 
-    const pedidoId = await criarPedido(usuarioId, itens, total);
+    // Validar se a data é futura
+    const dataRetiradaObj = new Date(dataRetirada);
+    const hoje = new Date();
+    hoje.setHours(0, 0, 0, 0);
+    if (dataRetiradaObj < hoje) {
+      return res.status(400).json({
+        erro: "A data de retirada deve ser futura"
+      });
+    }
+
+    // Obter itens do carrinho
+    const carrinho = await obterCarrinho(usuarioId);
+    console.log('Carrinho:', carrinho);
+
+    if (!carrinho || carrinho.length === 0) {
+      return res.status(400).json({ erro: "Carrinho vazio" });
+    }
+
+    // Calcular total
+    const total = carrinho.reduce((acc, item) => acc + (item.preco * item.quantidade), 0);
+    console.log('Total calculado:', total);
+
+    // Validar dados do cartão se necessário
+    if ((formaPagamento === 'debito' || formaPagamento === 'credito') && !dadosCartao) {
+      return res.status(400).json({
+        erro: "Dados do cartão são obrigatórios para pagamento com cartão"
+      });
+    }
+
+    // Criar o pedido
+    const pedido = await create({
+      usuarioId,
+      itens: carrinho,
+      total,
+      dataRetirada,
+      horarioRetirada,
+      formaPagamento,
+      dadosCartao,
+      status: 'pendente',
+      statusPagamento: 'pendente'
+    });
+
+    console.log('Pedido criado:', pedido);
+
+    // Limpar carrinho após criar pedido
     await limparCarrinho(usuarioId);
 
-    res.status(201).json({ mensagem: "Pedido criado com sucesso", pedidoId });
+    res.status(201).json({
+      mensagem: "Pedido criado com sucesso",
+      pedido
+    });
   } catch (err) {
     console.error("Erro ao criar pedido:", err);
-    res.status(500).json({ mensagem: "Erro ao criar pedido" });
+    res.status(500).json({ 
+      erro: "Erro ao criar pedido",
+      detalhes: err.message 
+    });
   }
 };
 
-const finalizarPedidoController = async (req, res) => {
-  const usuarioId = req.usuarioId;
-  const pedidoId = req.params.id;
-
+// Função para obter todos os pedidos
+export const obterPedidos = async (req, res) => {
   try {
-    await finalizarPedido(pedidoId, usuarioId);
-    res.json({ mensagem: "Pedido finalizado com sucesso" });
-  } catch (err) {
-    console.error("Erro ao finalizar pedido", err);
-    if (err.message === "Pedido não encontrado") {
-      return res.status(404).json({ mensagem: "Pedido não encontrado" });
-    }
-    if (err.message === "Pedido já foi finalizado") {
-      return res.status(400).json({ mensagem: "Pedido já foi finalizado" });
-    }
-    return res.status(500).json({ mensagem: "Erro ao finalizar pedido" });
-  }
-};
-
-const cancelarPedidoController = async (req, res) => {
-  const usuarioId = req.usuarioId;
-  const pedidoId = req.params.id;
-
-  try {
-    await cancelarPedido(usuarioId, pedidoId);
-    res.json({ mensagem: "Pedido cancelado com sucesso" });
-  } catch (err) {
-    console.error("Erro ao cancelar pedido", err);
-    if (err.message === "Pedido não encontrado") {
-      res.status(404).json({ mensagem: "Pedido não encontrado" });
-    }
-    if (err.message === "Apenas pedidos pendentes podem ser cancelados") {
-      return res
-        .status(400)
-        .json({ mensagem: "Apenas pedidos pendentes podem ser cancelados" });
-    }
-
-    return res.status(500).json({ mensagem: "Erro ao cancelar pedido" });
-  }
-};
-
-const listarPedidosController = async (req, res) => {
-  const usuarioId = req.usuarioId;
-  try {
-    const pedidos = await listarPedidosPorUsuario(usuarioId);
+    const usuarioId = req.usuarioId;
+    const pedidos = await readAll(usuarioId);
     res.json(pedidos);
   } catch (err) {
-    console.error("Erro ao listar pedidos:", err);
-    res.status(500).json({ mensagem: "Erro ao listar pedidos" });
+    console.error("Erro ao obter pedidos:", err);
+    res.status(500).json({ erro: "Erro ao obter pedidos" });
   }
 };
 
-const listarPedidosAtivosController = async (req, res) => {
-  const usuarioId = req.usuarioId;
+// Função para obter um pedido específico
+export const obterPedido = async (req, res) => {
   try {
-    const pedidos = await listarPedidosAtivos(usuarioId);
-    res.json(pedidos);
-  } catch (err) {
-    console.error("Erro ao listar pedidos ativos", err);
-    res.status(500).json({ mensagem: "Erro ao listar pedidos ativos" });
-  }
-};
-
-//Controller para admin
-const listarTodosPedidosAtivosController = async (req, res) => {
-  try {
-    const pedidos = await listarTodosPedidosAtivos();
-    res.json(pedidos);
-  } catch (err) {
-    console.error("Erro ao listar todos os pedidos ativos", err);
-    res.status(500).json({ mensagem: "Erro ao listar pedidos ativos" });
-  }
-};
-
-//Controller para admin
-const alterarStatusPedidoController = async (req, res) => {
-  const pedidoId = req.params.id;
-  const { status } = req.body;
-
-  try {
-    await alterarStatusPedido(pedidoId, status);
-    res.json({ mensagem: "Status do pedido alterado com sucesso" });
-  } catch (err) {
-    console.error("Erro ao alterar status do pedido", err);
-    if (err.message === "Status inválido") {
-      return res.status(400).json({ mensagem: "Status inválido" });
+    const usuarioId = req.usuarioId;
+    const pedido = await read(req.params.id, usuarioId);
+    if (!pedido) {
+      return res.status(404).json({ erro: "Pedido não encontrado" });
     }
-    res.status(500).json({ mensagem: "Erro ao alterar status do pedido" });
-  }
-};
-
-const obterItensPedidoController = async (req, res) => {
-  const pedidoId = req.params.id;
-  try {
-    const itens = await obterItensDoPedido(pedidoId);
-    res.json(itens);
+    res.json(pedido);
   } catch (err) {
-    console.error("Erro ao obter itens do pedido:", err);
-    res.status(500).json({ mensagem: "Erro ao obter itens do pedido" });
+    console.error("Erro ao obter pedido:", err);
+    res.status(500).json({ erro: "Erro ao obter pedido" });
   }
 };
 
-export {
-  criarPedidoController,
-  finalizarPedidoController,
-  cancelarPedidoController,
-  listarPedidosController,
-  listarPedidosAtivosController,
-  listarTodosPedidosAtivosController,
-  alterarStatusPedidoController,
-  obterItensPedidoController,
+// Função para atualizar um pedido
+export const atualizarPedido = async (req, res) => {
+  try {
+    const usuarioId = req.usuarioId;
+    const { id } = req.params;
+    const { status, statusPagamento } = req.body;
+
+    const pedido = await update(id, usuarioId, { status, statusPagamento });
+    if (!pedido) {
+      return res.status(404).json({ erro: "Pedido não encontrado" });
+    }
+
+    res.json(pedido);
+  } catch (err) {
+    console.error("Erro ao atualizar pedido:", err);
+    res.status(500).json({ erro: "Erro ao atualizar pedido" });
+  }
+};
+
+// Função para remover um pedido
+export const removerPedido = async (req, res) => {
+  try {
+    const usuarioId = req.usuarioId;
+    const pedido = await remove(req.params.id, usuarioId);
+    if (!pedido) {
+      return res.status(404).json({ erro: "Pedido não encontrado" });
+    }
+    res.json({ mensagem: "Pedido removido com sucesso" });
+  } catch (err) {
+    console.error("Erro ao remover pedido:", err);
+    res.status(500).json({ erro: "Erro ao remover pedido" });
+  }
 };

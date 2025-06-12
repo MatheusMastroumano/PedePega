@@ -9,15 +9,14 @@ import pedidoRotas from './routes/pedidoRotas.js';
 import pedidoAdminRotas from './routes/pedidoAdminRotas.js';
 
 const app = express();
-const port = 3001;
+const port = process.env.PORT || 3001;
 
+// Middlewares
 app.use(cors());
 app.use(express.json());
-
-// Usar o middleware de logging com Chalk
 app.use(logger);
 
-// Rotas existentes
+// Rotas
 app.use('/api/produtos', produtoRotas);
 app.use('/api/auth', authRotas);
 app.use('/api/carrinho', carrinhoRotas);
@@ -34,14 +33,60 @@ app.options('/', (req, res) => {
     res.status(204).send();
 });
 
+// Middleware para rotas não encontradas
 app.use((req, res) => {
-    res.status(404).json({mensagem: 'Rota não encontrada...'});
+    res.status(404).json({
+        erro: 'Rota não encontrada',
+        path: req.path,
+        method: req.method
+    });
 });
 
-// Capturar erros não tratados
+// Middleware de tratamento de erros
 app.use((err, req, res, next) => {
     console.error(chalk.bgRed.white(' ERRO '), chalk.red(err.message));
-    res.status(500).json({ mensagem: 'Erro interno do servidor' });
+    console.error(chalk.red('Stack:'), err.stack);
+
+    // Erros de validação
+    if (err.name === 'ValidationError') {
+        return res.status(400).json({
+            erro: 'Erro de validação',
+            detalhes: err.message
+        });
+    }
+
+    // Erros de banco de dados
+    if (err.code === 'ER_DUP_ENTRY') {
+        return res.status(409).json({
+            erro: 'Registro duplicado',
+            detalhes: err.message
+        });
+    }
+
+    // Erros de autenticação
+    if (err.name === 'JsonWebTokenError' || err.name === 'TokenExpiredError') {
+        return res.status(401).json({
+            erro: 'Erro de autenticação',
+            detalhes: err.message
+        });
+    }
+
+    // Erro interno do servidor
+    res.status(500).json({
+        erro: 'Erro interno do servidor',
+        detalhes: process.env.NODE_ENV === 'development' ? err.message : undefined
+    });
+});
+
+// Tratamento de erros não capturados
+process.on('uncaughtException', (err) => {
+    console.error(chalk.bgRed.white(' ERRO NÃO CAPTURADO '), err);
+    process.exit(1);
+});
+
+process.on('unhandledRejection', (err) => {
+    console.error(chalk.bgRed.white(' PROMESSA REJEITADA '), err);
+    process.exit(1);
 });
 
 app.listen(port, () => {

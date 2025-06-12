@@ -117,7 +117,7 @@ export default function AdminPage() {
                 <div className="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center">
                     <div className="flex items-center">
                         <Shield className="text-red-600 mr-3" size={28} />
-                        <h1 className="text-2xl font-bold text-gray-900">Painel Admin</h1>
+                        <h1 className="text-2xl font-bold text-black">Painel Admin</h1>
                     </div>
                     <button
                         onClick={logout}
@@ -141,8 +141,8 @@ export default function AdminPage() {
                         <div className="flex items-center">
                             <ShoppingCart className="text-blue-600 mr-3" size={24} />
                             <div>
-                                <p className="text-sm text-gray-600">Pedidos Ativos</p>
-                                <p className="text-2xl font-bold">{pedidosAtivos.length}</p>
+                                <p className="text-sm text-black">Pedidos Ativos</p>
+                                <p className="text-2xl font-bold text-black">{pedidosAtivos.length}</p>
                             </div>
                         </div>
                     </div>
@@ -151,8 +151,8 @@ export default function AdminPage() {
                         <div className="flex items-center">
                             <Clock className="text-orange-600 mr-3" size={24} />
                             <div>
-                                <p className="text-sm text-gray-600">Pendentes</p>
-                                <p className="text-2xl font-bold">
+                                <p className="text-sm text-black">Pendentes</p>
+                                <p className="text-2xl font-bold text-black">
                                     {pedidosAtivos.filter(p => p.status === 'pendente').length}
                                 </p>
                             </div>
@@ -163,8 +163,8 @@ export default function AdminPage() {
                         <div className="flex items-center">
                             <DollarSign className="text-green-600 mr-3" size={24} />
                             <div>
-                                <p className="text-sm text-gray-600">Total Ativo</p>
-                                <p className="text-2xl font-bold">
+                                <p className="text-sm text-black">Total Ativo</p>
+                                <p className="text-2xl font-bold text-black">
                                     {formatarPreco(pedidosAtivos.reduce((total, p) => total + (p.valor_total || 0), 0))}
                                 </p>
                             </div>
@@ -175,13 +175,13 @@ export default function AdminPage() {
                 {/* Lista de Pedidos */}
                 <div className="bg-white rounded-lg shadow">
                     <div className="px-6 py-4 border-b">
-                        <h2 className="text-xl font-semibold">Pedidos Ativos</h2>
+                        <h2 className="text-xl font-semibold text-black">Pedidos Ativos</h2>
                     </div>
 
                     {pedidosAtivos.length === 0 ? (
                         <div className="text-center py-12">
                             <ShoppingCart className="mx-auto h-12 w-12 text-gray-400 mb-4" />
-                            <p className="text-gray-500">Nenhum pedido ativo</p>
+                            <p className="text-black">Nenhum pedido ativo</p>
                         </div>
                     ) : (
                         <div className="divide-y divide-gray-200">
@@ -190,15 +190,15 @@ export default function AdminPage() {
                                     <div className="flex items-center justify-between">
                                         <div className="flex-1">
                                             <div className="flex items-center gap-3 mb-2">
-                                                <span className="font-semibold text-lg">Pedido #{pedido.id}</span>
+                                                <span className="font-semibold text-lg text-black">Pedido #{pedido.id}</span>
                                                 <span className={`px-3 py-1 text-xs font-semibold rounded-full ${getStatusColor(pedido.status)}`}>
                                                     {pedido.status}
                                                 </span>
                                             </div>
-                                            <div className="text-sm text-gray-600 space-y-1">
-                                                <p>Cliente: {pedido.usuario?.name || pedido.nomeUsuario || pedido.nome_usuario || 'N/A'}</p>
-                                                <p>Data: {formatarData(pedido.createdAt || pedido.data_pedido || pedido.created_at)}</p>
-                                                <p className="font-semibold text-gray-900">Total: {formatarPreco(pedido.valor_total || pedido.total)}</p>
+                                            <div className="text-sm space-y-1">
+                                                <p className="text-black">Cliente: {pedido.usuario?.name || pedido.nomeUsuario || pedido.nome_usuario || 'N/A'}</p>
+                                                <p className="text-black">Data: {formatarData(pedido.createdAt || pedido.data_pedido || pedido.created_at)}</p>
+                                                <p className="font-semibold text-black">Total: {formatarPreco(pedido.valor_total || pedido.total)}</p>
                                             </div>
                                         </div>
 

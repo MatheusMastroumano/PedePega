@@ -3,140 +3,311 @@ import React, { useState, useEffect } from "react";
 import { useCart } from "../components/Cart/contextoCart.js";
 import { useAuth } from "../components/AuthContexto/ContextoAuth.js";
 import { useRouter } from 'next/navigation';
-import { ShoppingBag, AlertTriangle, CheckCircle, CreditCard, User, MapPin } from 'lucide-react';
+import { ShoppingBag, AlertTriangle, CheckCircle, CreditCard, User, MapPin, Clock } from 'lucide-react';
+import { maskPhone, maskCardNumber, maskCardExpiry, maskCVV, removeMask } from "@/utils/masks";
+
+const styles = {
+  container: {
+    maxWidth: "1200px",
+    margin: "0 auto",
+    padding: "20px",
+  },
+  title: {
+    fontSize: "24px",
+    fontWeight: "bold",
+    marginBottom: "20px",
+    color: "#333",
+  },
+  section: {
+    backgroundColor: "white",
+    borderRadius: "8px",
+    padding: "20px",
+    marginBottom: "20px",
+    boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
+  },
+  sectionTitle: {
+    fontSize: "18px",
+    fontWeight: "bold",
+    marginBottom: "15px",
+    color: "#333",
+  },
+  cartItem: {
+    display: "flex",
+    alignItems: "center",
+    padding: "10px 0",
+    borderBottom: "1px solid #eee",
+  },
+  itemImage: {
+    width: "60px",
+    height: "60px",
+    objectFit: "cover",
+    borderRadius: "4px",
+    marginRight: "15px",
+  },
+  itemDetails: {
+    flex: 1,
+  },
+  itemName: {
+    fontWeight: "bold",
+    color: "#333",
+  },
+  itemPrice: {
+    color: "#666",
+  },
+  total: {
+    display: "flex",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginTop: "20px",
+    paddingTop: "20px",
+    borderTop: "2px solid #eee",
+  },
+  totalText: {
+    fontSize: "18px",
+    fontWeight: "bold",
+    color: "#333",
+  },
+  totalValue: {
+    fontSize: "24px",
+    fontWeight: "bold",
+    color: "#2ecc71",
+  },
+  button: {
+    backgroundColor: "#2ecc71",
+    color: "white",
+    padding: "12px 24px",
+    border: "none",
+    borderRadius: "4px",
+    cursor: "pointer",
+    fontSize: "16px",
+    fontWeight: "bold",
+    width: "100%",
+    marginTop: "20px",
+  },
+  buttonDisabled: {
+    backgroundColor: "#ccc",
+    cursor: "not-allowed",
+  },
+  error: {
+    color: "#e74c3c",
+    marginTop: "10px",
+    textAlign: "center",
+  },
+  loading: {
+    textAlign: "center",
+    padding: "20px",
+    color: "#666",
+  },
+  horarioItem: {
+    padding: "12px",
+    border: "1px solid #ddd",
+    borderRadius: "4px",
+    marginBottom: "8px",
+    cursor: "pointer",
+    transition: "all 0.2s ease",
+    backgroundColor: "white",
+  },
+  horarioItemHover: {
+    borderColor: "#2ecc71",
+    backgroundColor: "#f8f9fa",
+  },
+  horarioItemSelecionado: {
+    borderColor: "#2ecc71",
+    backgroundColor: "#e8f8f0",
+  },
+  horarioItemIndisponivel: {
+    opacity: 0.6,
+    cursor: "not-allowed",
+    backgroundColor: "#f8f9fa",
+  },
+  horarioInfo: {
+    display: "flex",
+    justifyContent: "space-between",
+    alignItems: "center",
+  },
+  horarioTexto: {
+    fontWeight: "500",
+    color: "#333",
+  },
+  disponibilidade: {
+    fontSize: "0.9em",
+    color: "#666",
+  },
+};
 
 export default function Checkout() {
-  const {
-    cartItems,
-    loading: cartLoading,
-    total,
-    fetchCartFromAPI,
-    getTotalItems,
-  } = useCart();
-  
-  const { token } = useAuth();
   const router = useRouter();
-  
-  const [loading, setLoading] = useState(false);
+  const { token, user } = useAuth();
+  const { cartItems, total, fetchCartFromAPI } = useCart();
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [success, setSuccess] = useState(false);
+  const [formData, setFormData] = useState({
+    nome: "",
+    telefone: "",
+    dataEntrega: "",
+    turno: "",
+    horario: "",
+    formaPagamento: "dinheiro",
+    numeroCartao: "",
+    nomeCartao: "",
+    validadeCartao: "",
+    cvvCartao: "",
+  });
+
+  const API_URL = 'http://localhost:3001/api';
 
   // Recarrega o carrinho quando a página é acessada
   useEffect(() => {
-    if (token) {
-      fetchCartFromAPI();
-    }
+    const initializePage = async () => {
+      try {
+        if (token) {
+          await fetchCartFromAPI();
+        }
+      } catch (error) {
+        console.error('Erro ao inicializar página:', error);
+        setError('Erro ao carregar dados do pedido');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    initializePage();
   }, [token]);
 
-  // Verifica se há problemas de estoque
-  const itemsComProblemaEstoque = cartItems.filter(item => 
-    !item.estoque || item.estoque < item.quantidade
-  );
+  useEffect(() => {
+    if (user) {
+      setFormData(prev => ({
+        ...prev,
+        nome: user.nome || '',
+        telefone: user.telefone || '',
+      }));
+    }
+  }, [user]);
+
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    let formattedValue = value;
+
+    // Aplicar máscaras específicas para cada campo
+    switch (name) {
+      case 'telefone':
+        formattedValue = maskPhone(value);
+        break;
+      case 'numeroCartao':
+        formattedValue = maskCardNumber(value);
+        break;
+      case 'validadeCartao':
+        formattedValue = maskCardExpiry(value);
+        break;
+      case 'cvvCartao':
+        formattedValue = maskCVV(value);
+        break;
+      default:
+        formattedValue = value;
+    }
+
+    setFormData(prev => ({
+      ...prev,
+      [name]: formattedValue
+    }));
+  };
+
+  const validarCartao = () => {
+    if (formData.formaPagamento === '') return false;
+    if (formData.formaPagamento === 'dinheiro') return true;
+    
+    return formData.numeroCartao && formData.nomeCartao && formData.validadeCartao && formData.cvvCartao;
+  };
 
   const finalizarPedido = async () => {
-    if (cartItems.length === 0) {
-      setError('Seu carrinho está vazio!');
-      return;
-    }
-
-    if (itemsComProblemaEstoque.length > 0) {
-      setError('Alguns itens não possuem estoque suficiente. Ajuste as quantidades no carrinho.');
-      return;
-    }
-
-    setLoading(true);
-    setError(null);
-
     try {
-      const response = await fetch('http://localhost:3001/api/pedidos', {
+      setLoading(true);
+      setError(null);
+
+      if (!formData.dataEntrega) {
+        throw new Error('Por favor, selecione uma data de entrega');
+      }
+
+      if (!formData.horario) {
+        throw new Error('Por favor, selecione um horário de retirada');
+      }
+
+      if (!formData.formaPagamento) {
+        throw new Error('Por favor, selecione uma forma de pagamento');
+      }
+
+      if ((formData.formaPagamento === 'debito' || formData.formaPagamento === 'credito') && !validarCartao()) {
+        throw new Error('Por favor, preencha corretamente os dados do cartão');
+      }
+
+      // Formatar o horário para HH:mm
+      const horarioFormatado = formData.horario.split(':').slice(0, 2).join(':');
+
+      const response = await fetch(`${API_URL}/pedido`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}`
-        }
+        },
+        body: JSON.stringify({
+          dataRetirada: formData.dataEntrega,
+          horarioRetirada: horarioFormatado,
+          formaPagamento: formData.formaPagamento,
+          dadosCartao: formData.formaPagamento === 'debito' || formData.formaPagamento === 'credito' ? {
+            numero: removeMask(formData.numeroCartao),
+            numero: formData.numeroCartao,
+            nome: formData.nomeCartao,
+            validade: formData.validadeCartao,
+            cvv: formData.cvvCartao
+          } : undefined
+        })
       });
 
-      const data = await response.json();
-
       if (!response.ok) {
-        throw new Error(data.mensagem || 'Erro ao criar pedido');
+        const errorData = await response.json();
+        throw new Error(errorData.erro || 'Erro ao finalizar pedido');
       }
 
-      setSuccess(true);
-      
-      // Redireciona para página de sucesso após 3 segundos
-      setTimeout(() => {
-        router.push('./clientePedidos');
-      }, 3000);
+      const data = await response.json();
+      console.log('Pedido finalizado com sucesso:', data);
 
-    } catch (err) {
-      console.error('Erro ao finalizar pedido:', err);
-      setError(err.message || 'Erro ao finalizar pedido. Tente novamente.');
+      // Limpar carrinho e redirecionar
+      await fetchCartFromAPI();
+      router.push('/pedidos');
+    } catch (error) {
+      console.error('Erro ao finalizar pedido:', error);
+      setError(error.message);
     } finally {
       setLoading(false);
     }
   };
 
-  if (cartLoading) {
+  // Verifica se há problemas de estoque
+  const itemsComProblemaEstoque = cartItems?.filter(item => 
+    !item.estoque || item.estoque < item.quantidade
+  ) || [];
+
+  if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <div className="flex flex-col items-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-yellow-500"></div>
-          <p className="mt-4 text-gray-600">Carregando checkout...</p>
-        </div>
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-yellow-500"></div>
       </div>
     );
   }
 
-  if (!token) {
-    return (
-      <div className="min-h-screen flex items-center justify-center p-4">
-        <div className="bg-red-100 border border-red-400 text-red-700 px-6 py-4 rounded-lg max-w-md w-full text-center">
-          <AlertTriangle className="mx-auto mb-3 h-8 w-8" />
-          <strong className="block mb-2">Acesso negado!</strong>
-          <p>Você precisa estar logado para finalizar a compra.</p>
-          <button
-            onClick={() => router.push('/FormLoginRegister')}
-            className="mt-4 bg-red-500 hover:bg-red-600 text-white px-6 py-2 rounded-lg transition-colors"
-          >
-            Fazer Login
-          </button>
-        </div>
-      </div>
-    );
-  }
-
-  if (cartItems.length === 0) {
+  if (!cartItems || cartItems.length === 0) {
     return (
       <div className="min-h-screen flex items-center justify-center p-4">
         <div className="text-center">
-          <div className="text-6xl mb-4">🛒</div>
-          <h2 className="text-2xl text-gray-500 mb-4">Carrinho vazio</h2>
-          <p className="text-gray-400 mb-6">Adicione alguns produtos para finalizar uma compra!</p>
+          <ShoppingBag className="mx-auto h-12 w-12 text-gray-400" />
+          <h2 className="mt-4 text-xl font-semibold text-gray-800">Carrinho Vazio</h2>
+          <p className="mt-2 text-gray-600">Adicione itens ao seu carrinho para continuar</p>
           <button
             onClick={() => router.push('/PaginaProdutos')}
-            className="bg-yellow-500 hover:bg-yellow-600 text-white px-6 py-3 rounded-lg font-semibold transition-colors"
+            className="mt-4 px-4 py-2 bg-yellow-500 text-white rounded-lg hover:bg-yellow-600"
           >
             Ver Produtos
           </button>
-        </div>
-      </div>
-    );
-  }
-
-  if (success) {
-    return (
-      <div className="min-h-screen flex items-center justify-center p-4">
-        <div className="bg-green-100 border border-green-400 text-green-700 px-8 py-6 rounded-lg max-w-lg w-full text-center">
-          <CheckCircle className="mx-auto mb-4 h-16 w-16 text-green-600" />
-          <h2 className="text-2xl font-bold mb-3">Pedido Realizado com Sucesso!</h2>
-          <p className="mb-4">
-            Seu pedido foi criado e está sendo processado. 
-            Você será redirecionado para acompanhar seus pedidos.
-          </p>
-          <div className="animate-pulse text-sm text-green-600">
-            Redirecionando em alguns segundos...
-          </div>
         </div>
       </div>
     );
@@ -153,169 +324,230 @@ export default function Checkout() {
           >
             ← Voltar ao Carrinho
           </button>
-          <h1 className="text-3xl font-bold text-gray-800 flex items-center gap-3">
-            <CreditCard className="h-8 w-8 text-yellow-500" />
-            Finalizar Compra
-          </h1>
+          <h1 className="text-3xl font-bold text-gray-900">Checkout</h1>
+          <p className="mt-2 text-gray-600">Finalize seu pedido</p>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* Resumo do Pedido */}
-          <div className="lg:col-span-2 space-y-6">
-            {/* Alertas */}
-            {error && (
-              <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-lg">
-                <div className="flex items-start gap-3">
-                  <AlertTriangle className="h-5 w-5 text-red-500 flex-shrink-0 mt-0.5" />
-                  <div>
-                    <strong>Erro!</strong> {error}
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {itemsComProblemaEstoque.length > 0 && (
-              <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-lg">
-                <div className="flex items-start gap-3">
-                  <AlertTriangle className="h-5 w-5 text-red-500 flex-shrink-0 mt-0.5" />
-                  <div>
-                    <strong>Atenção!</strong> Os seguintes itens não possuem estoque suficiente:
-                    <ul className="mt-2 list-disc list-inside">
-                      {itemsComProblemaEstoque.map(item => (
-                        <li key={item.id}>
-                          {item.nome} - Solicitado: {item.quantidade}, Disponível: {item.estoque}
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {/* Itens do Pedido */}
-            <div className="bg-white rounded-lg shadow-sm border border-gray-200">
-              <div className="p-6 border-b border-gray-200">
-                <h2 className="text-xl font-semibold text-gray-800 flex items-center gap-2">
-                  <ShoppingBag className="h-5 w-5" />
-                  Itens do Pedido ({getTotalItems()} {getTotalItems() === 1 ? 'item' : 'itens'})
-                </h2>
-              </div>
-              
-              <div className="p-6 space-y-4">
-                {cartItems.map((item) => {
-                  const temEstoqueSuficiente = item.estoque >= item.quantidade;
-                  
-                  return (
-                    <div 
-                      key={item.id} 
-                      className={`flex items-center justify-between p-4 rounded-lg border ${
-                        !temEstoqueSuficiente ? 'border-red-300 bg-red-50' : 'border-gray-200 bg-gray-50'
-                      }`}
-                    >
-                      <div className="flex items-center gap-4">
-                        {item.imagem && (
-                          <img
-                            src={item.imagem}
-                            alt={item.nome}
-                            className="w-16 h-16 object-cover rounded-lg"
-                          />
-                        )}
-                        <div>
-                          <h3 className="font-semibold text-gray-800">{item.nome}</h3>
-                          <p className="text-gray-600">R$ {item.preco.toFixed(2)} cada</p>
-                          <p className="text-sm text-gray-500">Quantidade: {item.quantidade}</p>
-                          {!temEstoqueSuficiente && (
-                            <p className="text-sm text-red-600 font-semibold">
-                              ⚠️ Estoque insuficiente ({item.estoque} disponível)
-                            </p>
-                          )}
-                        </div>
-                      </div>
-                      <div className="text-right">
-                        <p className={`font-bold text-lg ${!temEstoqueSuficiente ? 'text-red-600' : 'text-gray-800'}`}>
-                          R$ {(item.preco * item.quantidade).toFixed(2)}
-                        </p>
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
-
-            {/* Informações do Cliente (placeholder) */}
-            <div className="bg-white rounded-lg shadow-sm border border-gray-200">
-              <div className="p-6 border-b border-gray-200">
-                <h2 className="text-xl font-semibold text-gray-800 flex items-center gap-2">
-                  <User className="h-5 w-5" />
-                  Informações de Entrega
-                </h2>
-              </div>
-              <div className="p-6">
-                <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-                  <div className="flex items-center gap-2 text-blue-800">
-                    <MapPin className="h-5 w-5" />
-                    <span className="font-semibold">Retirada no Local</span>
-                  </div>
-                  <p className="text-blue-700 mt-2">
-                    Este pedido será preparado para retirada no estabelecimento. 
-                    Você receberá uma notificação quando estiver pronto.
-                  </p>
-                </div>
-              </div>
-            </div>
+        {loading ? (
+          <div className="text-center py-8">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-500 mx-auto"></div>
+            <p className="mt-4 text-gray-600">Carregando...</p>
           </div>
+        ) : error ? (
+          <div className="bg-red-50 border border-red-200 rounded-lg p-4 text-center">
+            <p className="text-red-600">{error}</p>
+          </div>
+        ) : (
+          <div className="space-y-6">
+            {/* Resumo do Pedido */}
+            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+              <h2 className="text-xl font-semibold text-gray-800 mb-4">Resumo do Pedido</h2>
+              <div className="space-y-4">
+                {cartItems.map((item) => (
+                  <div key={`cart-item-${item.id}`} className="flex items-center py-3 border-b border-gray-100">
+                    <img
+                      src={item.imagem}
+                      alt={item.nome}
+                      className="w-16 h-16 object-cover rounded-lg"
+                    />
+                    <div className="ml-4 flex-1">
+                      <h3 className="text-gray-800 font-medium">{item.nome}</h3>
+                      <p className="text-gray-600">Quantidade: {item.quantidade}</p>
+                      <p className="text-gray-800 font-medium">
+                        R$ {(item.preco * item.quantidade).toFixed(2)}
+                      </p>
+                    </div>
+                  </div>
+                ))}
+                <div className="flex justify-between items-center pt-4 border-t border-gray-200">
+                  <span className="text-lg font-semibold text-gray-800">Total</span>
+                  <span className="text-2xl font-bold text-yellow-500">
+                    R$ {total.toFixed(2)}
+                  </span>
+                </div>
+              </div>
+            </div>
 
-          {/* Resumo Financeiro */}
-          <div className="lg:col-span-1">
-            <div className="bg-white rounded-lg shadow-sm border border-gray-200 sticky top-8">
-              <div className="p-6 border-b border-gray-200">
-                <h2 className="text-xl font-semibold text-gray-800">Resumo do Pedido</h2>
+            {/* Informações de Entrega */}
+            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+              <h2 className="text-xl font-semibold text-gray-800 mb-4">Informações de Entrega</h2>
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-gray-800 mb-2">Nome Completo</label>
+                  <input
+                    type="text"
+                    value={formData.nome}
+                    onChange={(e) => setFormData({ ...formData, nome: e.target.value })}
+                    className="w-full p-2 border border-gray-300 rounded-lg text-black focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                  />
+                </div>
+                <div>
+                  <label className="block text-gray-800 mb-2">Telefone</label>
+                  <input
+                    type="tel"
+                    value={formData.telefone}
+                    onChange={(e) => setFormData({ ...formData, telefone: e.target.value })}
+                    className="w-full p-2 border border-gray-300 rounded-lg text-black focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* Data e Horário de Retirada */}
+            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+              <h2 className="text-xl font-semibold text-gray-800 mb-4">Data e Horário de Retirada</h2>
+              
+              {/* Seletor de Data */}
+              <div className="mb-6">
+                <label className="block text-gray-700 text-sm font-medium mb-2">
+                  Data de Entrega
+                </label>
+                <input
+                  type="date"
+                  value={formData.dataEntrega}
+                  onChange={(e) => setFormData({ ...formData, dataEntrega: e.target.value })}
+                  min={new Date().toISOString().split('T')[0]}
+                  className="w-full p-3 border border-gray-300 rounded-lg text-black focus:ring-2 focus:ring-yellow-500 focus:border-transparent"
+                />
               </div>
               
-              <div className="p-6 space-y-4">
-                <div className="flex justify-between">
-                  <span className="text-gray-600">Subtotal ({getTotalItems()} itens)</span>
-                  <span className="font-semibold">R$ {total.toFixed(2)}</span>
-                </div>
-                
-                <div className="flex justify-between">
-                  <span className="text-gray-600">Taxa de entrega</span>
-                  <span className="font-semibold text-green-600">Grátis</span>
-                </div>
-                
-                <hr className="border-gray-200" />
-                
-                <div className="flex justify-between text-lg">
-                  <span className="font-semibold text-gray-800">Total</span>
-                  <span className="font-bold text-yellow-600">R$ {total.toFixed(2)}</span>
-                </div>
-                
+              {/* Seletor de Turno */}
+              <div className="mb-6">
+                <label className="block text-black mb-2">Turno</label>
+                <select
+                  className="w-full p-2 border border-gray-300 rounded text-black"
+                  value={formData.turno}
+                  onChange={(e) => setFormData({ ...formData, turno: e.target.value })}
+                  required
+                >
+                  <option value="">Selecione o turno</option>
+                  <option value="manha">Manhã</option>
+                  <option value="tarde">Tarde</option>
+                  <option value="noite">Noite</option>
+                </select>
+              </div>
+
+              {/* Seletor de Horário */}
+              <div className="mb-6">
+                <label className="block text-black mb-2">Horário</label>
+                <input
+                  type="time"
+                  className="w-full p-2 border border-gray-300 rounded text-black"
+                  value={formData.horario}
+                  onChange={(e) => setFormData({ ...formData, horario: e.target.value })}
+                  required
+                />
+              </div>
+            </div>
+
+            {/* Forma de Pagamento */}
+            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mt-6">
+              <h2 className="text-xl font-semibold text-gray-800 mb-4">Forma de Pagamento</h2>
+              
+              <div className="grid grid-cols-2 gap-4">
                 <button
-                  onClick={finalizarPedido}
-                  disabled={loading || itemsComProblemaEstoque.length > 0}
-                  className={`w-full py-4 rounded-lg font-semibold text-lg transition-colors ${
-                    loading || itemsComProblemaEstoque.length > 0
-                      ? 'bg-gray-400 cursor-not-allowed text-gray-600'
-                      : 'bg-yellow-500 hover:bg-yellow-600 text-white'
+                  onClick={() => setFormData({ ...formData, formaPagamento: 'debito' })}
+                  className={`p-4 rounded-lg border-2 transition-all duration-200 ${
+                    formData.formaPagamento === 'debito'
+                      ? 'border-yellow-500 bg-yellow-50'
+                      : 'border-gray-200 hover:border-yellow-500'
                   }`}
                 >
-                  {loading ? 'Processando...' : 'Confirmar Pedido'}
+                  <div className="flex items-center justify-center gap-2">
+                    <CreditCard className="w-6 h-6" />
+                    <span className="font-medium">Débito</span>
+                  </div>
                 </button>
                 
-                {itemsComProblemaEstoque.length > 0 && (
-                  <p className="text-sm text-red-600 text-center">
-                    Ajuste as quantidades no carrinho para continuar
-                  </p>
-                )}
-                
-                <div className="text-xs text-gray-500 text-center space-y-1">
-                  <p>✅ Pedido será preparado para retirada</p>
-                  <p>✅ Sem taxas adicionais</p>
-                </div>
+                <button
+                  onClick={() => setFormData({ ...formData, formaPagamento: 'credito' })}
+                  className={`p-4 rounded-lg border-2 transition-all duration-200 ${
+                    formData.formaPagamento === 'credito'
+                      ? 'border-yellow-500 bg-yellow-50'
+                      : 'border-gray-200 hover:border-yellow-500'
+                  }`}
+                >
+                  <div className="flex items-center justify-center gap-2">
+                    <CreditCard className="w-6 h-6" />
+                    <span className="font-medium">Crédito</span>
+                  </div>
+                </button>
               </div>
+
+              {/* Campos do Cartão */}
+              {(formData.formaPagamento === 'debito' || formData.formaPagamento === 'credito') && (
+                <div className="mt-6 space-y-4">
+                  <div>
+                    <label className="block text-gray-700 text-sm font-medium mb-2">
+                      Número do Cartão
+                    </label>
+                    <input
+                      type="text"
+                      value={formData.numeroCartao}
+                      onChange={(e) => setFormData({ ...formData, numeroCartao: e.target.value })}
+                      placeholder="0000 0000 0000 0000"
+                      className="w-full p-3 border border-gray-300 rounded-lg text-black focus:ring-2 focus:ring-yellow-500 focus:border-transparent"
+                    />
+                  </div>
+                  
+                  <div>
+                    <label className="block text-gray-700 text-sm font-medium mb-2">
+                      Nome no Cartão
+                    </label>
+                    <input
+                      type="text"
+                      value={formData.nomeCartao}
+                      onChange={(e) => setFormData({ ...formData, nomeCartao: e.target.value })}
+                      placeholder="Nome como está no cartão"
+                      className="w-full p-3 border border-gray-300 rounded-lg text-black focus:ring-2 focus:ring-yellow-500 focus:border-transparent"
+                    />
+                  </div>
+                  
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-gray-700 text-sm font-medium mb-2">
+                        Validade
+                      </label>
+                      <input
+                        type="text"
+                        value={formData.validadeCartao}
+                        onChange={(e) => setFormData({ ...formData, validadeCartao: e.target.value })}
+                        placeholder="MM/AA"
+                        className="w-full p-3 border border-gray-300 rounded-lg text-black focus:ring-2 focus:ring-yellow-500 focus:border-transparent"
+                      />
+                    </div>
+                    
+                    <div>
+                      <label className="block text-gray-700 text-sm font-medium mb-2">
+                        CVV
+                      </label>
+                      <input
+                        type="text"
+                        value={formData.cvvCartao}
+                        onChange={(e) => setFormData({ ...formData, cvvCartao: e.target.value })}
+                        placeholder="123"
+                        className="w-full p-3 border border-gray-300 rounded-lg text-black focus:ring-2 focus:ring-yellow-500 focus:border-transparent"
+                      />
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
+
+            {/* Botão de Finalizar Compra */}
+            <button
+              onClick={finalizarPedido}
+              disabled={!validarCartao() || loading || !formData.formaPagamento || !formData.dataEntrega || !formData.horario}
+              className={`w-full py-3 px-4 rounded-lg font-semibold text-white transition-colors duration-200 ${
+                !validarCartao() || loading || !formData.formaPagamento || !formData.dataEntrega || !formData.horario
+                  ? 'bg-gray-400 cursor-not-allowed'
+                  : 'bg-yellow-500 hover:bg-yellow-600'
+              }`}
+            >
+              {loading ? 'Processando...' : 'Finalizar Compra'}
+            </button>
           </div>
-        </div>
+        )}
       </div>
     </div>
   );

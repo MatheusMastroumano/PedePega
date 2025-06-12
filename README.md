@@ -25,13 +25,13 @@ Na **ETEC Manoel Teodoro**, a cantina da escola, administrada por **Dona Alice**
 
 ## ⚙️ Tecnologias Utilizadas
 
-- **FrontEnd**: HTML, CSS, Next.js
-- **BackEnd**: JavaScript,Node.js,
+- **FrontEnd**: React, TailwindCSS, Next.js
+- **BackEnd**: JavaScript, Node.js,
 - **Banco de Dados**:  MySQL
 
 ## 👨‍💻 Desenvolvedores
 
-- **FrontEnd**: Vinicius Cavalcante & Matheus Mastroumano
+- **FrontEnd**: Matheus Mastroumano
 - **BackEnd**: Gustavo Grelhus
 - **Banco de Dados**: Gustavo Grelhus
 

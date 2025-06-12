@@ -1,14 +1,16 @@
 "use client";
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { useCart } from "../components/Cart/contextoCart.js";
 import { useAuth } from "../components/AuthContexto/ContextoAuth.js";
 import { useRouter } from 'next/navigation';
 import { Trash2, Plus, Minus, ShoppingBag, AlertTriangle } from 'lucide-react';
+import Cookies from 'js-cookie';
 
 export default function CarrinhoPage() {
+  const router = useRouter();
   const {
     cartItems,
-    loading,
+    loading: cartLoading,
     total,
     removeFromCart,
     increaseQuantity,
@@ -16,26 +18,52 @@ export default function CarrinhoPage() {
     clearCart,
     fetchCartFromAPI,
     getTotalItems,
+    recarregarCarrinho,
   } = useCart();
   
-  const { token } = useAuth();
-  const router = useRouter();
+  const { token, loading: authLoading } = useAuth();
+  const [isLoading, setIsLoading] = useState(true);
+  const [isInitialized, setIsInitialized] = useState(false);
 
-  // Recarrega o carrinho quando a página é acessada
   useEffect(() => {
-    if (token) {
-      fetchCartFromAPI();
-    }
-  }, [token]);
+    const initializePage = async () => {
+      try {
+        // Verificar token nos cookies
+        const authToken = Cookies.get('authToken');
+        
+        if (!authToken) {
+          console.log('Token não encontrado nos cookies');
+          router.push('/FormLoginRegister');
+          return;
+        }
 
-  const handleFinalizarCompra = () => {
-    // Verifica se há itens no carrinho
+        if (!isInitialized) {
+          await fetchCartFromAPI();
+          setIsInitialized(true);
+        }
+      } catch (error) {
+        console.error('Erro ao inicializar página:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    initializePage();
+  }, [isInitialized]);
+
+  const handleFinalizarCompra = async () => {
+    const authToken = Cookies.get('authToken');
+    
+    if (!authToken) {
+      router.push('/FormLoginRegister');
+      return;
+    }
+
     if (cartItems.length === 0) {
       alert('Seu carrinho está vazio!');
       return;
     }
 
-    // Verifica se há estoque suficiente para todos os itens
     const itemsSemEstoque = cartItems.filter(item => 
       !item.estoque || item.estoque < item.quantidade
     );
@@ -46,13 +74,19 @@ export default function CarrinhoPage() {
       return;
     }
 
-    // Redireciona para a página de checkout
-    router.push('/checkout');
+    try {
+      await recarregarCarrinho();
+      router.push('/checkout');
+    } catch (error) {
+      console.error('Erro ao finalizar compra:', error);
+      alert('Erro ao finalizar compra. Por favor, tente novamente.');
+    }
   };
 
-  if (loading) {
+  // Se ainda estiver carregando, mostra o loading
+  if (isLoading || cartLoading || authLoading) {
     return (
-      <div className="p-4 text-center flex items-center justify-center">
+      <div className="p-4 text-center flex items-center justify-center min-h-screen">
         <div className="flex flex-col items-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-yellow-500"></div>
           <p className="mt-4 text-gray-600">Carregando carrinho...</p>
@@ -61,6 +95,7 @@ export default function CarrinhoPage() {
     );
   }
 
+  // Se não estiver autenticado, mostra a mensagem de acesso negado
   if (!token) {
     return (
       <div className="p-4 min-h-screen flex items-center justify-center">
@@ -92,7 +127,7 @@ export default function CarrinhoPage() {
             <button
               onClick={clearCart}
               className="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg transition-colors flex items-center gap-2 self-start sm:self-auto"
-              disabled={loading}
+              disabled={cartLoading}
             >
               <Trash2 className="h-4 w-4" />
               <span className="hidden sm:inline">Limpar Carrinho</span>
@@ -166,42 +201,38 @@ export default function CarrinhoPage() {
                         </div>
                       </div>
 
-                      {/* Controles e total */}
+                      {/* Controles de quantidade e remover */}
                       <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-2">
+                        <div className="flex items-center space-x-2">
                           <button
                             onClick={() => decreaseQuantity(item.id)}
-                            disabled={loading || item.quantidade <= 1}
+                            disabled={cartLoading || item.quantidade <= 1}
                             className="w-8 h-8 rounded-full bg-gray-500 hover:bg-gray-900 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center transition-colors"
                           >
                             <Minus className="h-4 w-4" />
                           </button>
                           
-                          <span className={`w-8 text-center text-black font-semibold ${!temEstoqueSuficiente ? 'text-red-600' : ''}`}>
+                          <span className={`w-12 text-center text-black font-semibold text-lg ${!temEstoqueSuficiente ? 'text-red-600' : ''}`}>
                             {item.quantidade}
                           </span>
                           
                           <button
                             onClick={() => increaseQuantity(item.id)}
-                            disabled={loading || item.quantidade >= item.estoque}
+                            disabled={cartLoading || item.quantidade >= item.estoque}
                             className="w-8 h-8 rounded-full bg-gray-500 hover:bg-gray-900 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center transition-colors"
                           >
                             <Plus className="h-4 w-4" />
                           </button>
                         </div>
 
-                        <div className="flex items-center gap-3">
-                          <span className={`font-bold ${!temEstoqueSuficiente ? 'text-red-600' : 'text-gray-800'}`}>
-                            R$ {(item.preco * item.quantidade).toFixed(2)}
-                          </span>
-                          <button
-                            onClick={() => removeFromCart(item.id)}
-                            disabled={loading}
-                            className="p-2 text-red-500 hover:bg-red-100 rounded-lg transition-colors disabled:opacity-50"
-                          >
-                            <Trash2 className="h-4 w-4" />
-                          </button>
-                        </div>
+                        <button
+                          onClick={() => removeFromCart(item.id)}
+                          disabled={cartLoading}
+                          className="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                          <span className="text-sm">Remover</span>
+                        </button>
                       </div>
                     </div>
 
@@ -235,7 +266,7 @@ export default function CarrinhoPage() {
                         <div className="flex items-center space-x-2">
                           <button
                             onClick={() => decreaseQuantity(item.id)}
-                            disabled={loading || item.quantidade <= 1}
+                            disabled={cartLoading || item.quantidade <= 1}
                             className="w-8 h-8 rounded-full bg-gray-500 hover:bg-gray-900 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center transition-colors"
                           >
                             <Minus className="h-4 w-4" />
@@ -247,7 +278,7 @@ export default function CarrinhoPage() {
                           
                           <button
                             onClick={() => increaseQuantity(item.id)}
-                            disabled={loading || item.quantidade >= item.estoque}
+                            disabled={cartLoading || item.quantidade >= item.estoque}
                             className="w-8 h-8 rounded-full bg-gray-500 hover:bg-gray-900 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center transition-colors"
                           >
                             <Plus className="h-4 w-4" />
@@ -264,7 +295,7 @@ export default function CarrinhoPage() {
                         {/* Botão remover */}
                         <button
                           onClick={() => removeFromCart(item.id)}
-                          disabled={loading}
+                          disabled={cartLoading}
                           className="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
                         >
                           <Trash2 className="h-4 w-4" />
@@ -306,21 +337,22 @@ export default function CarrinhoPage() {
                   <button
                     onClick={() => router.push('/PaginaProdutos')}
                     className="w-full sm:w-auto bg-gray-500 hover:bg-gray-600 text-white px-4 sm:px-6 py-3 rounded-lg text-sm sm:text-lg font-semibold transition-colors order-2 sm:order-1"
-                    disabled={loading}
+                    disabled={cartLoading}
                   >
                     Continuar Comprando
                   </button>
                   
                   <button
+                    type="button"
                     onClick={handleFinalizarCompra}
                     className={`w-full sm:w-auto px-6 sm:px-8 py-3 rounded-lg text-sm sm:text-lg font-semibold transition-colors order-1 sm:order-2 ${
-                      cartItems.some(item => item.estoque < item.quantidade) || loading
+                      cartItems.some(item => item.estoque < item.quantidade) || cartLoading || !token
                         ? 'bg-gray-400 cursor-not-allowed text-gray-600'
                         : 'bg-yellow-400 hover:bg-yellow-600 text-white'
                     }`}
-                    disabled={cartItems.some(item => item.estoque < item.quantidade) || loading}
+                    disabled={cartItems.some(item => item.estoque < item.quantidade) || cartLoading || !token}
                   >
-                    {loading ? 'Processando...' : 'Finalizar Compra'}
+                    {cartLoading ? 'Processando...' : !token ? 'Faça Login para Continuar' : 'Finalizar Compra'}
                   </button>
                 </div>
               </div>
@@ -330,4 +362,4 @@ export default function CarrinhoPage() {
       </div>
     </div>
   );
-};
+}

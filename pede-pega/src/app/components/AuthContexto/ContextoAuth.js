@@ -1,5 +1,6 @@
 "use client";
 import { createContext, useContext, useState, useEffect } from 'react';
+import Cookies from 'js-cookie';
 
 const AuthContext = createContext();
 
@@ -16,15 +17,15 @@ export const AuthProvider = ({ children }) => {
     setIsHydrated(true);
   }, []);
 
-  // Carregar token do localStorage apenas no cliente
+  // Carregar token dos cookies apenas no cliente
   useEffect(() => {
     if (!isHydrated) return;
 
     const loadAuthData = async () => {
       try {
-        const savedToken = localStorage.getItem('authToken');
-        const savedUser = localStorage.getItem('userData');
-        const savedIsAdmin = localStorage.getItem('isAdmin');
+        const savedToken = Cookies.get('authToken');
+        const savedUser = Cookies.get('userData');
+        const savedIsAdmin = Cookies.get('isAdmin');
         
         console.log('Carregando dados salvos:', { 
           hasToken: !!savedToken, 
@@ -78,9 +79,9 @@ export const AuthProvider = ({ children }) => {
   // Função para limpar dados de autenticação
   const clearAuthData = () => {
     if (isHydrated) {
-      localStorage.removeItem('authToken');
-      localStorage.removeItem('userData');
-      localStorage.removeItem('isAdmin');
+      Cookies.remove('authToken');
+      Cookies.remove('userData');
+      Cookies.remove('isAdmin');
     }
     setToken(null);
     setUser(null);
@@ -100,7 +101,7 @@ export const AuthProvider = ({ children }) => {
         console.log('Usuário já identificado como admin pelos dados locais');
         setIsAdmin(true);
         if (isHydrated) {
-          localStorage.setItem('isAdmin', 'true');
+          Cookies.set('isAdmin', 'true', { expires: 7 });
         }
         return true;
       }
@@ -122,7 +123,7 @@ export const AuthProvider = ({ children }) => {
       setIsAdmin(hasAdminPrivileges);
       
       if (isHydrated) {
-        localStorage.setItem('isAdmin', hasAdminPrivileges.toString());
+        Cookies.set('isAdmin', hasAdminPrivileges.toString(), { expires: 7 });
       }
       
       return hasAdminPrivileges;
@@ -130,7 +131,7 @@ export const AuthProvider = ({ children }) => {
       console.error('Erro ao verificar privilégios de admin:', error);
       setIsAdmin(false);
       if (isHydrated) {
-        localStorage.setItem('isAdmin', 'false');
+        Cookies.remove('isAdmin');
       }
       return false;
     }
@@ -145,9 +146,10 @@ export const AuthProvider = ({ children }) => {
       setIsAuthenticated(true);
       
       if (isHydrated) {
-        localStorage.setItem('authToken', tokenData);
+        // Salvar nos cookies com expiração de 7 dias
+        Cookies.set('authToken', tokenData, { expires: 7 });
         if (userData) {
-          localStorage.setItem('userData', JSON.stringify(userData));
+          Cookies.set('userData', JSON.stringify(userData), { expires: 7 });
         }
       }
 
@@ -157,7 +159,7 @@ export const AuthProvider = ({ children }) => {
         if (userIsAdmin) {
           setIsAdmin(true);
           if (isHydrated) {
-            localStorage.setItem('isAdmin', 'true');
+            Cookies.set('isAdmin', 'true', { expires: 7 });
           }
         } else {
           await checkAdminPrivileges(tokenData, userData);
@@ -182,9 +184,10 @@ export const AuthProvider = ({ children }) => {
       setIsAuthenticated(true);
       
       if (isHydrated) {
-        localStorage.setItem('authToken', tokenData);
+        // Salvar nos cookies com expiração de 7 dias
+        Cookies.set('authToken', tokenData, { expires: 7 });
         if (userData) {
-          localStorage.setItem('userData', JSON.stringify(userData));
+          Cookies.set('userData', JSON.stringify(userData), { expires: 7 });
         }
       }
 
@@ -211,7 +214,7 @@ export const AuthProvider = ({ children }) => {
       
       setIsAdmin(true);
       if (isHydrated) {
-        localStorage.setItem('isAdmin', 'true');
+        Cookies.set('isAdmin', 'true', { expires: 7 });
       }
       
       console.log('Login de admin realizado com sucesso');
@@ -291,7 +294,7 @@ export const AuthProvider = ({ children }) => {
       console.log('Acesso negado para rota admin, atualizando status...');
       setIsAdmin(false);
       if (isHydrated) {
-        localStorage.setItem('isAdmin', 'false');
+        Cookies.remove('isAdmin');
       }
     }
 
