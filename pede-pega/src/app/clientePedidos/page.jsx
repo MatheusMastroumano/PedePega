@@ -199,7 +199,7 @@ export default function ClientePedidos() {
                     <div className="flex items-center gap-3 mb-3">
                       {getStatusIcon(pedido.status)}
                       <span className="font-semibold text-lg text-gray-800">
-                        Pedido #{pedidos.length - index}
+                        Pedido #{pedido.id}
                       </span>
                       <span className={`px-3 py-1 rounded-full text-sm font-medium ${
                         pedido.status === 'pendente' ? 'bg-yellow-100 text-yellow-800' :

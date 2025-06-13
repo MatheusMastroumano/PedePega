@@ -153,15 +153,20 @@ export const AuthProvider = ({ children }) => {
         }
       }
 
-      // Verificar se é admin baseado no tipo do usuário
-      const userIsAdmin = userData?.tipo === 'admin';
-      setIsAdmin(userIsAdmin);
-      if (isHydrated) {
-        localStorage.setItem('isAdmin', userIsAdmin.toString());
+      // Verificar privilégios de admin após login
+      if (!skipAdminCheck) {
+        const userIsAdmin = userData?.tipo === 'admin';
+        if (userIsAdmin) {
+          setIsAdmin(true);
+          if (isHydrated) {
+            Cookies.set('isAdmin', 'true', { expires: 7 });
+          }
+        } else {
+          await checkAdminPrivileges(tokenData, userData);
+        }
       }
       
       console.log('Login realizado com sucesso');
-      console.log('É admin?', userIsAdmin);
       
       return { success: true };
     } catch (error) {

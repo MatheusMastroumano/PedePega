@@ -454,3 +454,9 @@
 [2025-06-13T13:29:50.100Z] GET /api/pedidos 200 - 18ms
 [2025-06-13T13:29:50.102Z] GET /api/pedidos
 [2025-06-13T13:29:50.145Z] GET /api/pedidos 304 - 34ms
+[2025-06-13T14:43:09.824Z] POST /api/auth/login
+[2025-06-13T14:43:10.366Z] POST /api/auth/login 200 - 505ms
+[2025-06-13T14:43:10.471Z] GET /api/carrinho
+[2025-06-13T14:43:10.557Z] GET /api/carrinho 500 - 78ms
+[2025-06-13T14:43:10.558Z] GET /api/carrinho
+[2025-06-13T14:43:15.669Z] GET /api/produtos

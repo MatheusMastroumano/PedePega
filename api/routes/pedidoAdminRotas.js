@@ -5,8 +5,7 @@ import {
     listarTodosPedidosAtivosController,
     alterarStatusPedidoController,
     listarPedidosController,
-    obterItensPedidoController,
-    listarTodosPedidosController
+    obterItensPedidoController
 } from '../controllers/PedidoController.js';
 
 const adminRouter = express.Router();
@@ -15,7 +14,6 @@ adminRouter.use(authMiddleware);
 adminRouter.use(adminMiddleware);
 
 //Rotas administrativas
-adminRouter.get("/", listarTodosPedidosController);
 adminRouter.get("/ativos", listarTodosPedidosAtivosController);
 adminRouter.patch("/:id/status", alterarStatusPedidoController);
 adminRouter.get("/:id/itens", obterItensPedidoController);

@@ -219,14 +219,6 @@ export default function Navbar() {
                 Carrinho
               </li>
             )}
-            {token && (
-              <li
-                className="text-lg text-black cursor-pointer hover:text-yellow-600 transition-colors"
-                onClick={() => handleNavigation('../../clientePedidos')}
-              >
-                Pedidos
-              </li>
-            )}
             {token ? (
               <li
                 className="text-lg text-red-600 cursor-pointer hover:text-red-700 transition-colors"

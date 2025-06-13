@@ -2,25 +2,21 @@ import { read } from "../config/database.js";
 
 const adminMiddleware = async (req, res, next) => {
   try {
-    const usuarioId = req.usuarioId;
-    
-    // Buscar usuário no banco
-    const usuario = await read("users", "id = ?", [usuarioId]);
-    
-    if (!usuario) {
-      return res.status(404).json({ mensagem: "Usuário não encontrado" });
+    const usuario = await read("users", `id = ?`, [req.usuarioId]);
+
+    if(!usuario) {
+        return res.status(401).json({mensagem: "Usuário não encontrado"});
     }
 
-    // Verificar se é admin
-    if (usuario.tipo !== "admin") {
-      return res.status(403).json({ mensagem: "Acesso negado. Apenas administradores podem realizar esta ação." });
+    if (usuario.tipo !== 'admin') {
+        return res.status(403).json({mensagem: "Acesso negado. Apenas administradores"});
     }
 
     req.usuario = usuario;
     next();
   } catch (err) {
-    console.error("Erro ao verificar permissões de admin:", err);
-    res.status(500).json({ mensagem: "Erro ao verificar permissões" });
+    console.error('Erro no middleware de admin:', err);
+    return res.status(403).json({mensagem: "Erro na verificação de permissões"});
   }
 };
 

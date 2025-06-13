@@ -172,7 +172,7 @@ const loginController = async (req, res) => {
         email: usuario.email,
         turma: usuario.turma,
         turno: usuario.turno,
-        tipo: usuario.tipo
+        tipo: usuario.tipo || 'usuario'
       }
     });
 
