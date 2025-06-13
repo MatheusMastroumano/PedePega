@@ -196,9 +196,9 @@ export default function ProdutosPage() {
                   >
                     {/* Imagem do produto */}
                     <div className="h-56 bg-gray-100 flex items-center justify-center relative overflow-hidden">
-                      {produto.imagemPath ? (
+                      {produto.imagem_url ? (
                         <img
-                          src={`${API_BASE_URL.replace('/api', '')}/${produto.imagemPath}`}
+                          src={produto.imagem_url}
                           alt={produto.nome}
                           className="h-full w-full object-cover transition-transform duration-300 hover:scale-105"
                           onError={(e) => {
@@ -209,7 +209,7 @@ export default function ProdutosPage() {
                       ) : null}
                       <div
                         className="text-gray-400 text-5xl flex items-center justify-center h-full w-full"
-                        style={{ display: produto.imagemPath ? 'none' : 'flex' }}
+                        style={{ display: produto.imagem_url ? 'none' : 'flex' }}
                       >
                         📦
                       </div>

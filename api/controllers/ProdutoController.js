@@ -1,9 +1,4 @@
 import { listarProdutos, obterProdutoPorId, criarProduto, atualizarProduto, deletarProduto } from '../models/Produto.js';
-import { fileURLToPath } from 'url';
-import path from 'path';
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
 
 const listarProdutosController = async (req, res) => {
     try {
@@ -31,16 +26,12 @@ const obterProdutoPorIdController = async (req, res) => {
 
 const criarProdutoController = async (req, res) => {
     try {
-        const { nome, preco, disponivel } = req.body;
-        let imagemPath = null;
-        if (req.file) {
-            imagemPath = req.file.path.replace(__dirname.replace('\\controllers', ''), '');
-        }
+        const { nome, preco, estoque, imagem_url } = req.body;
         const produtoData = {
             nome: nome,
             preco: preco,
-            disponivel: disponivel,
-            imagemPath: imagemPath,
+            estoque: estoque,
+            imagem_url: imagem_url || '/img/produtos/default.png'
         };
         const produtoId = await criarProduto(produtoData);
         res.status(201).json({ mensagem: 'Produto criado com sucesso', produtoId });
@@ -53,16 +44,12 @@ const criarProdutoController = async (req, res) => {
 const atualizarProdutoController = async (req, res) => {
     try {
         const produtoId = req.params.id;
-        const { nome, preco, disponivel } = req.body;
-        let imagemPath = null;
-        if (req.file) {
-            imagemPath = req.file.path.replace(__dirname.replace('\\controllers', ''), '');
-        }
+        const { nome, preco, estoque, imagem_url } = req.body;
         const produtoData = {
             nome: nome,
             preco: preco,
-            disponivel: disponivel,
-            imagemPath: imagemPath,
+            estoque: estoque,
+            imagem_url: imagem_url
         };
         await atualizarProduto(produtoId, produtoData);
         res.status(200).json({ mensagem: 'Produto atualizado com sucesso' });

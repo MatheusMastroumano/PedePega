@@ -12,8 +12,12 @@ const listarProdutos = async () => {
 
 const obterProdutoPorId = async (id) => {
     try {
+<<<<<<< Updated upstream
         const produto = await read('produtos', 'id_produto = ?', [id]);
         return produto;
+=======
+        return await read('produtos', `id_produto = ?`, [id]);
+>>>>>>> Stashed changes
     } catch (err) {
         console.error('Erro ao obter produto por ID:', err);
         throw err;
@@ -22,6 +26,7 @@ const obterProdutoPorId = async (id) => {
 
 const criarProduto = async (produtoData) => {
     try {
+<<<<<<< Updated upstream
         const { nome, preco, estoque } = produtoData;
         
         if (!nome || !preco || estoque === undefined) {
@@ -35,6 +40,13 @@ const criarProduto = async (produtoData) => {
         };
 
         return await create('produtos', produto);
+=======
+        // Se não houver imagem, usar uma imagem padrão
+        if (!produtoData.imagem_url) {
+            produtoData.imagem_url = '/img/produtos/default.png';
+        }
+        return await create('produtos', produtoData);
+>>>>>>> Stashed changes
     } catch (err) {
         console.error('Erro ao criar produto:', err);
         throw err;
@@ -43,6 +55,7 @@ const criarProduto = async (produtoData) => {
 
 const atualizarProduto = async (id, produtoData) => {
     try {
+<<<<<<< Updated upstream
         const { nome, preco, estoque } = produtoData;
         
         const updates = {};
@@ -55,6 +68,9 @@ const atualizarProduto = async (id, produtoData) => {
         }
 
         return await update('produtos', updates, 'id_produto = ?', [id]);
+=======
+        return await update('produtos', produtoData, 'id_produto = ?', [id]);
+>>>>>>> Stashed changes
     } catch (err) {
         console.error('Erro ao atualizar produto:', err);
         throw err;

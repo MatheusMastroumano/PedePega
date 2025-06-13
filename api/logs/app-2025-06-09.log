@@ -1,0 +1,6 @@
+[2025-06-09T11:33:28.457Z] GET /api/produtos
+[2025-06-09T11:33:28.760Z] GET /api/produtos 500 - 197ms
+[2025-06-09T11:33:28.776Z] GET /api/produtos
+[2025-06-09T11:33:29.455Z] GET /api/produtos 500 - 540ms
+[2025-06-09T11:33:36.886Z] GET /api/produtos
+[2025-06-09T11:33:37.388Z] GET /api/produtos 500 - 318ms

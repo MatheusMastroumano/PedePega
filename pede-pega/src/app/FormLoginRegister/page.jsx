@@ -358,7 +358,7 @@ export default function AuthPage() {
                 value={form.senha}
                 onChange={handleChange}
                 className="w-full outline-none"
-                placeholder={activeTab === 'register' ? 'Mínimo 6 caracteres' : 'Sua senha'}
+                placeholder={activeTab === 'register' ? 'Mínimo 8 caracteres' : 'Sua senha'}
                 disabled={loading}
               />
               <button
