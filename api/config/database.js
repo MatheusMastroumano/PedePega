@@ -19,36 +19,18 @@ const gerarHorariosDisponiveis = () => {
 
 // Função para validar horário de retirada
 const validarHorarioRetirada = async (horario) => {
-  const connection = await getConnection();
-  try {
-    // Converter o horário para o formato HH:mm:ss
-    const [hora, minuto] = horario.split(':');
-    const horarioFormatado = `${hora.padStart(2, '0')}:${minuto.padStart(2, '0')}:00`;
+  // Validar se o horário está em um dos intervalos permitidos
+  const intervalos = [
+    { inicio: '07:00', fim: '12:00' }, // Manhã
+    { inicio: '12:01', fim: '17:00' }, // Tarde
+    { inicio: '17:01', fim: '22:00' }  // Noite
+  ];
 
-    // Verificar se o horário existe na tabela horarios
-    const [rows] = await connection.execute(
-      "SELECT COUNT(*) as total FROM horarios WHERE horario = ?",
-      [horarioFormatado]
-    );
-
-    if (rows[0].total === 0) {
-      return false;
-    }
-
-    // Verificar se o horário está disponível (não excedeu o limite de pedidos)
-    const [pedidos] = await connection.execute(
-      "SELECT COUNT(*) as total FROM pedidos WHERE horario_retirada = ? AND status != 'Cancelado'",
-      [horarioFormatado]
-    );
-
-    const limiteAlunos = 5; // Limite de alunos por horário
-    return pedidos[0].total < limiteAlunos;
-  } catch (err) {
-    console.error("Erro ao validar horário:", err);
-    throw err;
-  } finally {
-    connection.release();
-  }
+  // Verificar se o horário está em algum dos intervalos
+  return intervalos.some(intervalo => {
+    const [horarioInicio, horarioFim] = horario.split('-');
+    return horarioInicio === intervalo.inicio && horarioFim === intervalo.fim;
+  });
 };
 
 const pool = mysql.createPool({

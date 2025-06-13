@@ -21,7 +21,6 @@ app.use('/api/produtos', produtoRotas);
 app.use('/api/auth', authRotas);
 app.use('/api/carrinho', carrinhoRotas);
 app.use('/api/pedido', pedidoRotas);
-app.use("/api/pedidos", pedidoRotas);
 app.use("/api/admin/pedidos", pedidoAdminRotas);
 
 app.get('/', (req, res) => {

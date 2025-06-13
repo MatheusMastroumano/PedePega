@@ -29,14 +29,14 @@ export default function ClientePedidos() {
 
   const carregarPedidos = async () => {
     try {
-      const response = await authenticatedFetch('http://localhost:3001/api/pedidos');
+      const response = await authenticatedFetch('http://localhost:3001/api/pedido');
       
       if (response.ok) {
         const data = await response.json();
         // Ordenar pedidos por data mais recente primeiro
-        const pedidosOrdenados = (data.pedidos || data || []).sort((a, b) => {
-          const dataA = new Date(a.data_pedido || a.createdAt || a.created_at);
-          const dataB = new Date(b.data_pedido || b.createdAt || b.created_at);
+        const pedidosOrdenados = (data.pedidos || []).sort((a, b) => {
+          const dataA = new Date(a.data);
+          const dataB = new Date(b.data);
           return dataB - dataA;
         });
         setPedidos(pedidosOrdenados);
@@ -56,7 +56,7 @@ export default function ClientePedidos() {
     if (!confirm('Tem certeza que deseja cancelar este pedido?')) return;
 
     try {
-      const response = await authenticatedFetch(`http://localhost:3001/api/pedidos/${pedidoId}/cancelar`, {
+      const response = await authenticatedFetch(`http://localhost:3001/api/pedido/${pedidoId}/cancelar`, {
         method: 'PATCH'
       });
       
@@ -75,15 +75,15 @@ export default function ClientePedidos() {
 
   const getStatusIcon = (status) => {
     switch (status) {
-      case 'pendente':
+      case 'Pendente':
         return <Clock className="h-5 w-5 text-yellow-500" />;
-      case 'preparando':
+      case 'Em Preparo':
         return <Package className="h-5 w-5 text-blue-500" />;
-      case 'pronto':
+      case 'Pronto':
         return <CheckCircle className="h-5 w-5 text-green-500" />;
-      case 'finalizado':
+      case 'Entregue':
         return <CheckCircle className="h-5 w-5 text-green-600" />;
-      case 'cancelado':
+      case 'Cancelado':
         return <XCircle className="h-5 w-5 text-red-500" />;
       default:
         return <AlertTriangle className="h-5 w-5 text-gray-500" />;
@@ -92,18 +92,35 @@ export default function ClientePedidos() {
 
   const getStatusText = (status) => {
     switch (status) {
-      case 'pendente':
+      case 'Pendente':
         return 'Pendente';
-      case 'preparando':
+      case 'Em Preparo':
         return 'Em Preparação';
-      case 'pronto':
+      case 'Pronto':
         return 'Pronto para Retirada';
-      case 'finalizado':
-        return 'Finalizado';
-      case 'cancelado':
+      case 'Entregue':
+        return 'Entregue';
+      case 'Cancelado':
         return 'Cancelado';
       default:
         return status;
+    }
+  };
+
+  const getStatusColor = (status) => {
+    switch (status) {
+      case 'Pendente':
+        return 'bg-yellow-100 text-yellow-800';
+      case 'Em Preparo':
+        return 'bg-blue-100 text-blue-800';
+      case 'Pronto':
+        return 'bg-green-100 text-green-800';
+      case 'Entregue':
+        return 'bg-gray-100 text-gray-800';
+      case 'Cancelado':
+        return 'bg-red-100 text-red-800';
+      default:
+        return 'bg-gray-100 text-gray-800';
     }
   };
 
@@ -192,29 +209,19 @@ export default function ClientePedidos() {
             </div>
           ) : (
             pedidos.map((pedido, index) => (
-              <div key={`pedido-${pedido.id}-${index}-${pedido.status}`} className="bg-white rounded-lg shadow-sm border p-6">
+              <div key={`pedido-${pedido.id_pedido}-${index}-${pedido.status}`} className="bg-white rounded-lg shadow-sm border p-6">
                 <div className="flex items-center justify-between">
                   {/* Informações do Pedido */}
                   <div className="flex-1">
                     <div className="flex items-center gap-3 mb-3">
                       {getStatusIcon(pedido.status)}
-                      <span className="font-semibold text-lg text-gray-800">
-                        Pedido #{pedido.id}
-                      </span>
-                      <span className={`px-3 py-1 rounded-full text-sm font-medium ${
-                        pedido.status === 'pendente' ? 'bg-yellow-100 text-yellow-800' :
-                        pedido.status === 'preparando' ? 'bg-blue-100 text-blue-800' :
-                        pedido.status === 'pronto' ? 'bg-green-100 text-green-800' :
-                        pedido.status === 'finalizado' ? 'bg-gray-100 text-gray-800' :
-                        pedido.status === 'cancelado' ? 'bg-red-100 text-red-800' :
-                        'bg-gray-100 text-gray-800'
-                      }`}>
+                      <span className={`px-3 py-1 rounded-full text-sm font-medium ${getStatusColor(pedido.status)}`}>
                         {getStatusText(pedido.status)}
                       </span>
                     </div>
                     
                     <div className="text-gray-600 space-y-1">
-                      <p>Data: {formatDate(pedido.data_pedido || pedido.createdAt || pedido.created_at)}</p>
+                      <p>Data: {formatDate(pedido.data)}</p>
                       <p className="font-semibold text-lg text-gray-800">
                         Total: {formatPrice(pedido.valor_total || pedido.total)}
                       </p>
@@ -222,10 +229,10 @@ export default function ClientePedidos() {
                   </div>
 
                   {/* Botão de Cancelar */}
-                  {pedido.status === 'pendente' && (
+                  {pedido.status === 'Pendente' && (
                     <button
-                      key={`btn-cancelar-${pedido.id}-${index}`}
-                      onClick={() => cancelarPedido(pedido.id)}
+                      key={`btn-cancelar-${pedido.id_pedido}-${index}`}
+                      onClick={() => cancelarPedido(pedido.id_pedido)}
                       className="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg flex items-center gap-2"
                     >
                       <XCircle className="h-4 w-4" />
@@ -235,7 +242,7 @@ export default function ClientePedidos() {
                 </div>
 
                 {/* Informação adicional baseada no status */}
-                {pedido.status === 'pronto' && (
+                {pedido.status === 'Pronto' && (
                   <div className="mt-3 p-3 bg-green-50 rounded-lg border border-green-200">
                     <p className="text-green-800 font-medium">
                       🎉 Seu pedido está pronto para retirada!
@@ -243,7 +250,7 @@ export default function ClientePedidos() {
                   </div>
                 )}
                 
-                {pedido.status === 'preparando' && (
+                {pedido.status === 'Em Preparo' && (
                   <div className="mt-3 p-3 bg-blue-50 rounded-lg border border-blue-200">
                     <p className="text-blue-800">
                       👨‍🍳 Seu pedido está sendo preparado...

@@ -1,15 +1,14 @@
 import { getConnection, validarHorarioRetirada } from "../config/database.js";
 
-const criarPedido = async (usuarioId, itens, total, dataRetirada, horarioRetirada, formaPagamento, dadosCartao) => {
-  // Validar horário de retirada
-  const horarioValido = await validarHorarioRetirada(horarioRetirada);
-  if (!horarioValido) {
-    throw new Error('Horário de retirada inválido');
-  }
-
+const criarPedido = async (usuarioId, itens, total) => {
   const connection = await getConnection();
   try {
     await connection.beginTransaction();
+
+    // Calcular o total se não foi fornecido
+    if (!total) {
+      total = itens.reduce((acc, item) => acc + (item.preco * item.quantidade), 0);
+    }
 
     const [result] = await connection.execute(
       `INSERT INTO pedidos (
@@ -17,28 +16,26 @@ const criarPedido = async (usuarioId, itens, total, dataRetirada, horarioRetirad
         data, 
         horario_pedido, 
         status, 
-        total,
-        data_retirada,
-        horario_retirada,
-        forma_pagamento,
-        dados_cartao
-      ) VALUES (?, NOW(), CURTIME(), 'Pendente', ?, ?, ?, ?, ?)`,
-      [
-        usuarioId, 
-        total, 
-        dataRetirada, 
-        horarioRetirada,
-        formaPagamento,
-        dadosCartao ? JSON.stringify(dadosCartao) : null
-      ]
+        total
+      ) VALUES (?, NOW(), CURTIME(), 'Pendente', ?)`,
+      [usuarioId, total]
     );
     const pedidoId = result.insertId;
 
+    // Processar itens do carrinho
     for (const item of itens) {
       await connection.execute(
         `INSERT INTO item_pedido (id_pedido, id_produto, quantidade, preco_unitario) 
          VALUES (?, ?, ?, ?)`,
         [pedidoId, item.id_produto, item.quantidade, item.preco]
+      );
+
+      // Atualizar estoque do produto
+      await connection.execute(
+        `UPDATE produtos 
+         SET estoque = estoque - ? 
+         WHERE id_produto = ? AND estoque >= ?`,
+        [item.quantidade, item.id_produto, item.quantidade]
       );
     }
 
@@ -119,13 +116,44 @@ const listarPedidosPorUsuario = async (usuarioId) => {
   const connection = await getConnection();
   try {
     const [pedidos] = await connection.execute(
-      `SELECT p.*, u.name as nome_usuario, u.turma, u.turno
+      `SELECT 
+        p.*, 
+        u.name as nome_usuario, 
+        u.turma, 
+        u.turno,
+        ROW_NUMBER() OVER (ORDER BY p.data DESC) as numero_pedido,
+        (
+          SELECT GROUP_CONCAT(
+            CONCAT(ip.quantidade, 'x ', pr.nome, ' (R$ ', FORMAT(ip.preco_unitario, 2), ')')
+            SEPARATOR ', '
+          )
+          FROM item_pedido ip
+          JOIN produtos pr ON ip.id_produto = pr.id_produto
+          WHERE ip.id_pedido = p.id_pedido
+        ) as itens_pedido,
+        (
+          SELECT SUM(ip.quantidade * ip.preco_unitario)
+          FROM item_pedido ip
+          WHERE ip.id_pedido = p.id_pedido
+        ) as total_calculado
        FROM pedidos p 
        JOIN users u ON p.id_usuario = u.id 
        WHERE p.id_usuario = ? 
        ORDER BY p.data DESC`,
       [usuarioId]
     );
+
+    // Atualizar o total se estiver zerado
+    for (const pedido of pedidos) {
+      if (!pedido.total || pedido.total === 0) {
+        await connection.execute(
+          'UPDATE pedidos SET total = ? WHERE id_pedido = ?',
+          [pedido.total_calculado, pedido.id_pedido]
+        );
+        pedido.total = pedido.total_calculado;
+      }
+    }
+
     return pedidos;
   } finally {
     connection.release();
@@ -138,7 +166,7 @@ const listarPedidosAtivos = async (usuarioId) => {
     FROM pedidos p
     JOIN users u ON p.id_usuario = u.id
     WHERE p.id_usuario = ? AND p.status IN ('Pendente', 'Em Preparo', 'Pronto')
-    ORDER BY p.data DESC, p.horario_retirada ASC
+    ORDER BY p.data DESC
     `;
 
   const connection = await getConnection();
@@ -154,11 +182,12 @@ const listarTodosPedidosAtivos = async () => {
   const connection = await getConnection();
   try {
     const [pedidos] = await connection.execute(
-      `SELECT p.*, u.name as nome_usuario, u.turma, u.turno
+      `SELECT p.*, u.name as nome_usuario, u.turma, u.turno,
+              ROW_NUMBER() OVER (ORDER BY p.data DESC) as numero_pedido
        FROM pedidos p 
        JOIN users u ON p.id_usuario = u.id 
-       WHERE p.status IN ('Pendente', 'Em Preparo', 'Pronto')
-       ORDER BY p.data DESC, p.horario_retirada ASC`
+       WHERE p.status IN ('Pendente', 'Em Preparo')
+       ORDER BY p.data DESC`
     );
     return pedidos;
   } finally {

@@ -32,7 +32,7 @@ export default function Navbar() {
 
     updateNavHeight();
     window.addEventListener('resize', updateNavHeight);
-    
+
     return () => {
       window.removeEventListener('resize', updateNavHeight);
       document.body.style.paddingTop = '';
@@ -104,7 +104,7 @@ export default function Navbar() {
 
           {/* Nome centralizado */}
           <div className="absolute left-1/2 transform -translate-x-1/2">
-            <button 
+            <button
               onClick={() => router.push('/')}
               className="text-[25px] font-medium no-underline text-black hover:text-yellow-600 transition-colors"
             >
@@ -160,7 +160,7 @@ export default function Navbar() {
               <X size={24} className="text-black hover:text-yellow-600 transition-colors" />
             </button>
           </div>
-          
+
           {/* Saudação do usuário */}
           {token && user && (
             <div className="px-6 py-4 border-b border-gray-200 bg-yellow-50">
@@ -182,7 +182,7 @@ export default function Navbar() {
               </div>
             </div>
           )}
-          
+
           {/* Informações do carrinho no menu */}
           {token && (
             <div className="px-6 py-4 border-b border-gray-200">
@@ -197,7 +197,7 @@ export default function Navbar() {
               </div>
             </div>
           )}
-          
+
           <ul className="px-6 py-4 space-y-4">
             <li
               className="text-lg text-black cursor-pointer hover:text-yellow-600 transition-colors"
@@ -217,6 +217,14 @@ export default function Navbar() {
                 onClick={() => handleNavigation('/carrinho')}
               >
                 Carrinho
+              </li>
+            )}
+            {token && (
+              <li
+                className="text-lg text-black cursor-pointer hover:text-yellow-600 transition-colors"
+                onClick={() => handleNavigation('/clientePedidos')}
+              >
+                Meus Pedidos
               </li>
             )}
             {token ? (

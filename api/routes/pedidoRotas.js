@@ -6,14 +6,10 @@ import {
     cancelarPedidoController,
     listarPedidosController, 
     listarPedidosAtivosController,
-    obterItensPedidoController,
-    obterHorariosDisponiveisController
+    obterItensPedidoController
 } from "../controllers/PedidoController.js";
 
 const router = express.Router();
-
-// Rota pública para obter horários disponíveis
-router.get("/pedido/horarios-disponiveis", obterHorariosDisponiveisController);
 
 // Rotas que precisam de autenticação
 router.post("/", authMiddleware, criarPedidoController);

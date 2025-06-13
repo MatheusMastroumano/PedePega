@@ -4,7 +4,6 @@ import adminMiddleware from '../middlewares/adminMiddleware.js';
 import {
     listarTodosPedidosAtivosController,
     alterarStatusPedidoController,
-    listarPedidosController,
     obterItensPedidoController
 } from '../controllers/PedidoController.js';
 

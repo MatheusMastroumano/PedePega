@@ -9,7 +9,7 @@ export const CartProvider = ({ children }) => {
   const [loading, setLoading] = useState(false);
   const [total, setTotal] = useState(0);
   const [addingItemId, setAddingItemId] = useState(null);
-  const { token, isAuthenticated, checkTokenValidity } = useAuth();
+  const { token, isAuthenticated, checkTokenValidity, authenticatedFetch } = useAuth();
 
   // Vai Carregar o carrinho quando fizer login ou logout
   useEffect(() => {
@@ -26,50 +26,6 @@ export const CartProvider = ({ children }) => {
     }
   }, [isAuthenticated, token]);
 
-  const makeAuthenticatedRequest = async (url, options = {}) => {
-    if (!isAuthenticated || !checkTokenValidity()) {
-      throw new Error('Não autenticado ou token inválido');
-    }
-
-    try {
-      const headers = {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}`,
-        ...options.headers,
-      };
-
-      console.log('Fazendo requisição para:', url);
-      console.log('Headers:', headers);
-      console.log('Options:', options);
-
-      const response = await fetch(url, {
-        ...options,
-        headers,
-      });
-
-      console.log('Resposta recebida:', response.status, response.statusText);
-
-      if (!response.ok) {
-        let errorMessage = 'Erro na requisição';
-        try {
-          const errorData = await response.json();
-          errorMessage = errorData.erro || errorData.mensagem || errorData.message || errorMessage;
-        } catch (e) {
-          console.log('Erro ao parsear resposta de erro:', e);
-        }
-        throw new Error(errorMessage);
-      }
-
-      return response;
-    } catch (error) {
-      console.error('Erro na requisição:', error);
-      if (error.message === 'Failed to fetch') {
-        throw new Error('Erro de conexão com o servidor. Verifique se o servidor está rodando.');
-      }
-      throw error;
-    }
-  };
-
   const fetchCartFromAPI = async () => {
     if (!isAuthenticated || !checkTokenValidity()) {
       console.log("Não autenticado, limpando carrinho local");
@@ -83,7 +39,7 @@ export const CartProvider = ({ children }) => {
       console.log("Buscando carrinho da API...");
       
       //GET /api/carrinho
-      const response = await makeAuthenticatedRequest("http://localhost:3001/api/carrinho");
+      const response = await authenticatedFetch("http://localhost:3001/api/carrinho");
       const data = await response.json();
 
       console.log("Dados do carrinho recebidos:", data);
@@ -187,7 +143,7 @@ export const CartProvider = ({ children }) => {
 
       console.log("Enviando dados para API:", requestBody);
 
-      const response = await makeAuthenticatedRequest("http://localhost:3001/api/carrinho/itens", {
+      const response = await authenticatedFetch("http://localhost:3001/api/carrinho/itens", {
         method: "POST",
         body: JSON.stringify(requestBody),
       });
@@ -217,7 +173,7 @@ export const CartProvider = ({ children }) => {
     console.log("Removendo item do carrinho:", itemId);
     setLoading(true);
     try {
-      await makeAuthenticatedRequest(`http://localhost:3001/api/carrinho/itens/${itemId}`, {
+      await authenticatedFetch(`http://localhost:3001/api/carrinho/itens/${itemId}`, {
         method: "DELETE",
       });
 
@@ -238,7 +194,7 @@ export const CartProvider = ({ children }) => {
     console.log("Atualizando quantidade:", { itemId, newQuantidade: newQuantity });
     setLoading(true);
     try {
-      await makeAuthenticatedRequest(`http://localhost:3001/api/carrinho/itens/${itemId}`, {
+      await authenticatedFetch(`http://localhost:3001/api/carrinho/itens/${itemId}`, {
         method: "PUT",
         body: JSON.stringify({ quantidade: newQuantity }),
       });
@@ -278,7 +234,7 @@ export const CartProvider = ({ children }) => {
     console.log("Limpando carrinho...");
     setLoading(true);
     try {
-      await makeAuthenticatedRequest("http://localhost:3001/api/carrinho", {
+      await authenticatedFetch("http://localhost:3001/api/carrinho", {
         method: "DELETE",
       });
 
@@ -294,7 +250,7 @@ export const CartProvider = ({ children }) => {
   };
 
 
-  const finalizarCompra = async (dadosPagamento = {}) => {
+  const finalizarCompra = async () => {
     if (!isAuthenticated || !checkTokenValidity()) {
       throw new Error("Você precisa estar logado para finalizar a compra");
     }
@@ -307,14 +263,23 @@ export const CartProvider = ({ children }) => {
     setLoading(true);
     
     try {
-      const response = await makeAuthenticatedRequest("http://localhost:3001/api/pedido", {
+      const response = await authenticatedFetch("http://localhost:3001/api/pedido", {
         method: "POST",
-        body: JSON.stringify(dadosPagamento),
+        body: JSON.stringify({
+          itens: cartItems.map(item => ({
+            id_produto: item.id_produto,
+            quantidade: item.quantidade,
+            preco: item.preco
+          })),
+          total: total
+        }),
       });
 
       const resultado = await response.json();
       console.log("Compra finalizada:", resultado);
-      await fetchCartFromAPI();
+      
+      // Limpar o carrinho após finalizar a compra
+      await clearCart();
       
       return resultado;
       
@@ -332,7 +297,7 @@ export const CartProvider = ({ children }) => {
     }
 
     try {
-      const response = await makeAuthenticatedRequest("http://localhost:3001/api/pedido");
+      const response = await authenticatedFetch("http://localhost:3001/api/pedido");
       const pedidos = await response.json();
       
       console.log("Pedidos recebidos:", pedidos);
@@ -350,7 +315,7 @@ export const CartProvider = ({ children }) => {
     }
 
     try {
-      const response = await makeAuthenticatedRequest(`http://localhost:3001/api/pedido/${pedidoId}/itens`);
+      const response = await authenticatedFetch(`http://localhost:3001/api/pedido/${pedidoId}/itens`);
       const itens = await response.json();
       
       console.log("Itens do pedido recebidos:", itens);

@@ -66,15 +66,15 @@ export default function AdminPage() {
 
     const getStatusColor = (status) => {
         switch (status) {
-            case 'pendente':
+            case 'Pendente':
                 return 'bg-yellow-100 text-yellow-800';
-            case 'preparando':
+            case 'Em Preparo':
                 return 'bg-blue-100 text-blue-800';
-            case 'pronto':
+            case 'Pronto':
                 return 'bg-green-100 text-green-800';
-            case 'finalizado':
+            case 'Entregue':
                 return 'bg-gray-100 text-gray-800';
-            case 'cancelado':
+            case 'Cancelado':
                 return 'bg-red-100 text-red-800';
             default:
                 return 'bg-gray-100 text-gray-800';
@@ -153,7 +153,7 @@ export default function AdminPage() {
                             <div>
                                 <p className="text-sm text-black">Pendentes</p>
                                 <p className="text-2xl font-bold text-black">
-                                    {pedidosAtivos.filter(p => p.status === 'pendente').length}
+                                    {pedidosAtivos.filter(p => p.status === 'Pendente').length}
                                 </p>
                             </div>
                         </div>
@@ -197,50 +197,33 @@ export default function AdminPage() {
                                             </div>
                                             <div className="text-sm space-y-1">
                                                 <p className="text-black">Cliente: {pedido.usuario?.name || pedido.nomeUsuario || pedido.nome_usuario || 'N/A'}</p>
-                                                <p className="text-black">Data: {formatarData(pedido.createdAt || pedido.data_pedido || pedido.created_at)}</p>
+                                                <p className="text-black">Data: {formatarData(pedido.data)}</p>
                                                 <p className="font-semibold text-black">Total: {formatarPreco(pedido.valor_total || pedido.total)}</p>
                                             </div>
                                         </div>
-
-                                        <div className="flex flex-col gap-2">
-                                            {pedido.status === 'pendente' && (
-                                                <button
-                                                    key={`btn-preparar-${pedido.id}`}
-                                                    onClick={() => alterarStatusPedido(pedido.id, 'preparando')}
-                                                    className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm flex items-center gap-2"
-                                                >
-                                                    <Clock size={16} />
-                                                    Preparar
-                                                </button>
+                                        <div className="flex gap-2">
+                                            {pedido.status === 'Pendente' && (
+                                                <>
+                                                    <button
+                                                        onClick={() => alterarStatusPedido(pedido.id, 'Em Preparo')}
+                                                        className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-medium"
+                                                    >
+                                                        Preparar
+                                                    </button>
+                                                    <button
+                                                        onClick={() => alterarStatusPedido(pedido.id, 'Cancelado')}
+                                                        className="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg text-sm font-medium"
+                                                    >
+                                                        Cancelar
+                                                    </button>
+                                                </>
                                             )}
-                                            {pedido.status === 'preparando' && (
+                                            {pedido.status === 'Em Preparo' && (
                                                 <button
-                                                    key={`btn-pronto-${pedido.id}`}
-                                                    onClick={() => alterarStatusPedido(pedido.id, 'pronto')}
-                                                    className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg text-sm flex items-center gap-2"
+                                                    onClick={() => alterarStatusPedido(pedido.id, 'Pronto')}
+                                                    className="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg text-sm font-medium"
                                                 >
-                                                    <Check size={16} />
-                                                    Pronto
-                                                </button>
-                                            )}
-                                            {pedido.status === 'pronto' && (
-                                                <button
-                                                    key={`btn-finalizar-${pedido.id}`}
-                                                    onClick={() => alterarStatusPedido(pedido.id, 'finalizado')}
-                                                    className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg text-sm flex items-center gap-2"
-                                                >
-                                                    <Check size={16} />
                                                     Finalizar
-                                                </button>
-                                            )}
-                                            {(pedido.status === 'pendente' || pedido.status === 'preparando') && (
-                                                <button
-                                                    key={`btn-cancelar-${pedido.id}`}
-                                                    onClick={() => alterarStatusPedido(pedido.id, 'cancelado')}
-                                                    className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg text-sm flex items-center gap-2"
-                                                >
-                                                    <X size={16} />
-                                                    Cancelar
                                                 </button>
                                             )}
                                         </div>
