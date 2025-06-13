@@ -172,11 +172,7 @@ const loginController = async (req, res) => {
         email: usuario.email,
         turma: usuario.turma,
         turno: usuario.turno,
-<<<<<<< Updated upstream
-        tipo: usuario.tipo || 'usuario'
-=======
         tipo: usuario.tipo
->>>>>>> Stashed changes
       }
     });
 

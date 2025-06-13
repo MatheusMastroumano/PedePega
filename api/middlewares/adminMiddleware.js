@@ -11,14 +11,9 @@ const adminMiddleware = async (req, res, next) => {
       return res.status(404).json({ mensagem: "Usuário não encontrado" });
     }
 
-<<<<<<< Updated upstream
-    if (usuario.tipo !== 'admin') {
-        return res.status(403).json({mensagem: "Acesso negado. Apenas administradores"});
-=======
     // Verificar se é admin
     if (usuario.tipo !== "admin") {
       return res.status(403).json({ mensagem: "Acesso negado. Apenas administradores podem realizar esta ação." });
->>>>>>> Stashed changes
     }
 
     req.usuario = usuario;

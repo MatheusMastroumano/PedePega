@@ -115,19 +115,6 @@ const cancelarPedido = async (pedidoId, usuarioId) => {
   }
 };
 
-<<<<<<< Updated upstream
-const listarPedidosPorUsuario = async (usuarioId) => {
-  const connection = await getConnection();
-  try {
-    const [pedidos] = await connection.execute(
-      `SELECT p.*, u.name as nome_usuario, u.turma, u.turno
-       FROM pedidos p 
-       JOIN users u ON p.id_usuario = u.id 
-       WHERE p.id_usuario = ? 
-       ORDER BY p.data DESC`,
-      [usuarioId]
-    );
-=======
 const listarPedidosPorUsuario = async (usuarioId, incluirFinalizados = true) => {
   const connection = await getConnection();
   try {
@@ -160,7 +147,6 @@ const listarPedidosPorUsuario = async (usuarioId, incluirFinalizados = true) => 
       pedido.itens = itens;
     }
 
->>>>>>> Stashed changes
     return pedidos;
   } finally {
     connection.release();
@@ -188,16 +174,6 @@ const listarPedidosAtivos = async (usuarioId) => {
 const listarTodosPedidosAtivos = async () => {
   const connection = await getConnection();
   try {
-<<<<<<< Updated upstream
-    const [pedidos] = await connection.execute(
-      `SELECT p.*, u.name as nome_usuario, u.turma, u.turno
-       FROM pedidos p 
-       JOIN users u ON p.id_usuario = u.id 
-       WHERE p.status IN ('Pendente', 'Em Preparo', 'Pronto')
-       ORDER BY p.data DESC, p.horario_retirada ASC`
-    );
-    return pedidos;
-=======
     const sql = `
       SELECT p.*, 
              u.name AS name_usuario, 
@@ -229,7 +205,6 @@ const listarTodosPedidosAtivos = async () => {
   } catch (error) {
     console.error('Erro ao listar pedidos ativos:', error);
     throw error;
->>>>>>> Stashed changes
   } finally {
     connection.release();
   }
@@ -282,15 +257,6 @@ const alterarStatusPedido = async (pedidoId, status) => {
 };
 
 const obterItensDoPedido = async (pedidoId) => {
-<<<<<<< Updated upstream
-  const sql = `
-    SELECT item_pedido.*, produtos.nome, produtos.preco, produtos.id_produto
-    FROM item_pedido
-    JOIN produtos ON item_pedido.id_produto = produtos.id_produto
-    WHERE id_pedido = ?
-  `;
-=======
->>>>>>> Stashed changes
   const connection = await getConnection();
   try {
     const [rows] = await connection.execute(`

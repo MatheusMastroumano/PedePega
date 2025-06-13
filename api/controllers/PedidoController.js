@@ -118,14 +118,12 @@ export const criarPedido = async (req, res) => {
 // Função para obter todos os pedidos
 export const obterPedidos = async (req, res) => {
   try {
-<<<<<<< Updated upstream
     const usuarioId = req.usuarioId;
     const pedidos = await readAll(usuarioId);
     res.json(pedidos);
   } catch (err) {
     console.error("Erro ao obter pedidos:", err);
     res.status(500).json({ erro: "Erro ao obter pedidos" });
-=======
     await finalizarPedido(pedidoId, usuarioId);
     res.json({ mensagem: "Pedido finalizado com sucesso" });
   } catch (err) {
@@ -187,7 +185,6 @@ const listarPedidosController = async (req, res) => {
   } catch (error) {
     console.error('Erro ao listar pedidos:', error);
     res.status(500).json({ error: 'Erro ao listar pedidos' });
->>>>>>> Stashed changes
   }
 };
 
@@ -277,14 +274,12 @@ const obterItensPedidoController = async (req, res) => {
   try {
     const itens = await obterItensDoPedido(pedidoId);
     res.json(itens);
->>>>>>> Stashed changes
   } catch (err) {
     console.error("Erro ao obter pedido:", err);
     res.status(500).json({ erro: "Erro ao obter pedido" });
   }
 };
 
-<<<<<<< Updated upstream
 // Função para atualizar um pedido
 export const atualizarPedido = async (req, res) => {
   try {
@@ -314,10 +309,11 @@ export const removerPedido = async (req, res) => {
     }
     res.json({ mensagem: "Pedido removido com sucesso" });
   } catch (err) {
-    console.error("Erro ao remover pedido:", err);
-    res.status(500).json({ erro: "Erro ao remover pedido" });
+    console.error("Erro ao obter itens do pedido:", err);
+    res.status(500).json({ mensagem: "Erro ao obter itens do pedido" });
   }
-=======
+};
+
 const listarTodosPedidosController = async (req, res) => {
   try {
     const pedidos = await listarTodosPedidos();
@@ -360,5 +356,4 @@ export {
   alterarStatusPedidoController,
   obterItensPedidoController,
   listarTodosPedidosController,
->>>>>>> Stashed changes
 };
