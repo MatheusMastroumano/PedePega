@@ -110,6 +110,34 @@ export default function ProdutosPage() {
     router.push(`/produto/${produtoId}`);
   };
 
+  const getImagemProduto = (nome) => {
+    const imagens = {
+        'X-Burger': 'https://picsum.photos/seed/burger/300/200',
+        'X-Salada': 'https://picsum.photos/seed/salada/300/200',
+        'X-Bacon': 'https://picsum.photos/seed/bacon/300/200',
+        'X-Egg': 'https://picsum.photos/seed/egg/300/200',
+        'X-Tudo': 'https://picsum.photos/seed/tudo/300/200',
+        'Batata Frita': 'https://picsum.photos/seed/batata/300/200',
+        'Batata Frita Cheddar': 'https://picsum.photos/seed/batata-cheddar/300/200',
+        'Batata Frita Bacon': 'https://picsum.photos/seed/batata-bacon/300/200',
+        'Refrigerante': 'https://picsum.photos/seed/refrigerante/300/200',
+        'Suco': 'https://picsum.photos/seed/suco/300/200',
+        'Água': 'https://picsum.photos/seed/agua/300/200',
+        'Milk Shake': 'https://picsum.photos/seed/milkshake/300/200',
+        'Sorvete': 'https://picsum.photos/seed/sorvete/300/200'
+    };
+
+    // Se o nome exato não for encontrado, tenta encontrar uma correspondência parcial
+    const nomeNormalizado = nome.toLowerCase();
+    for (const [key, value] of Object.entries(imagens)) {
+        if (nomeNormalizado.includes(key.toLowerCase())) {
+            return value;
+        }
+    }
+
+    return 'https://picsum.photos/seed/produto/300/200';
+  };
+
   if (loadingProducts) {
     return (
       <div className="p-6 text-center min-h-screen flex flex-col justify-center items-center">
@@ -196,28 +224,18 @@ export default function ProdutosPage() {
                   >
                     {/* Imagem do produto */}
                     <div className="h-56 bg-gray-100 flex items-center justify-center relative overflow-hidden">
-                      {produto.imagemPath ? (
-                        <img
-                          src={`${API_BASE_URL.replace('/api', '')}/${produto.imagemPath}`}
-                          alt={produto.nome}
-                          className="h-full w-full object-cover transition-transform duration-300 hover:scale-105"
-                          onError={(e) => {
-                            e.target.style.display = 'none';
-                            e.target.nextSibling.style.display = 'flex';
-                          }}
-                        />
-                      ) : null}
-                      <div
-                        className="text-gray-400 text-5xl flex items-center justify-center h-full w-full"
-                        style={{ display: produto.imagemPath ? 'none' : 'flex' }}
-                      >
-                        📦
-                      </div>
-
-                      {/* Badge de estoque */}
-                      {!hasStock && (
-                        <div className="absolute top-3 right-3 bg-red-500 text-white px-2 py-1 rounded-lg text-xs font-semibold">
-                          Sem Estoque
+                      <img
+                        src={`https://source.unsplash.com/300x200/?${encodeURIComponent(produto.nome)}`}
+                        alt={produto.nome}
+                        className="w-full h-full object-cover"
+                        onError={(e) => {
+                          e.target.onerror = null;
+                          e.target.src = 'https://source.unsplash.com/300x200/?food';
+                        }}
+                      />
+                      {produto.estoque === 0 && (
+                        <div className="absolute top-2 right-2 bg-red-500 text-white px-2 py-1 rounded text-sm">
+                          Esgotado
                         </div>
                       )}
                     </div>

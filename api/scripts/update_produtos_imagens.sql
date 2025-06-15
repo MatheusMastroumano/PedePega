@@ -11,4 +11,10 @@ UPDATE produtos SET imagemPath = '/uploads/produtos/refrigerante.jpg' WHERE nome
 UPDATE produtos SET imagemPath = '/uploads/produtos/suco.jpg' WHERE nome LIKE '%Suco%';
 UPDATE produtos SET imagemPath = '/uploads/produtos/agua.jpg' WHERE nome LIKE '%Água%';
 UPDATE produtos SET imagemPath = '/uploads/produtos/milk-shake.jpg' WHERE nome LIKE '%Milk Shake%';
-UPDATE produtos SET imagemPath = '/uploads/produtos/sorvete.jpg' WHERE nome LIKE '%Sorvete%'; 
+UPDATE produtos SET imagemPath = '/uploads/produtos/sorvete.jpg' WHERE nome LIKE '%Sorvete%';
+
+-- Adicionar coluna imagemPath na tabela produtos
+ALTER TABLE produtos ADD COLUMN imagemPath VARCHAR(255);
+
+-- Criar pasta para armazenar as imagens
+-- mkdir -p api/uploads/produtos 
